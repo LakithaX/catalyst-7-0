@@ -1,0 +1,6 @@
+{
+  "name": "Experience Japan",
+  "description": "An interactive multi-plane 3D parallax clone of Experience Japan by Alex Hartan, featuring layered Torii gate perspective, fluid mouse tracking, and editorial story mode.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

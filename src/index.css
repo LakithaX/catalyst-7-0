@@ -1,0 +1,824 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: 'Osaka Bright';
+  src: url('/fonts/OsakaBrightDemoRegular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bison';
+  src: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f067ab4646cf8c5c25b9ae9_Bison-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bison';
+  src: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f067ab44f711c35052f89b2_Bison-DemiBold.ttf") format("truetype");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Bison';
+  src: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f067ab54f0c21786c10e659_Bison-Regular.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --background: #0b1a20;
+  --foreground: #f8fafc;
+  --primary: #bf3030;
+  --primary-foreground: #ffffff;
+  --muted: #16242b;
+  --muted-foreground: #94a3b8;
+  --black-color: #101117;
+  --white-color: #fff;
+  --brown: #992e2e;
+  --grey: #99908a;
+  --red-accent: #bf3030;
+
+  /* Catalyst 7.0 Merchandise Design Tokens */
+  --merch-bg: #090909;
+  --merch-surface: #11100f;
+  --merch-surface-light: #191714;
+  --merch-gold: #c5a46d;
+  --merch-gold-muted: #8e754d;
+  --merch-crimson: #b51e23;
+  --merch-crimson-dark: #8f171b;
+  --merch-white: #f4f0e8;
+  --merch-muted: #99938a;
+  --merch-border: rgba(197, 164, 109, 0.18);
+  --merch-transition: 300ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+@theme {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background-color: #0b1a20;
+  font-family: 'Droid Serif', Georgia, serif;
+  overflow-x: clip;
+}
+
+/* Native scroll must remain instant — scroll-behavior:smooth conflicts with GSAP.
+   Smoothness is achieved via per-section lerp/spring in JS, not CSS. */
+
+/* Ensure each major section's sticky/pin context composites independently */
+.catalyst-section-isolate {
+  isolation: isolate;
+}
+
+.webgl {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  outline: none;
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 26, 32, 0.9);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(220, 38, 38, 0.6);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(220, 38, 38, 0.9);
+}
+
+/* ==========================================================================
+   SCENE LAYOUT & DEPTH LAYERS
+   ========================================================================== */
+
+/* Sky Background */
+.sky-bg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.png");
+  background-position: 50% 35px;
+  background-size: cover;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.theme-classic .sky-bg {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f06798276dba755a2ffa879_sky.jpg");
+}
+
+/* Celestial Rising Sun / Harvest Moon */
+.celestial-body {
+  width: min(32vw, 280px);
+  height: min(32vw, 280px);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 17.5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 2; /* Sits behind Asset 2 (Mt. Fuji at z-index 3) */
+  transition: transform 0.15s ease-out, box-shadow 0.6s ease, background 0.6s ease;
+}
+
+.celestial-body.is-sun {
+  background: radial-gradient(circle at 45% 45%, #f43f5e 0%, #dc2626 45%, #b91c1c 80%, #991b1b 100%);
+  box-shadow: 0 0 65px rgba(239, 68, 68, 0.75), 0 0 130px rgba(220, 38, 38, 0.45);
+}
+
+.celestial-body.is-moon {
+  /* Half moon (illuminated on right half, dark/transparent on left half) */
+  background: linear-gradient(85deg, transparent 0%, transparent 48%, rgba(255, 255, 240, 0.9) 49%, #ffffff 52%, #fef08a 70%, #facc15 88%, #eab308 100%);
+  box-shadow: 26px 0 55px rgba(254, 240, 138, 0.85), 48px 0 115px rgba(234, 179, 8, 0.45);
+}
+
+/* Stage for Sequential Typography Near the Moon */
+.moon-title-stage {
+  position: absolute;
+  bottom: 27vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 950px);
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.title-word-item {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.title-experience {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(1.25rem, 4.8vw, 4.2rem);
+  font-weight: 900;
+  letter-spacing: clamp(0.18em, 0.8vw, 0.35em);
+  padding-left: clamp(0.18em, 0.8vw, 0.35em);
+  color: #fef08a;
+  text-shadow: 0 4px 28px rgba(0, 0, 0, 0.95), 0 0 45px rgba(254, 240, 138, 0.7);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.catalyst-word-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
+.title-presenter {
+  font-family: 'Montserrat', sans-serif;
+  font-size: clamp(0.55rem, 1.8vw, 0.95rem);
+  font-weight: 800;
+  letter-spacing: clamp(0.16em, 0.7vw, 0.35em);
+  padding-left: clamp(0.16em, 0.7vw, 0.35em);
+  text-transform: uppercase;
+  color: #fef08a;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.95), 0 0 25px rgba(254, 240, 138, 0.75);
+  white-space: nowrap;
+  opacity: 0;
+  will-change: opacity, transform;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+}
+
+.title-catalyst {
+  font-family: 'Osaka Bright', 'Bison', sans-serif;
+  font-size: clamp(1.85rem, 8.2vw, 7.8rem);
+  font-weight: 400;
+  line-height: 1;
+  margin: 0;
+  padding: 0;
+  color: #ffffff;
+  text-shadow: 0 6px 35px rgba(0, 0, 0, 0.95), 0 0 55px rgba(239, 68, 68, 0.75);
+  text-transform: uppercase;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.04em, 0.5vw, 0.08em);
+  white-space: nowrap;
+}
+
+.catalyst-brush-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+}
+
+.brush-letter {
+  display: inline-block;
+  position: relative;
+  will-change: transform, opacity;
+  transform-origin: 50% 50%;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  line-height: 1;
+}
+
+/* Calligraphic Japanese Sumi Brush Tip */
+.brush-tip-cursor {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 34px;
+  height: 34px;
+  margin-top: -17px;
+  margin-left: -17px;
+  pointer-events: none;
+  z-index: 40;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #ffffff 0%, #fef08a 25%, #ef4444 65%, transparent 85%);
+  box-shadow: 0 0 16px rgba(254, 240, 138, 0.95), 0 0 32px rgba(239, 68, 68, 0.85), 0 0 50px rgba(255, 255, 255, 0.6);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+  opacity: 0;
+}
+
+.brush-tip-cursor::after {
+  content: '';
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  filter: blur(1.5px);
+}
+
+/* Mt. Fuji */
+.mt-fuji-layer {
+  position: absolute;
+  bottom: calc(22vh - 15px);
+  left: 0;
+  right: 0;
+  height: 48vh;
+  background-image: url("/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.png");
+  background-position: 50% 100%;
+  background-repeat: no-repeat;
+  background-size: auto min(36vh, 360px);
+  pointer-events: none;
+  z-index: 3;
+}
+
+.theme-classic .mt-fuji-layer {
+  background-image: linear-gradient(#0000, #a7abaf), url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f0e2493e68d29651da7f16a_Fuji.png");
+  background-size: auto, 750px;
+  bottom: 22vh;
+}
+
+/* Drifting Lake Mist */
+.mist-layer-box {
+  position: absolute;
+  bottom: 22vh;
+  left: -20%;
+  right: -20%;
+  height: 22vh;
+  background-image: url("/assets/aistudio/Asset_12___Drifting_Mist_Layer_e20761d0.png");
+  background-position: 50% 100%;
+  background-repeat: repeat-x;
+  background-size: 1300px auto;
+  pointer-events: none;
+  opacity: 0.6;
+  z-index: 4;
+  animation: mistFlow 48s linear infinite alternate;
+}
+
+@keyframes mistFlow {
+  0% { transform: translate3d(-140px, 0, 0); opacity: 0.45; }
+  50% { transform: translate3d(60px, -6px, 0); opacity: 0.75; }
+  100% { transform: translate3d(160px, 4px, 0); opacity: 0.45; }
+}
+
+/* Forested Hills Framing Sides */
+.hill-left-layer {
+  position: absolute;
+  bottom: 18vh;
+  left: -8vw;
+  width: 68vw;
+  height: 46vh;
+  background-image: url("/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.png");
+  background-position: left bottom;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.theme-classic .hill-left-layer {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f0b93c68385164b8b6fedef_hill%20left.png");
+  background-position: left bottom;
+  background-size: auto 100%;
+}
+
+.hill-right-layer {
+  position: absolute;
+  bottom: 18vh;
+  right: -8vw;
+  width: 68vw;
+  height: 46vh;
+  background-image: url("/assets/aistudio/Asset_5_clean.png");
+  background-position: right bottom;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.theme-classic .hill-right-layer {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f067a1315dc28d204c50029_hill%20right.png");
+  background-position: right bottom;
+  background-size: auto 100%;
+}
+
+/* Lake Water Surface */
+.water-lake-layer {
+  position: absolute;
+  bottom: -14vh;
+  left: 0;
+  right: 0;
+  height: 42vh;
+  background-image: url("/assets/aistudio/Asset_3_clean.png");
+  background-position: 50% 0%;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  z-index: 6;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+}
+
+.theme-classic .water-lake-layer {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f0679827efa7b976f66ffe5_water.jpg");
+  background-size: 100% 50vh;
+}
+
+/* ==========================================================================
+   PERFECTLY ALIGNED RYŌBU-TORII ASSEMBLY
+   ========================================================================== */
+.torii-stage {
+  position: absolute;
+  bottom: 2.5vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(86vw, 1050px);
+  aspect-ratio: 1536 / 1024;
+  pointer-events: none;
+  z-index: 10;
+  transform-style: preserve-3d;
+  transition: transform 0.1s ease-out;
+}
+
+/* Rear support columns (Asset 6) - sits directly in perspective */
+.torii-back-pillars {
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 1;
+}
+
+.theme-classic .torii-back-pillars {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f0518b9839bf96061f427b8_III.png");
+  background-size: 40%;
+  background-position: center;
+}
+
+/* Main Torii Gate (Asset 7) - matches 1536x1024 seamlessly */
+.torii-front-gate {
+  position: absolute;
+  inset: 0;
+  background-image: url("/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.png");
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 3;
+}
+
+.theme-classic .torii-front-gate {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f0ba1d7507a6550b9f6bc95_Torii.png");
+}
+
+/* Wooden Floating Pontoon Dock */
+.pontoon-dock {
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(65vw, 660px);
+  aspect-ratio: 1774 / 831;
+  background-image: url("/assets/aistudio/Asset_10_clean.png");
+  background-size: 100% 100%;
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 15;
+  transform-origin: 50% 100%;
+  will-change: transform, opacity;
+  transition: opacity 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pontoon-dock:hover {
+  opacity: 0.9;
+}
+
+.pontoon-dock:active {
+  opacity: 0.8;
+}
+
+.theme-classic .pontoon-dock {
+  background-image: url("https://cdn.prod.website-files.com/5f04f5f7580a600d594aedd4/5f064a8b4f0c21b7a7109377_pontoon2.png");
+}
+
+/* Water Ripple Pulse */
+.water-ripple-center {
+  position: absolute;
+  bottom: 6vh;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 40px;
+  pointer-events: none;
+  z-index: 12;
+}
+
+.water-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  opacity: 0;
+  animation: waterRippleExpand 3.2s cubic-bezier(0.2, 0.8, 0.4, 1) infinite;
+}
+
+.water-ring._2 {
+  animation-delay: 1.6s;
+}
+
+@keyframes waterRippleExpand {
+  0% { transform: scale(0.3); opacity: 0.8; }
+  60% { opacity: 0.35; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM ACROSS ALL BREAKPOINTS
+   ========================================================================== */
+
+/* Laptops & Tablets Landscape (max-width: 1024px) */
+@media screen and (max-width: 1024px) {
+  .torii-stage {
+    width: min(92vw, 850px);
+    bottom: 2.5vh;
+  }
+  .pontoon-dock {
+    width: min(70vw, 560px);
+    bottom: -16px;
+  }
+  .water-lake-layer {
+    height: 40vh;
+    bottom: -12vh;
+  }
+  .moon-title-stage {
+    bottom: 26vh;
+    height: 170px;
+    width: 94vw;
+  }
+  .celestial-body {
+    bottom: 17vh;
+    width: min(32vw, 240px);
+    height: min(32vw, 240px);
+  }
+}
+
+/* Tablets Portrait (e.g. iPad 768px - 1024px portrait) */
+@media screen and (max-width: 1024px) and (orientation: portrait) {
+  .celestial-body {
+    bottom: 30vh;
+    width: min(36vw, 240px);
+    height: min(36vw, 240px);
+  }
+  .moon-title-stage {
+    bottom: calc(30vh + 20px);
+    height: 160px;
+    width: 92vw;
+  }
+  .title-catalyst {
+    font-size: clamp(2.5rem, calc(8.5vw + 10px), 4.5rem);
+  }
+  .mt-fuji-layer {
+    bottom: calc(18vh + 36px);
+    height: 40vh;
+    background-size: auto min(30vh, 300px);
+  }
+  .hill-right-layer {
+    bottom: calc(12vh - 20px);
+    width: 72vw;
+    height: 38vh;
+  }
+  .hill-left-layer {
+    bottom: calc(12vh - 28px);
+    width: 72vw;
+    height: 38vh;
+  }
+  .torii-stage {
+    width: min(112vw, 920px);
+    bottom: 5vh;
+  }
+  .pontoon-dock {
+    width: min(78vw, 560px);
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .water-lake-layer {
+    bottom: calc(-14vh + 10px);
+    height: 38vh;
+  }
+}
+
+/* Smartphones & Small Tablets Portrait (max-width: 768px) */
+@media screen and (max-width: 768px) and (orientation: portrait), screen and (max-width: 768px) and (not (orientation: landscape)) {
+  .celestial-body {
+    bottom: 26vh;
+    width: min(48vw, 200px);
+    height: min(48vw, 200px);
+  }
+  .moon-title-stage {
+    bottom: calc(26vh + 20px);
+    height: 135px;
+    width: 96vw;
+  }
+  .title-catalyst {
+    font-size: clamp(3.7rem, calc(8.8vw + 30px), 5.4rem);
+  }
+  .title-presenter {
+    font-size: clamp(0.85rem, 3.2vw, 1.15rem);
+  }
+  .catalyst-word-wrapper {
+    gap: 0.35rem;
+  }
+  .mt-fuji-layer {
+    bottom: calc(15vh + 36px);
+    height: 38vh;
+    background-size: auto min(25vh, 230px);
+  }
+  .mist-layer-box {
+    bottom: calc(14vh + 36px);
+    height: 16vh;
+  }
+  .hill-right-layer {
+    bottom: calc(10vh - 20px);
+    width: 76vw;
+    height: 34vh;
+  }
+  .hill-left-layer {
+    bottom: calc(10vh - 28px);
+    width: 76vw;
+    height: 34vh;
+  }
+  .torii-stage {
+    width: min(136vw, 680px);
+    bottom: 6.5vh;
+  }
+  .pontoon-dock {
+    width: min(94vw, 440px);
+    bottom: -16px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .water-lake-layer {
+    bottom: calc(-16vh + 10px);
+    height: 36vh;
+  }
+  .water-ripple-center {
+    bottom: 6vh;
+    width: 110px;
+    height: 32px;
+  }
+  .brush-tip-cursor {
+    width: 24px;
+    height: 24px;
+    margin-top: -12px;
+    margin-left: -12px;
+  }
+}
+
+/* Standard Smartphones Portrait (max-width: 480px) */
+@media screen and (max-width: 480px) {
+  .celestial-body {
+    bottom: 22vh;
+    width: min(52vw, 185px);
+    height: min(52vw, 185px);
+  }
+  .moon-title-stage {
+    bottom: calc(22vh + 20px);
+    height: 120px;
+    width: 98vw;
+  }
+  .title-catalyst {
+    font-size: clamp(3.675rem, calc(8.8vw + 30px), 4.675rem);
+    gap: 0.03em;
+  }
+  .title-presenter {
+    font-size: clamp(0.78rem, calc(2.8vw + 3px), 1.05rem);
+    letter-spacing: clamp(0.08em, 0.35vw, 0.14em);
+    padding-left: clamp(0.08em, 0.35vw, 0.14em);
+  }
+  .title-experience {
+    font-size: clamp(2.45rem, calc(5.5vw + 25px), 3.45rem);
+    letter-spacing: 0.18em;
+    padding-left: 0.18em;
+  }
+  .catalyst-word-wrapper {
+    gap: 0.25rem;
+  }
+  .mt-fuji-layer {
+    bottom: calc(12vh + 36px);
+    height: 35vh;
+    background-size: auto min(23vh, 200px);
+  }
+  .hill-right-layer {
+    bottom: calc(7vh - 20px);
+    width: 80vw;
+    height: 30vh;
+  }
+  .hill-left-layer {
+    bottom: calc(7vh - 28px);
+    width: 80vw;
+    height: 30vh;
+  }
+  .torii-stage {
+    width: 148vw;
+    bottom: 7vh;
+  }
+  .pontoon-dock {
+    width: min(100vw, 420px);
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .water-lake-layer {
+    bottom: calc(-18vh + 10px);
+    height: 34vh;
+  }
+  .water-ripple-center {
+    bottom: 5vh;
+    width: 95px;
+    height: 28px;
+  }
+  .brush-tip-cursor {
+    width: 26px;
+    height: 26px;
+    margin-top: -13px;
+    margin-left: -13px;
+  }
+}
+
+/* Ultra-Compact Screens (max-width: 360px) */
+@media screen and (max-width: 360px) {
+  .celestial-body {
+    bottom: 20vh;
+    width: 155px;
+    height: 155px;
+  }
+  .moon-title-stage {
+    bottom: calc(20vh + 20px);
+    height: 110px;
+  }
+  .title-catalyst {
+    font-size: clamp(3.2rem, calc(8.2vw + 26px), 3.9rem);
+    gap: 0.02em;
+  }
+  .title-presenter {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    padding-left: 0.08em;
+  }
+  .title-experience {
+    font-size: 2.15rem;
+    letter-spacing: 0.14em;
+    padding-left: 0.14em;
+  }
+  .mt-fuji-layer {
+    bottom: calc(10vh + 36px);
+    height: 32vh;
+    background-size: auto 20vh;
+  }
+  .hill-right-layer {
+    bottom: calc(5vh - 20px);
+    width: 84vw;
+    height: 26vh;
+  }
+  .hill-left-layer {
+    bottom: calc(5vh - 28px);
+    width: 84vw;
+    height: 26vh;
+  }
+  .torii-stage {
+    width: 158vw;
+    bottom: 7.5vh;
+  }
+  .pontoon-dock {
+    width: 100vw;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  .water-lake-layer {
+    bottom: calc(-20vh + 10px);
+    height: 34vh;
+  }
+  .water-ripple-center {
+    bottom: 4vh;
+  }
+}
+
+/* Mobile Landscape (short height, wide aspect ratio) */
+@media screen and (max-height: 520px) and (orientation: landscape) {
+  .moon-title-stage {
+    bottom: 16vh;
+    height: 95px;
+  }
+  .celestial-body {
+    bottom: 10vh;
+    width: min(22vh, 120px);
+    height: min(22vh, 120px);
+  }
+  .mt-fuji-layer {
+    bottom: 9vh;
+    height: 36vh;
+    background-size: auto 22vh;
+  }
+  .hill-left-layer,
+  .hill-right-layer {
+    bottom: 8vh;
+    height: 32vh;
+    width: 55vw;
+  }
+  .torii-stage {
+    width: min(65vw, 620px);
+    bottom: 0.5vh;
+  }
+  .pontoon-dock {
+    width: min(48vw, 420px);
+    bottom: -10px;
+  }
+  .water-lake-layer {
+    height: 30vh;
+    bottom: -8vh;
+  }
+  .water-ripple-center {
+    bottom: 3vh;
+  }
+}
