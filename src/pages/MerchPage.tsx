@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { MerchNav } from '../components/merch/MerchNav';
+import Navbar from '../components/Navbar';
 import { MerchHero } from '../components/merch/MerchHero';
 import { MerchCollection } from '../components/merch/MerchCollection';
 import { MerchBrandStatement } from '../components/merch/MerchBrandStatement';
@@ -15,8 +15,8 @@ export const MerchPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col selection:bg-[#C9362B] selection:text-white">
-      {/* Merchandise Navigation */}
-      <MerchNav />
+      {/* Navigation */}
+      <Navbar />
 
       {/* Main Content */}
       <main className="flex-1">

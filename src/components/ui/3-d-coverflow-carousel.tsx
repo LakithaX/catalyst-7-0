@@ -158,8 +158,16 @@ export function CoverFlowCarousel({
   const navigate = useNavigate();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const touchStartX = useRef(0);
   const total = items.length;
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   const nextSlide = useCallback(() => {
     setCurrentIndex((prev) => (prev + 1) % total);
@@ -254,6 +262,25 @@ export function CoverFlowCarousel({
         />
       </div>
 
+      {/* ── Bushido Combat Samurai: Dynamic Warrior Flanking the Merch Showcase (Desktop Only) ── */}
+      <div
+        className="pointer-events-none absolute right-0 xl:right-4 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[320px] lg:max-w-[370px] xl:max-w-[420px] h-auto transition-opacity"
+        aria-hidden="true"
+      >
+        {/* Soft Crimson Backlight */}
+        <div
+          className="absolute -inset-6 rounded-full blur-3xl opacity-35 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(201, 54, 43, 0.22) 0%, transparent 70%)",
+          }}
+        />
+        <img
+          src="/assets/samurai/samurai-combat.png"
+          alt=""
+          className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.22)]"
+        />
+      </div>
+
       <div className="relative w-full max-w-6xl mx-auto px-4 z-10 flex flex-col items-center">
         {/* Eyebrow */}
         {sectionLabel && (
@@ -278,11 +305,17 @@ export function CoverFlowCarousel({
 
         {/* 3D Coverflow Stage */}
         <div
-          className="relative w-full h-[520px] flex justify-center items-center mb-8"
+          className="relative w-full h-[450px] sm:h-[490px] lg:h-[520px] flex justify-center items-center mb-8"
           style={{ perspective: "1400px" }}
         >
           {items.map((item, idx) => {
             const offset = (idx - currentIndex + total) % total;
+
+            const cardWidth = isMobile ? 250 : 330;
+            const cardHeight = isMobile ? 410 : 500;
+            const shift1 = isMobile ? 100 : 285;
+            const shift2 = isMobile ? 190 : 510;
+            const cardScale = isMobile ? 0.78 : 0.84;
 
             let transform = "translateX(0px) scale(0.4) rotateY(0deg)";
             let opacity = 0;
@@ -297,23 +330,23 @@ export function CoverFlowCarousel({
               zIndex = 30;
               filter = "brightness(1)";
             } else if (offset === 1) {
-              transform = "translateX(285px) scale(0.84) rotateY(-24deg)";
-              opacity = 0.65;
+              transform = `translateX(${shift1}px) scale(${cardScale}) rotateY(-24deg)`;
+              opacity = isMobile ? 0.45 : 0.65;
               zIndex = 20;
               filter = "brightness(0.75)";
             } else if (offset === 2) {
-              transform = "translateX(510px) scale(0.68) rotateY(-38deg)";
-              opacity = 0.38;
+              transform = `translateX(${shift2}px) scale(0.68) rotateY(-38deg)`;
+              opacity = isMobile ? 0 : 0.38;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
             } else if (offset === total - 1) {
-              transform = "translateX(-285px) scale(0.84) rotateY(24deg)";
-              opacity = 0.65;
+              transform = `translateX(-${shift1}px) scale(${cardScale}) rotateY(24deg)`;
+              opacity = isMobile ? 0.45 : 0.65;
               zIndex = 20;
               filter = "brightness(0.75)";
             } else if (offset === total - 2) {
-              transform = "translateX(-510px) scale(0.68) rotateY(38deg)";
-              opacity = 0.38;
+              transform = `translateX(-${shift2}px) scale(0.68) rotateY(38deg)`;
+              opacity = isMobile ? 0 : 0.38;
               zIndex = 10;
               filter = "brightness(0.55) blur(1px)";
             }
@@ -334,8 +367,8 @@ export function CoverFlowCarousel({
                 }}
                 style={{
                   position: "absolute",
-                  width: "330px",
-                  height: "500px",
+                  width: `${cardWidth}px`,
+                  height: `${cardHeight}px`,
                   borderRadius: "18px",
                   overflow: "hidden",
                   backgroundColor: "#FFFFFF",
@@ -365,14 +398,14 @@ export function CoverFlowCarousel({
                   }}
                 />
 
-                {/* Merch Product Photo - Centered in upper 65% with realistic 3D drop shadow */}
+                {/* Merch Product Photo - Centered in upper area with realistic 3D drop shadow */}
                 <div
                   style={{
                     position: "absolute",
-                    top: "32px",
+                    top: isMobile ? "24px" : "32px",
                     left: "18px",
                     right: "18px",
-                    height: "260px",
+                    height: isMobile ? "180px" : "250px",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
@@ -463,13 +496,13 @@ export function CoverFlowCarousel({
                     <h2
                       style={{
                         fontFamily: "'Shippori Mincho', serif",
-                        fontSize: "1.6rem",
+                        fontSize: isMobile ? "1.32rem" : "1.6rem",
                         fontWeight: 800,
                         textTransform: "uppercase",
                         letterSpacing: "0.02em",
                         color: "#252321",
                         margin: 0,
-                        lineHeight: 1.05,
+                        lineHeight: 1.08,
                       }}
                     >
                       {item.titleLine1}
@@ -479,7 +512,7 @@ export function CoverFlowCarousel({
                       <span
                         style={{
                           fontFamily: "'Shippori Mincho', serif",
-                          fontSize: "1.1rem",
+                          fontSize: isMobile ? "0.95rem" : "1.1rem",
                           fontWeight: 700,
                           textTransform: "uppercase",
                           letterSpacing: "0.04em",
@@ -497,24 +530,9 @@ export function CoverFlowCarousel({
                         height: "2px",
                         backgroundColor: "#C9362B",
                         borderRadius: "2px",
-                        margin: "6px auto 5px",
+                        margin: isMobile ? "6px auto 12px" : "8px auto 14px",
                       }}
                     />
-
-                    {item.desc && (
-                      <p
-                        style={{
-                          fontFamily: "system-ui, -apple-system, sans-serif",
-                          fontSize: "0.82rem",
-                          color: "#4A4540",
-                          maxWidth: "280px",
-                          margin: "0 0 10px",
-                          lineHeight: 1.35,
-                        }}
-                      >
-                        {item.desc}
-                      </p>
-                    )}
 
                     <button
                       onClick={(e) => {
@@ -531,12 +549,12 @@ export function CoverFlowCarousel({
                         display: "inline-flex",
                         alignItems: "center",
                         gap: "6px",
-                        padding: "8px 22px",
+                        padding: isMobile ? "7px 20px" : "8px 24px",
                         borderRadius: "10px",
                         background: "#B51E23",
                         color: "#FFFFFF",
                         fontFamily: "'Montserrat', sans-serif",
-                        fontSize: "0.72rem",
+                        fontSize: isMobile ? "0.68rem" : "0.72rem",
                         fontWeight: 700,
                         letterSpacing: "0.14em",
                         textTransform: "uppercase",
@@ -562,11 +580,11 @@ export function CoverFlowCarousel({
           aria-label="Previous merchandise item"
           style={{
             position: "absolute",
-            left: "24px",
+            left: isMobile ? "6px" : "24px",
             top: "50%",
             transform: "translateY(-50%)",
-            width: "46px",
-            height: "46px",
+            width: isMobile ? "38px" : "46px",
+            height: isMobile ? "38px" : "46px",
             borderRadius: "50%",
             backgroundColor: "#FFFFFF",
             border: "1px solid #E5DDD0",
@@ -589,11 +607,11 @@ export function CoverFlowCarousel({
           aria-label="Next merchandise item"
           style={{
             position: "absolute",
-            right: "24px",
+            right: isMobile ? "6px" : "24px",
             top: "50%",
             transform: "translateY(-50%)",
-            width: "46px",
-            height: "46px",
+            width: isMobile ? "38px" : "46px",
+            height: isMobile ? "38px" : "46px",
             borderRadius: "50%",
             backgroundColor: "#FFFFFF",
             border: "1px solid #E5DDD0",
@@ -630,6 +648,31 @@ export function CoverFlowCarousel({
               }}
             />
           ))}
+        </div>
+
+        {/* ── Mobile Combat Samurai Presentation (Mobile & Tablet Only) ── */}
+        <div
+          className="flex lg:hidden flex-col items-center justify-center mt-8 select-none pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="relative max-w-[190px] sm:max-w-[240px] h-auto">
+            <div
+              className="absolute -inset-4 rounded-full blur-2xl opacity-40 pointer-events-none"
+              style={{
+                background: "radial-gradient(circle, rgba(201, 54, 43, 0.25) 0%, transparent 70%)",
+              }}
+            />
+            <img
+              src="/assets/samurai/samurai-combat.png"
+              alt="Catalyst 7.0 Bushido Samurai"
+              className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
+            />
+          </div>
+          <div className="flex items-center gap-2.5 mt-2.5 text-[9.5px] sm:text-[11px] font-['Noto_Sans_JP',sans-serif] tracking-[0.25em] text-[#C9362B] uppercase font-bold">
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+            <span>武士道 · BUSHIDO HERITAGE</span>
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+          </div>
         </div>
       </div>
     </section>

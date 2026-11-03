@@ -24,7 +24,7 @@ const sections = [
     leftLabel: "Change",
     title: "Opportunity",
     rightLabel: "Change",
-    background: "/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.jpg",
+    background: "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg",
   },
 ];
 

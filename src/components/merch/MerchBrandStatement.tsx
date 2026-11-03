@@ -10,6 +10,25 @@ export const MerchBrandStatement: React.FC = () => {
         </span>
       </div>
 
+      {/* ── Bushido Guardian Sentinel Illustration (Desktop Flanking Sentinel) ── */}
+      <div
+        className="pointer-events-none absolute right-2 sm:right-6 lg:right-12 xl:right-20 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] h-auto opacity-95 transition-opacity"
+        aria-hidden="true"
+      >
+        {/* Soft Crimson Backlight */}
+        <div
+          className="absolute -inset-6 rounded-full blur-3xl opacity-35 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(201, 54, 43, 0.22) 0%, transparent 70%)",
+          }}
+        />
+        <img
+          src="/assets/samurai/samurai-guardian.png"
+          alt=""
+          className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.2)]"
+        />
+      </div>
+
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         {/* Japanese Eyebrow */}
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-md border border-[#C9362B]/30 bg-[#C9362B]/5 mb-6">
@@ -31,6 +50,31 @@ export const MerchBrandStatement: React.FC = () => {
           <span className="h-[1.5px] w-16 sm:w-24 bg-gradient-to-r from-transparent to-[#C9362B]" />
           <span className="w-2 h-2 rotate-45 bg-[#C9362B]" />
           <span className="h-[1.5px] w-16 sm:w-24 bg-gradient-to-l from-transparent to-[#C9362B]" />
+        </div>
+
+        {/* ── Bushido Guardian Sentinel Illustration (Mobile & Tablet Dedicated Showcase) ── */}
+        <div
+          className="flex lg:hidden flex-col items-center justify-center my-7 select-none pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="relative max-w-[190px] sm:max-w-[240px] h-auto">
+            <div
+              className="absolute -inset-4 rounded-full blur-2xl opacity-40 pointer-events-none"
+              style={{
+                background: "radial-gradient(circle, rgba(201, 54, 43, 0.25) 0%, transparent 70%)",
+              }}
+            />
+            <img
+              src="/assets/samurai/samurai-guardian.png"
+              alt="Catalyst 7.0 Guardian Sentinel"
+              className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
+            />
+          </div>
+          <div className="flex items-center gap-2 mt-3 text-[9.5px] sm:text-[11px] font-['Noto_Sans_JP',sans-serif] tracking-[0.25em] text-[#C9362B] uppercase font-bold">
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+            <span>守護者 · GUARDIAN OF CULTURE</span>
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+          </div>
         </div>
 
         {/* Supporting statement */}

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, ArrowRight, ShieldCheck, Heart, ShoppingBag, Plus } from 'lucide-react';
 import { useMerch } from '../context/MerchContext';
 import { getProductById } from '../data/merchProducts';
-import { MerchNav } from '../components/merch/MerchNav';
+import Navbar from '../components/Navbar';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
 
@@ -28,7 +28,7 @@ export const CartPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col selection:bg-[#C9362B] selection:text-white">
-      <MerchNav />
+      <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-16">
         {/* Header */}
@@ -113,14 +113,21 @@ export const CartPage: React.FC = () => {
                       >
                         {item.name}
                       </Link>
-                      <p className="font-mono text-xs text-[#736B63] uppercase tracking-wider mb-1">
+                      <p className="font-mono text-xs text-[#736B63] uppercase tracking-wider mb-1.5">
                         {item.variant}
                       </p>
-                      {item.size && (
-                        <span className="inline-block px-2 py-0.5 rounded bg-[#FAF6EE] border border-[#E5DDD0] text-[10px] font-mono text-[#C9362B] font-bold">
-                          SIZE: {item.size}
-                        </span>
-                      )}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {item.size && (
+                          <span className="inline-block px-2 py-0.5 rounded bg-[#FAF6EE] border border-[#E5DDD0] text-[10px] font-mono text-[#C9362B] font-bold">
+                            SIZE: {item.size}
+                          </span>
+                        )}
+                        {item.priceDisplay && (
+                          <span className="inline-block px-2.5 py-0.5 rounded bg-[#C9362B]/10 border border-[#C9362B]/30 text-xs font-['Bison',sans-serif] text-[#C9362B] font-black tracking-wider">
+                            {item.priceDisplay}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -185,6 +192,13 @@ export const CartPage: React.FC = () => {
                   <div className="flex items-center justify-between">
                     <span className="text-[#736B63] uppercase tracking-wider font-medium">Claim Status:</span>
                     <span className="text-[#C9362B] font-bold">READY TO RESERVE</span>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-2 border-t border-[#252321]/10">
+                    <span className="text-[#252321] uppercase tracking-wider font-bold">Total Estimated:</span>
+                    <span className="font-['Bison',sans-serif] font-black text-2xl text-[#C9362B] tracking-wider">
+                      LKR {cartItems.reduce((acc, i) => acc + (i.priceLkr || 0) * i.quantity, 0).toLocaleString()}
+                    </span>
                   </div>
                 </div>
 

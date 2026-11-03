@@ -40,89 +40,6 @@ const HERO_SLIDES = [
   },
 ];
 
-/** Top-Left Organic Sakura Branch with Blossoms (Replicating Reference Design) */
-const SakuraBranchArt = ({ className = '' }: { className?: string }) => (
-  <svg
-    viewBox="0 0 580 440"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    {/* Gnarled Sumi-e Ink Main Branch & Twigs */}
-    <path
-      d="M-20 -10 C50 35, 110 80, 190 95 C260 110, 330 90, 410 135 C460 165, 500 215, 540 275 M190 95 C165 145, 130 200, 85 255 M330 90 C305 155, 270 215, 235 270 M410 135 C435 190, 470 225, 510 250 M100 65 C85 110, 60 150, 30 190 M470 225 C495 270, 520 300, 550 330"
-      stroke="#252321"
-      strokeWidth="7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      opacity="0.88"
-    />
-    <path
-      d="M-20 -10 C40 30, 100 70, 170 85 C240 100, 310 80, 380 125"
-      stroke="#252321"
-      strokeWidth="12"
-      strokeLinecap="round"
-      opacity="0.95"
-    />
-
-    {/* Sakura Blossoms Clustered on the Branch */}
-    {[
-      { cx: 70, cy: 45, r: 16, rot: 12 },
-      { cx: 120, cy: 70, r: 20, rot: 34 },
-      { cx: 175, cy: 85, r: 23, rot: 5 },
-      { cx: 235, cy: 92, r: 19, rot: 48 },
-      { cx: 300, cy: 98, r: 22, rot: 22 },
-      { cx: 360, cy: 118, r: 24, rot: 55 },
-      { cx: 420, cy: 140, r: 20, rot: 15 },
-      { cx: 470, cy: 195, r: 18, rot: 40 },
-      { cx: 520, cy: 260, r: 17, rot: 25 },
-      { cx: 90, cy: 140, r: 17, rot: 80 },
-      { cx: 55, cy: 205, r: 15, rot: 25 },
-      { cx: 250, cy: 155, r: 19, rot: 40 },
-      { cx: 210, cy: 220, r: 16, rot: 70 },
-      { cx: 25, cy: 105, r: 14, rot: 10 },
-      { cx: 390, cy: 205, r: 16, rot: 55 },
-      { cx: 450, cy: 240, r: 15, rot: 30 },
-      { cx: 510, cy: 300, r: 14, rot: 65 },
-      { cx: 330, cy: 175, r: 15, rot: 18 },
-    ].map((b, i) => (
-      <g key={i} transform={`translate(${b.cx}, ${b.cy}) rotate(${b.rot}) scale(${b.r / 16})`}>
-        {[0, 72, 144, 216, 288].map((deg) => (
-          <ellipse
-            key={deg}
-            cx="0"
-            cy="-9"
-            rx="6.5"
-            ry="8.5"
-            fill={i % 2 === 0 ? "#C9362B" : "#B51E23"}
-            transform={`rotate(${deg})`}
-            opacity="0.95"
-          />
-        ))}
-        <circle cx="0" cy="0" r="4" fill="#F8F3E9" />
-        <circle cx="0" cy="0" r="2.2" fill="#252321" />
-      </g>
-    ))}
-
-    {/* Floating Petals Drifting Down */}
-    {[
-      { x: 190, y: 160, rot: 35, s: 1 },
-      { x: 260, y: 220, rot: -20, s: 0.9 },
-      { x: 310, y: 190, rot: 45, s: 1.1 },
-      { x: 370, y: 280, rot: 15, s: 0.8 },
-      { x: 440, y: 310, rot: -30, s: 0.9 },
-      { x: 140, y: 250, rot: -40, s: 0.85 },
-      { x: 80, y: 310, rot: 60, s: 0.95 },
-      { x: 500, y: 360, rot: 25, s: 0.85 },
-    ].map((p, i) => (
-      <g key={`petal-${i}`} transform={`translate(${p.x}, ${p.y}) rotate(${p.rot}) scale(${p.s})`}>
-        <ellipse cx="0" cy="0" rx="5" ry="9" fill="#C9362B" opacity="0.85" />
-      </g>
-    ))}
-  </svg>
-);
-
 /** Individual Falling Petal */
 const FloatingPetal = ({ className = '' }: { className?: string }) => (
   <svg viewBox="0 0 24 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} aria-hidden="true">
@@ -312,11 +229,6 @@ export const MerchHero: React.FC = () => {
       className="relative w-full min-h-[90vh] lg:min-h-[92vh] flex flex-col justify-center overflow-hidden bg-[#F8F3E9] py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-12 select-none border-b border-[#252321]/10"
       aria-label="Catalyst 7.0 Official Merch Hero"
     >
-      {/* ── Background Layer 1: Top-Left Sakura Branch ── */}
-      <div className="pointer-events-none absolute top-0 left-0 w-64 sm:w-96 md:w-[480px] lg:w-[560px] h-auto z-10 select-none">
-        <SakuraBranchArt className="w-full h-auto drop-shadow-[0_4px_16px_rgba(201,54,43,0.12)]" />
-      </div>
-
       {/* ── Background Layer 2: Floating Sakura Petals Drifting ── */}
       <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
         {[

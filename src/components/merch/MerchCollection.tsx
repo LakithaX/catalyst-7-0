@@ -38,32 +38,34 @@ export const MerchCollection: React.FC = () => {
           </p>
         </div>
 
-        {/* Category Filter Tabs */}
-        <div className="flex items-center justify-center flex-wrap gap-2 sm:gap-3 mb-10 sm:mb-14">
-          {CATEGORIES.map((cat) => {
-            const count = cat === 'ALL'
-              ? MERCH_PRODUCTS.length
-              : MERCH_PRODUCTS.filter((p) => p.category === cat).length;
+        {/* Category Filter Tabs (Horizontal Smooth Scroll on Mobile, Centered Wrap on Desktop) */}
+        <div className="w-full flex justify-center mb-8 sm:mb-14">
+          <div className="flex items-center justify-start sm:justify-center overflow-x-auto no-scrollbar max-w-full px-2 sm:px-0 py-1.5 gap-2 sm:gap-3 flex-nowrap sm:flex-wrap">
+            {CATEGORIES.map((cat) => {
+              const count = cat === 'ALL'
+                ? MERCH_PRODUCTS.length
+                : MERCH_PRODUCTS.filter((p) => p.category === cat).length;
 
-            const isActive = selectedCategory === cat;
+              const isActive = selectedCategory === cat;
 
-            return (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`relative px-4 sm:px-6 py-2.5 rounded-xl text-xs font-['Montserrat',sans-serif] font-bold tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer shadow-xs ${
-                  isActive
-                    ? 'bg-[#B51E23] text-white shadow-[0_4px_18px_rgba(181,30,35,0.35)]'
-                    : 'bg-white text-[#252321] hover:text-[#C9362B] border border-[#E5DDD0] hover:border-[#C9362B]/50'
-                }`}
-              >
-                <span>{cat}</span>
-                <span className={`ml-2 text-[10px] font-mono font-bold ${isActive ? 'text-white/80' : 'text-[#736B63]'}`}>
-                  ({count})
-                </span>
-              </button>
-            );
-          })}
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`shrink-0 whitespace-nowrap px-3.5 sm:px-6 py-2 sm:py-2.5 rounded-xl text-[11px] sm:text-xs font-['Montserrat',sans-serif] font-bold tracking-[0.14em] sm:tracking-[0.2em] uppercase transition-all duration-300 cursor-pointer shadow-xs select-none ${
+                    isActive
+                      ? 'bg-[#B51E23] text-white shadow-[0_4px_18px_rgba(181,30,35,0.35)] scale-[1.02]'
+                      : 'bg-white text-[#252321] hover:text-[#C9362B] border border-[#E5DDD0] hover:border-[#C9362B]/50'
+                  }`}
+                >
+                  <span>{cat}</span>
+                  <span className={`ml-1.5 sm:ml-2 text-[10px] font-mono font-bold ${isActive ? 'text-white/80' : 'text-[#736B63]'}`}>
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {/* Product Grid */}

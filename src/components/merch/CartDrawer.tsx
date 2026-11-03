@@ -87,9 +87,16 @@ export const CartDrawer: React.FC = () => {
 
                     {/* Item Details */}
                     <div className="flex-1 min-w-0">
-                      <span className="text-[9px] font-['Montserrat',sans-serif] tracking-wider text-[#C9362B] uppercase font-bold block">
-                        {item.category}
-                      </span>
+                      <div className="flex items-baseline justify-between mb-0.5">
+                        <span className="text-[9px] font-['Montserrat',sans-serif] tracking-wider text-[#C9362B] uppercase font-bold block">
+                          {item.category}
+                        </span>
+                        {item.priceDisplay && (
+                          <span className="font-['Bison',sans-serif] text-sm font-black text-[#C9362B]">
+                            {item.priceDisplay}
+                          </span>
+                        )}
+                      </div>
                       <h5 className="font-['Bison',sans-serif] font-bold text-base tracking-wide text-[#252321] truncate">
                         {item.name}
                       </h5>
@@ -145,6 +152,13 @@ export const CartDrawer: React.FC = () => {
                   <span className="text-[#736B63] font-medium">Total Pieces:</span>
                   <span className="text-[#252321] font-mono font-bold text-sm">
                     {cartItems.reduce((acc, item) => acc + item.quantity, 0)} Items
+                  </span>
+                </div>
+
+                <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif] tracking-wider uppercase pt-1 border-t border-[#252321]/10">
+                  <span className="text-[#252321] font-bold">Estimated Total:</span>
+                  <span className="text-[#C9362B] font-['Bison',sans-serif] font-black text-xl tracking-wider">
+                    LKR {cartItems.reduce((acc, item) => acc + (item.priceLkr || 0) * item.quantity, 0).toLocaleString()}
                   </span>
                 </div>
 

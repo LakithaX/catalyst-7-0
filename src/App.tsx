@@ -88,6 +88,26 @@ export default function App() {
     }
   }, [isLockedToBubbles]);
 
+  // Handle URL hash navigation (e.g. from /#gallery, /#about, /#contact)
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash) {
+        lockToSection2();
+        setTimeout(() => {
+          const target = document.querySelector(hash);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }, 350);
+      }
+    };
+
+    handleHash();
+    window.addEventListener('hashchange', handleHash);
+    return () => window.removeEventListener('hashchange', handleHash);
+  }, [lockToSection2]);
+
   // Smooth loading screen experience
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -679,7 +699,7 @@ export default function App() {
         }}
       >
         {/* SECTION 2: FESTIVITY 3D INTERACTIVE HERO */}
-        <section className="relative w-full h-screen overflow-hidden catalyst-section-isolate">
+        <section id="about" className="relative w-full h-screen overflow-hidden catalyst-section-isolate">
           <FestivityDemo shouldAnimate={isSection2Active || isLockedToBubbles} />
         </section>
 
@@ -699,7 +719,28 @@ export default function App() {
         </div>
 
         {/* Outro / Footer */}
-        <section id="contact" className="flex h-[30svh] w-full items-center justify-center bg-[#F3ECE0] px-6 text-center select-none border-t border-[#252321]/10">
+        <section id="contact" className="relative flex flex-col min-h-[36svh] w-full items-center justify-center bg-[#F3ECE0] px-6 py-12 text-center select-none border-t border-[#252321]/10 overflow-hidden">
+          {/* Guardian Sentinel Illustration */}
+          <div className="relative mb-4 max-w-[110px] sm:max-w-[140px] md:max-w-[170px] h-auto pointer-events-none select-none">
+            <div
+              className="absolute -inset-4 rounded-full blur-2xl opacity-40 pointer-events-none"
+              style={{
+                background: "radial-gradient(circle, rgba(201, 54, 43, 0.25) 0%, transparent 70%)",
+              }}
+            />
+            <img
+              src="/assets/samurai/samurai-guardian.png"
+              alt="Catalyst 7.0 Guardian"
+              className="w-full h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(37,35,33,0.18)]"
+            />
+          </div>
+
+          <div className="flex items-center gap-3 mb-3 text-[10px] font-['Noto_Sans_JP',sans-serif] tracking-[0.3em] text-[#C9362B] uppercase font-bold">
+            <span className="w-8 h-[1px] bg-[#C9362B]/40" />
+            <span>武士道 · DARE BEYOND DEFINITION</span>
+            <span className="w-8 h-[1px] bg-[#C9362B]/40" />
+          </div>
+
           <p className="max-w-md font-mono text-xs uppercase leading-relaxed tracking-[0.3em] text-[#736B63] font-bold">
             Scroll back up to explore previous realms.
           </p>

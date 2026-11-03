@@ -494,7 +494,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           .fx-content {
             grid-column: 1 / 13;
             position: absolute; inset: 0;
-            display: grid; grid-template-columns: 1fr 1.3fr 1fr;
+            display: grid; grid-template-columns: minmax(100px, 1fr) minmax(auto, 2.8fr) minmax(100px, 1fr);
             align-items: center;
             height: 100%;
             padding: 0 var(--fx-grid-px);
@@ -540,7 +540,9 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
           .fx-center {
             position: relative;
-            display: grid; place-items: center; text-align: center; height: 60vh; overflow: hidden;
+            display: grid; place-items: center; text-align: center; height: 60vh;
+            overflow-y: hidden;
+            overflow-x: visible;
           }
           .fx-featured {
             position: absolute;
@@ -553,8 +555,9 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           .fx-featured-title {
             margin: 0; color: var(--fx-text);
             font-weight: 900; letter-spacing: -0.01em;
-            font-size: clamp(2rem, 7.5vw, 6rem);
+            font-size: clamp(1.8rem, 5.2vw, 4.6rem);
             line-height: 1.05;
+            white-space: nowrap;
           }
           .fx-word {
             display: inline-block;
@@ -572,13 +575,33 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           .fx-progress-numbers { position: absolute; inset: auto 0 100% 0; display: flex; justify-content: space-between; font-size: 0.8rem; color: #ffffff; font-weight: 600; padding-bottom: 4px; }
 
           @media (max-width: 900px) {
-            .fx-content {
-              grid-template-columns: 1fr; row-gap: 3vh;
-              place-items: center;
+            .fx-header {
+              padding-top: 4vh;
+              font-size: clamp(1.6rem, 7.5vw, 3.5rem);
             }
-            .fx-left, .fx-right, .fx-center { height: auto; }
-            .fx-left, .fx-right { justify-items: center; }
-            .fx-track { transform: none !important; }
+            .fx-content {
+              grid-template-columns: 1fr;
+              place-items: center;
+              padding: 0 1.25rem;
+            }
+            .fx-left, .fx-right {
+              display: none !important;
+            }
+            .fx-center {
+              height: 48vh;
+              width: 100%;
+            }
+            .fx-featured-title {
+              font-size: clamp(1.65rem, 8vw, 3.2rem);
+              white-space: normal;
+              word-break: break-word;
+            }
+            .fx-footer {
+              padding-bottom: 3vh;
+            }
+            .fx-progress {
+              width: 160px;
+            }
           }
         `}</style>
       </div>

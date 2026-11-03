@@ -11,6 +11,7 @@ export interface CartItem {
   size?: string;
   quantity: number;
   claimStatus: string;
+  priceLkr?: number;
   priceDisplay?: string;
 }
 
@@ -122,6 +123,7 @@ export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               size,
               quantity,
               claimStatus: product.claimStatus,
+              priceLkr: product.priceLkr,
               priceDisplay: product.priceDisplay,
             },
           ];

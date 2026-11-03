@@ -16,7 +16,7 @@ import {
 } from 'lucide-react';
 import { getProductById, getRelatedProducts, MerchProduct } from '../data/merchProducts';
 import { useMerch } from '../context/MerchContext';
-import { MerchNav } from '../components/merch/MerchNav';
+import Navbar from '../components/Navbar';
 import { CartDrawer } from '../components/merch/CartDrawer';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
@@ -80,7 +80,7 @@ export const ProductDetailPage: React.FC = () => {
   if (!product) {
     return (
       <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col">
-        <MerchNav />
+        <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
           <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl text-[#252321] mb-4">
             PIECE NOT FOUND
@@ -120,7 +120,7 @@ export const ProductDetailPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col selection:bg-[#C9362B] selection:text-white">
-      <MerchNav />
+      <Navbar />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Sleek Inline Breadcrumb & Collection Return */}
@@ -266,30 +266,30 @@ export const ProductDetailPage: React.FC = () => {
                 </span>
               </div>
 
-              {/* Product Headline */}
-              <h1 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-[#252321] leading-none mb-2">
-                {product.name}
-              </h1>
+              {/* Product Headline & Price */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
+                <h1 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-[#252321] leading-none">
+                  {product.name}
+                </h1>
+                <span className="font-['Bison',sans-serif] text-3xl sm:text-4xl font-black text-[#C9362B] tracking-wider whitespace-nowrap">
+                  {product.priceDisplay}
+                </span>
+              </div>
 
               {/* Variant Subtitle */}
-              <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl sm:text-3xl uppercase tracking-widest text-[#C9362B] mb-4">
+              <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl sm:text-3xl uppercase tracking-widest text-[#736B63] mb-6">
                 {product.variant}
               </h2>
 
-              {/* Japanese Mon Divider */}
-              <div className="flex items-center gap-3 my-4">
-                <span className="h-[1px] w-8 bg-gradient-to-r from-transparent to-[#C9362B]/40" />
-                <span className="w-1.5 h-1.5 rotate-45 border border-[#C9362B] bg-[#C9362B]/30" />
-                <span className="h-[1px] w-16 bg-gradient-to-l from-transparent to-[#C9362B]/40" />
-              </div>
-
-              {/* Editorial Description */}
-              <p className="font-['Droid_Serif',Georgia,serif] italic text-sm sm:text-base text-[#736B63] leading-relaxed mb-6">
-                {product.description}
-              </p>
-
               {/* Availability & Claim Status Badge */}
               <div className="p-4 rounded-xl bg-white border border-[#E5DDD0] shadow-xs space-y-2 mb-6 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase font-medium">
+                    Price:
+                  </span>
+                  <span className="font-mono font-bold text-sm text-[#C9362B]">{product.priceDisplay}</span>
+                </div>
+
                 <div className="flex items-center justify-between">
                   <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase font-medium">
                     Status:
@@ -390,25 +390,6 @@ export const ProductDetailPage: React.FC = () => {
                   />
                   <span>{wishlisted ? 'IN YOUR WISHLIST' : 'ADD TO WISHLIST'}</span>
                 </button>
-              </div>
-
-              {/* Material Details / Care Instructions */}
-              <div className="pt-8 border-t border-[#252321]/10 space-y-4">
-                {product.materialDetails && product.materialDetails.length > 0 && (
-                  <div>
-                    <h4 className="font-['Montserrat',sans-serif] text-xs font-bold tracking-widest text-[#C9362B] uppercase mb-2">
-                      SPECIFICATIONS & MATERIALS
-                    </h4>
-                    <ul className="space-y-1.5 text-xs text-[#736B63] font-sans">
-                      {product.materialDetails.map((detail, idx) => (
-                        <li key={idx} className="flex items-start gap-2">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B] mt-1 shrink-0" />
-                          <span>{detail}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 import React, { useRef } from "react"
+import { Link } from "react-router-dom"
 import { useIsMobile } from "@/components/blocks/animated-gallery"
 import { Button } from "@/components/ui/button"
 import {
@@ -38,10 +39,10 @@ const GALLERY_CONFIG = {
     headingLine4: "CONNECTION",
     paragraph:
       "Catalyst 7.0 is the flagship leadership development seminar of SLIIT, planned as a two-day experience. Further details will be announced through our official event channels.",
-    primaryButtonLabel: "GET UPDATES",
+    primaryButtonLabel: "EXPLORE MERCH",
     secondaryButtonLabel: "LEARN MORE",
     secondaryButtonHref: "#about",
-    ctaUrl: "#updates",
+    ctaUrl: "/merch",
   },
 } as const
 
@@ -51,10 +52,6 @@ export interface GalleryImageItem {
 }
 
 const ALL_IMAGES: GalleryImageItem[] = [
-  {
-    src: "/assets/catalyst-gallery/615870974_1268080742032503_7148270481263264852_n.jpg",
-    alt: "AIESEC in SLIIT delegates collaborating closely on a team leadership challenge",
-  },
   {
     src: "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg",
     alt: "Delegates engaged in an interactive group discussion during a Catalyst seminar session",
@@ -205,91 +202,6 @@ const SakuraIcon = ({ className = "w-4 h-4" }: { className?: string }) => (
     {/* 5-Petal Cherry Blossom */}
     <path d="M12 2 C13.5 5 15.5 6 18.5 4.5 C17.5 7.5 18 9.5 21 10.5 C18.5 12 17.5 14 19 17 C16 16.5 14 17.5 13 20.5 C12 18 10 17 7 18.5 C8 15.5 7.5 13.5 4.5 12.5 C7 11 8 9 6.5 6 C9.5 6.5 11.5 5.5 12 2 Z" />
     <circle cx="12" cy="12" r="2.2" fill="#E9B9A5" />
-  </svg>
-)
-
-/** Top-Left Organic Sakura Branch with Delicate Blossoms & Floating Petals */
-const SakuraBranchArt = ({ className = "" }: { className?: string }) => (
-  <svg
-    viewBox="0 0 580 440"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    {/* Gnarled Sumi-e Ink Main Branch & Twigs */}
-    <path
-      d="M-20 -10 C50 35, 110 80, 190 95 C260 110, 330 90, 410 135 C460 165, 500 215, 540 275 M190 95 C165 145, 130 200, 85 255 M330 90 C305 155, 270 215, 235 270 M410 135 C435 190, 470 225, 510 250 M100 65 C85 110, 60 150, 30 190 M470 225 C495 270, 520 300, 550 330"
-      stroke="#252321"
-      strokeWidth="7"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      opacity="0.88"
-    />
-    <path
-      d="M-20 -10 C40 30, 100 70, 170 85 C240 100, 310 80, 380 125"
-      stroke="#252321"
-      strokeWidth="12"
-      strokeLinecap="round"
-      opacity="0.95"
-    />
-
-    {/* Sakura Blossoms Clustered on the Branch */}
-    {[
-      { cx: 70, cy: 45, r: 16, rot: 12 },
-      { cx: 120, cy: 70, r: 20, rot: 34 },
-      { cx: 175, cy: 85, r: 23, rot: 5 },
-      { cx: 235, cy: 92, r: 19, rot: 48 },
-      { cx: 300, cy: 98, r: 22, rot: 22 },
-      { cx: 360, cy: 118, r: 24, rot: 55 },
-      { cx: 420, cy: 140, r: 20, rot: 15 },
-      { cx: 470, cy: 195, r: 18, rot: 40 },
-      { cx: 520, cy: 260, r: 17, rot: 25 },
-      { cx: 90, cy: 140, r: 17, rot: 80 },
-      { cx: 55, cy: 205, r: 15, rot: 25 },
-      { cx: 250, cy: 155, r: 19, rot: 40 },
-      { cx: 210, cy: 220, r: 16, rot: 70 },
-      { cx: 25, cy: 105, r: 14, rot: 10 },
-      { cx: 390, cy: 205, r: 16, rot: 55 },
-      { cx: 450, cy: 240, r: 15, rot: 30 },
-      { cx: 510, cy: 300, r: 14, rot: 65 },
-      { cx: 330, cy: 175, r: 15, rot: 18 },
-    ].map((b, i) => (
-      <g key={i} transform={`translate(${b.cx}, ${b.cy}) rotate(${b.rot}) scale(${b.r / 16})`}>
-        {/* 5 Petals */}
-        {[0, 72, 144, 216, 288].map((deg) => (
-          <ellipse
-            key={deg}
-            cx="0"
-            cy="-9"
-            rx="6.5"
-            ry="8.5"
-            fill={i % 2 === 0 ? "#C9362B" : "#D4483D"}
-            transform={`rotate(${deg})`}
-            opacity="0.95"
-          />
-        ))}
-        {/* Center pistil */}
-        <circle cx="0" cy="0" r="4" fill="#F8F3E9" />
-        <circle cx="0" cy="0" r="2.2" fill="#252321" />
-      </g>
-    ))}
-
-    {/* Floating Petals Drifting Down */}
-    {[
-      { x: 190, y: 160, rot: 35, s: 1 },
-      { x: 260, y: 220, rot: -20, s: 0.9 },
-      { x: 310, y: 190, rot: 45, s: 1.1 },
-      { x: 370, y: 280, rot: 15, s: 0.8 },
-      { x: 440, y: 310, rot: -30, s: 0.9 },
-      { x: 140, y: 250, rot: -40, s: 0.85 },
-      { x: 80, y: 310, rot: 60, s: 0.95 },
-      { x: 500, y: 360, rot: 25, s: 0.85 },
-    ].map((p, i) => (
-      <g key={`petal-${i}`} transform={`translate(${p.x}, ${p.y}) rotate(${p.rot}) scale(${p.s})`}>
-        <ellipse cx="0" cy="0" rx="5" ry="9" fill="#C9362B" opacity="0.85" />
-      </g>
-    ))}
   </svg>
 )
 
@@ -526,74 +438,6 @@ const JapanesePagodaLandscape = ({ className = "" }: { className?: string }) => 
   </svg>
 )
 
-/** Circular Japanese Hanko / Inkan Stamp Seal in Samurai Red */
-const JapaneseHankoSeal = ({ className = "" }: { className?: string }) => (
-  <svg
-    viewBox="0 0 140 140"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    {/* Distressed Red Ink Circle Ring */}
-    <circle
-      cx="70"
-      cy="70"
-      r="58"
-      stroke="#C9362B"
-      strokeWidth="5"
-      strokeDasharray="18 4 28 6 12 4"
-      opacity="0.9"
-    />
-    <circle
-      cx="70"
-      cy="70"
-      r="50"
-      stroke="#C9362B"
-      strokeWidth="1.5"
-      strokeDasharray="8 6 16 4"
-      opacity="0.65"
-    />
-    {/* Inner Stamp Badge */}
-    <text
-      x="70"
-      y="54"
-      textAnchor="middle"
-      fill="#C9362B"
-      fontSize="11"
-      fontFamily="'Montserrat', sans-serif"
-      fontWeight="800"
-      letterSpacing="0.25em"
-    >
-      CATALYST
-    </text>
-    <text
-      x="70"
-      y="76"
-      textAnchor="middle"
-      fill="#C9362B"
-      fontSize="20"
-      fontFamily="'Shippori Mincho', serif"
-      fontWeight="900"
-      letterSpacing="0.1em"
-    >
-      武士道
-    </text>
-    <text
-      x="70"
-      y="94"
-      textAnchor="middle"
-      fill="#C9362B"
-      fontSize="12"
-      fontFamily="'Montserrat', sans-serif"
-      fontWeight="800"
-      letterSpacing="0.2em"
-    >
-      7.0
-    </text>
-  </svg>
-)
-
 // ============================================================================
 // CINEMATIC TEXT REVEAL ZONE — WARM IVORY SUMI-E DESIGN
 // ============================================================================
@@ -611,10 +455,27 @@ const TextRevealZone = () => {
         background: "radial-gradient(ellipse at 50% 38%, #FAF8F2 0%, #F8F3E9 60%, #F4ECE0 100%)",
       }}
     >
-      {/* ── Layer 1: Top-Left Cherry Blossom Sakura Branch (Expansive framing) ── */}
-      <div className="pointer-events-none absolute top-0 left-0 w-72 sm:w-[400px] md:w-[480px] lg:w-[580px] xl:w-[680px] h-auto z-10 select-none">
-        <SakuraBranchArt className="w-full h-auto drop-shadow-[0_4px_16px_rgba(201,54,43,0.12)]" />
-      </div>
+      {/* ── Desktop Samurai Leader: Pointing Katana toward "LEAD WITH PURPOSE" (Desktop Only) ── */}
+      <motion.div
+        initial={{ opacity: 0, x: -30 }}
+        animate={animate === "visible" ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
+        transition={{ duration: 0.9, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+        className="pointer-events-none absolute left-0 xl:left-4 bottom-0 z-10 select-none hidden lg:flex items-end justify-start max-w-[380px] xl:max-w-[440px] h-auto transition-opacity"
+        aria-hidden="true"
+      >
+        {/* Subtle Warm Crimson Halo */}
+        <div
+          className="absolute -inset-6 rounded-full blur-3xl opacity-40 pointer-events-none"
+          style={{
+            background: "radial-gradient(circle, rgba(201, 54, 43, 0.22) 0%, transparent 70%)",
+          }}
+        />
+        <img
+          src="/assets/samurai/samurai-pointing.png"
+          alt=""
+          className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.22)]"
+        />
+      </motion.div>
 
       {/* ── Layer 2: Floating Organic Sakura Petals Drifting Across the Scene ── */}
       <div className="pointer-events-none absolute inset-0 z-10 overflow-hidden" aria-hidden="true">
@@ -668,11 +529,6 @@ const TextRevealZone = () => {
 
         {/* ── Main Samurai Headline (Replicating Reference Design) ── */}
         <div className="relative w-full my-2 sm:my-3">
-          {/* Subtle Inkan Hanko Stamp on the upper right */}
-          <div className="absolute -top-3 sm:-top-5 right-1 sm:right-4 md:right-8 lg:right-12 w-14 sm:w-20 md:w-24 h-auto pointer-events-none select-none rotate-[8deg] opacity-85 sm:opacity-95">
-            <JapaneseHankoSeal className="w-full h-auto drop-shadow-sm" />
-          </div>
-
           {/* Line 1: LEAD WITH */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -808,6 +664,34 @@ const TextRevealZone = () => {
           </a>
         </motion.div>
 
+        {/* ── Mobile Samurai Leader Presentation (Mobile & Tablet Only) ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          animate={animate === "visible" ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
+          transition={{ duration: 0.8, delay: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="flex lg:hidden flex-col items-center justify-center mt-10 sm:mt-12 select-none pointer-events-none"
+          aria-hidden="true"
+        >
+          <div className="relative max-w-[210px] sm:max-w-[270px] h-auto">
+            <div
+              className="absolute -inset-4 rounded-full blur-2xl opacity-40 pointer-events-none"
+              style={{
+                background: "radial-gradient(circle, rgba(201, 54, 43, 0.25) 0%, transparent 70%)",
+              }}
+            />
+            <img
+              src="/assets/samurai/samurai-pointing.png"
+              alt="Catalyst 7.0 Samurai Leader"
+              className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
+            />
+          </div>
+          <div className="flex items-center gap-2.5 mt-3.5 text-[9.5px] sm:text-[11px] font-['Noto_Sans_JP',sans-serif] tracking-[0.25em] text-[#C9362B] uppercase font-bold">
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+            <span>武士の道 · LEAD WITH PURPOSE</span>
+            <span className="w-6 sm:w-8 h-[1px] bg-[#C9362B]/40" />
+          </div>
+        </motion.div>
+
       </div>
     </div>
   )
@@ -875,6 +759,13 @@ export const DemoVariant1 = () => {
           <p className="font-['Noto_Sans_JP',sans-serif] text-[10px] sm:text-xs tracking-[0.25em] uppercase font-bold text-[#252321]/60">
             CATALYST 7.0 · MOMENTS OF LEADERSHIP
           </p>
+          <Link
+            to="/gallery"
+            className="inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full border border-[#252321]/40 bg-[#FAF6EE] hover:bg-[#252321] hover:text-[#FAF6EE] text-[#252321] font-['Montserrat',sans-serif] text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase transition-all shadow-xs cursor-pointer group"
+          >
+            <span>ENTER FULL SCROLL GALLERY</span>
+            <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+          </Link>
         </div>
       </div>
     </section>

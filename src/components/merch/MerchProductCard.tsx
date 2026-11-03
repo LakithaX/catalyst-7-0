@@ -89,9 +89,14 @@ export const MerchProductCard: React.FC<MerchProductCardProps> = ({ product }) =
       {/* ── Metadata Info Bar ── */}
       <div className="p-5 border-t border-[#E5DDD0] bg-white flex flex-col justify-between flex-grow">
         <div>
-          <h3 className="font-serif text-2xl font-bold uppercase tracking-tight text-[#252321] group-hover:text-[#C9362B] transition-colors leading-tight">
-            {product.name}
-          </h3>
+          <div className="flex items-start justify-between gap-3 mb-1">
+            <h3 className="font-serif text-2xl font-bold uppercase tracking-tight text-[#252321] group-hover:text-[#C9362B] transition-colors leading-tight">
+              {product.name}
+            </h3>
+            <span className="font-['Bison',sans-serif] text-xl sm:text-2xl font-black text-[#C9362B] tracking-wider whitespace-nowrap">
+              {product.priceDisplay}
+            </span>
+          </div>
           <p className="font-mono text-xs text-[#736B63] uppercase tracking-wider mb-2 font-medium">
             {product.variant}
           </p>

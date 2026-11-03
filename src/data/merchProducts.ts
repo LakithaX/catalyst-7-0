@@ -20,9 +20,8 @@ export interface MerchProduct {
   pickupLocation: string;
   materialDetails?: string[];
   careInstructions?: string[];
-  // Price note: Commercial monetary price is not published by the organizing committee.
-  // Marked as TBA/Included with Delegate Pass per instructions.
-  priceDisplay?: string;
+  priceLkr: number;
+  priceDisplay: string;
   isAvailable: boolean;
 }
 
@@ -55,7 +54,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Do not iron directly over back calligraphy artwork",
       "Hang dry in shade to preserve cotton structure"
     ],
-    priceDisplay: "INCLUDED WITH DELEGATE TICKET",
+    priceLkr: 2850,
+    priceDisplay: "LKR 2,850",
     isAvailable: true
   },
   {
@@ -84,7 +84,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Spot clean with mild damp cloth",
       "Do not tumble dry or bleach"
     ],
-    priceDisplay: "OFFICIAL MERCHANDISE",
+    priceLkr: 1750,
+    priceDisplay: "LKR 1,750",
     isAvailable: true
   },
   {
@@ -114,7 +115,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Wash inside out",
       "Medium iron on reverse"
     ],
-    priceDisplay: "INCLUDED WITH DELEGATE TICKET",
+    priceLkr: 2850,
+    priceDisplay: "LKR 2,850",
     isAvailable: true
   },
   {
@@ -136,7 +138,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Waterproof & scratch-proof adhesive",
       "Residue-free clean peel backing"
     ],
-    priceDisplay: "DELEGATE WELCOME PACKET",
+    priceLkr: 650,
+    priceDisplay: "LKR 650",
     isAvailable: true
   },
   {
@@ -158,7 +161,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Precision die-cut borders",
       "Fade-resistant Japanese ink printing"
     ],
-    priceDisplay: "DELEGATE WELCOME PACKET",
+    priceLkr: 750,
+    priceDisplay: "LKR 750",
     isAvailable: true
   },
   {
@@ -180,7 +184,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Brushed antique gold alloy locking bead",
       "Serialised commemorative identifier"
     ],
-    priceDisplay: "OFFICIAL ACCREDITATION",
+    priceLkr: 450,
+    priceDisplay: "LKR 450",
     isAvailable: true
   },
   {
@@ -202,7 +207,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Water-resistant and durable across multi-day wear",
       "Soft-touch skin-friendly weave"
     ],
-    priceDisplay: "LEADERSHIP TRACK ACCREDITATION",
+    priceLkr: 550,
+    priceDisplay: "LKR 550",
     isAvailable: true
   },
   {
@@ -223,7 +229,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Numbered certificate of authenticity",
       "Custom commemorative branding"
     ],
-    priceDisplay: "COMMEMORATIVE EDITION",
+    priceLkr: 3450,
+    priceDisplay: "LKR 3,450",
     isAvailable: true
   },
   {
@@ -244,7 +251,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
       "Special Edition 7.0 iconography",
       "Commemorative packaging"
     ],
-    priceDisplay: "COMMEMORATIVE EDITION",
+    priceLkr: 3650,
+    priceDisplay: "LKR 3,650",
     isAvailable: true
   }
 ];
