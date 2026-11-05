@@ -1,6 +1,6 @@
 /* Catalyst 7.0 OC Poster Styles */
 .oc-poster-page {
-  --ph: url("/assets/cat-oc-pics/nethuli-trimmed.png");
+  --ph: url('/assets/cat-oc-pics/nethuli-trimmed.png');
   --ar: 0.717;
   --pw: 36;
   --bg: #f3e9eb;
@@ -189,6 +189,21 @@
     drop-shadow(0 max(2px, calc(0.45 * var(--k))) 0 #fff)
     drop-shadow(0 min(-2px, calc(-0.45 * var(--k))) 0 #fff)
     drop-shadow(0 0 calc(0.8 * var(--k)) rgba(255, 190, 205, 0.7));
+}
+
+.oc-poster-page .pic .pic-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: bottom center;
+  filter: drop-shadow(max(2px, calc(0.45 * var(--k))) 0 0 #fff)
+    drop-shadow(min(-2px, calc(-0.45 * var(--k))) 0 0 #fff)
+    drop-shadow(0 max(2px, calc(0.45 * var(--k))) 0 #fff)
+    drop-shadow(0 min(-2px, calc(-0.45 * var(--k))) 0 #fff)
+    drop-shadow(0 0 calc(0.8 * var(--k)) rgba(255, 190, 205, 0.7));
+  pointer-events: none;
 }
 
 .oc-poster-page .nm {

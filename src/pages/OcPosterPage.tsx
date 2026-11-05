@@ -154,7 +154,7 @@ export default function OcPosterPage() {
         if (picWrap && E[i + 1]) {
           // Bottom white line cuts the image so it doesn't show past the white line
           picWrap.style.clipPath =
-            'polygon(0% -120cqw, 100% -120cqw, ' +
+            'polygon(0% -200%, 100% -200%, ' +
             line(E[i + 1], E[i + 1].a, R - g, true).join(',') +
             ')';
         }
@@ -252,7 +252,7 @@ export default function OcPosterPage() {
                   className={`row ${isOdd ? 'r' : 'l'}`}
                   style={
                     {
-                      '--ph': `url("${member.image}")`,
+                      '--ph': `url('${member.image}')`,
                       '--ar': member.aspect,
                       '--pw': member.pw,
                       '--p-bot': member.bottom || 'calc(-1 * var(--k))',
@@ -267,11 +267,24 @@ export default function OcPosterPage() {
                     >
                       {first}
                     </span>
-                    <i className="ghost" />
+                    <i
+                      className="ghost"
+                      style={{ backgroundImage: `url('${member.image}')` }}
+                    />
                   </div>
                   <div className="pic-wrap">
                     <div className="pic">
-                      <i role="img" aria-label={member.name} />
+                      <i
+                        role="img"
+                        aria-label={member.name}
+                        style={{ backgroundImage: `url('${member.image}')` }}
+                      />
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="pic-img"
+                        loading="eager"
+                      />
                     </div>
                   </div>
                   <div className="nm">
