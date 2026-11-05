@@ -327,13 +327,26 @@ export default function OcPosterPage() {
         rowEls.forEach((row, i) => {
           const bg = row.querySelector('.bg') as HTMLElement;
           const picWrap = row.querySelector('.pic-wrap') as HTMLElement;
+          const isLastRow = i === rowEls.length - 1;
+          const isLastSection = sIdx === sectionEls.length - 1;
+
           if (bg && E[i] && E[i + 1]) {
-            bg.style.clipPath =
-              'polygon(' +
-              line(E[i], E[i].b, En + g)
-                .concat(line(E[i + 1], E[i + 1].a, En + R - g, true))
-                .join(',') +
-              ')';
+            if (isLastRow && !isLastSection) {
+              // Seamlessly extend dark red to the bottom of the row so it connects with the SVG divider below
+              bg.style.clipPath =
+                'polygon(' +
+                line(E[i], E[i].b, En + g)
+                  .concat(['100% 100%', '0% 100%'])
+                  .join(',') +
+                ')';
+            } else {
+              bg.style.clipPath =
+                'polygon(' +
+                line(E[i], E[i].b, En + g)
+                  .concat(line(E[i + 1], E[i + 1].a, En + R - g, true))
+                  .join(',') +
+                ')';
+            }
           }
           if (picWrap && E[i + 1]) {
             // Bottom white line cuts the image so it doesn't show past the white line
@@ -468,8 +481,22 @@ export default function OcPosterPage() {
 
       <div className="page">
         <main className="poster" ref={posterRef}>
-          {SECTIONS.map((section) => (
+          {SECTIONS.map((section, sIdx) => (
             <section key={section.id} id={section.id} className="poster-section">
+              {/* Seamless dark red torn-paper divider at the top of OCVP sections */}
+              {sIdx > 0 && (
+                <div className="w-full overflow-hidden leading-none -mt-1 -mb-3 sm:-mb-5 md:-mb-7 relative z-20 pointer-events-none">
+                  <svg
+                    viewBox="0 0 1200 48"
+                    preserveAspectRatio="none"
+                    className="w-full h-6 sm:h-9 md:h-12 block"
+                    fill="#9a0d2a"
+                  >
+                    <path d="M 0 0 L 1200 0 L 1200 24 L 1175 38 L 1150 18 L 1120 42 L 1090 22 L 1060 36 L 1030 16 L 1000 44 L 970 26 L 940 38 L 910 18 L 880 40 L 850 22 L 820 44 L 790 20 L 760 38 L 730 18 L 700 42 L 670 24 L 640 40 L 610 16 L 580 44 L 550 22 L 520 38 L 490 18 L 460 42 L 430 20 L 400 38 L 370 24 L 340 44 L 310 18 L 280 40 L 250 22 L 220 42 L 190 18 L 160 38 L 130 22 L 100 44 L 70 20 L 40 36 L 15 18 L 0 32 Z" />
+                  </svg>
+                </div>
+              )}
+
               <header className="head">
                 <p className="wm" aria-hidden="true">
                   {section.watermark}

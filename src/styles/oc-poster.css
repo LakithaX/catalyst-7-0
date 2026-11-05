@@ -42,7 +42,7 @@
 }
 
 .oc-poster-page .poster-section + .poster-section {
-  margin-top: calc(3 * var(--k));
+  margin-top: 0;
   padding-top: 0;
 }
 
