@@ -13,7 +13,7 @@ export default function AboutPage() {
   const aboutDiscItems: DiscRevealItem[] = [
     {
       title: "Organizing Committee",
-      subtitle: "18 leaders forging the Catalyst 7.0 crucible",
+      subtitle: "19 leaders forging the Catalyst 7.0 crucible",
       href: "/oc",
       onClick: (e) => {
         e.preventDefault();

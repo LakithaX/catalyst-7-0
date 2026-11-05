@@ -36,6 +36,16 @@
   --gr: 24cqw;
 }
 
+.oc-poster-page .poster-section {
+  position: relative;
+  width: 100%;
+}
+
+.oc-poster-page .poster-section + .poster-section {
+  margin-top: calc(10 * var(--k));
+  padding-top: calc(2 * var(--k));
+}
+
 @container (min-width: 600px) {
   .oc-poster-page .poster {
     --k: 0.8cqw;

@@ -103,8 +103,8 @@ export const OC_MEMBERS: TeamMember[] = [
     quote: 'Igniting curiosity across every platform and commanding delegate attention.',
   },
   {
-    id: 'ocvp-isuri',
-    name: 'Isuri Walpola',
+    id: 'ocvp-isuri-marketing',
+    name: 'Isuri Naveesha',
     role: 'OCVP Marketing',
     category: 'OC',
     department: 'Marketing',
@@ -114,7 +114,7 @@ export const OC_MEMBERS: TeamMember[] = [
   },
   {
     id: 'ocvp-miran',
-    name: 'Miran',
+    name: 'Kaveesha Miran',
     role: 'OCVP Marketing',
     category: 'OC',
     department: 'Marketing',
@@ -124,7 +124,7 @@ export const OC_MEMBERS: TeamMember[] = [
   },
   {
     id: 'ocvp-binushi',
-    name: 'Binushi',
+    name: 'Binushi Wikramarathne',
     role: 'OCVP Delegates & Events',
     category: 'OC',
     department: 'Delegates & Events',
@@ -134,13 +134,23 @@ export const OC_MEMBERS: TeamMember[] = [
   },
   {
     id: 'ocvp-tharuka',
-    name: 'Tharuka',
+    name: 'Tharuka Liyanage',
     role: 'OCVP Delegates & Events',
     category: 'OC',
     department: 'Delegates & Events',
     image: '/assets/cat-oc-pics/tharuka-ocvp-delegates-and-events.webp',
     moniker: '儀礼 · Protocol & Flow',
     quote: 'Harmonizing delegate journeys into an indelible rite of leadership passage.',
+  },
+  {
+    id: 'ocvp-isuri-muthumalee',
+    name: 'Isuri Muthumalee',
+    role: 'OCVP Delegates & Events',
+    category: 'OC',
+    department: 'Delegates & Events',
+    image: '/assets/cat-oc-pics/isuri-muthumalee-ocvp-delegates-and-events.webp',
+    moniker: '歓待 · Delegate Experience',
+    quote: 'Crafting meaningful connections and unforgettable event moments for every delegate.',
   },
   {
     id: 'ocvp-vindhi',
