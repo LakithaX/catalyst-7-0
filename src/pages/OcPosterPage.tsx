@@ -34,7 +34,7 @@ const SECTIONS: SectionData[] = [
         role: 'Organizing Committee President (OCP)',
         image: '/assets/cat-oc-pics/mahdy-hassan-ocp.webp',
         aspect: 0.883,
-        pw: 23,
+        pw: 18.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -42,8 +42,8 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Finance',
         image: '/assets/cat-oc-pics/monali-edirisinghe-ocvp-finance.webp',
         aspect: 0.399,
-        pw: 11,
-        bottom: 'calc(-0.5 * var(--k))',
+        pw: 10.5,
+        bottom: 'calc(-6 * var(--k))',
       },
     ],
   },
@@ -59,7 +59,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Partnership Development',
         image: '/assets/cat-oc-pics/nethuli-gunathilaka-ocvp-pd.webp',
         aspect: 0.718,
-        pw: 19,
+        pw: 15.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -67,7 +67,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Partnership Development',
         image: '/assets/cat-oc-pics/chetha-atapattu-ocvp-pd.webp',
         aspect: 0.740,
-        pw: 19,
+        pw: 15.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -75,15 +75,15 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Partnership Development',
         image: '/assets/cat-oc-pics/vimarshi-ocvp-pd.webp',
         aspect: 0.833,
-        pw: 22,
+        pw: 17.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
         name: 'Gihansa Hasithmi',
         role: 'OCVP Partnership Development',
         image: '/assets/cat-oc-pics/gihansa-ocvp-pd.webp',
-        aspect: 1.207,
-        pw: 29,
+        aspect: 1.208,
+        pw: 25.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -91,8 +91,8 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Partnership Development',
         image: '/assets/cat-oc-pics/hari-ocvp-pd.webp',
         aspect: 0.931,
-        pw: 24,
-        bottom: 'calc(-0.5 * var(--k))',
+        pw: 24.5,
+        bottom: 'calc(-6 * var(--k))',
       },
     ],
   },
@@ -108,7 +108,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Marketing',
         image: '/assets/cat-oc-pics/harshitha-yasiru-ocvp-marketing.webp',
         aspect: 0.708,
-        pw: 18,
+        pw: 15.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -116,7 +116,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Marketing',
         image: '/assets/cat-oc-pics/isuri-walpola-ocvp-marketing.webp',
         aspect: 0.739,
-        pw: 19,
+        pw: 15.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -124,7 +124,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Marketing',
         image: '/assets/cat-oc-pics/dahamsa-ocvp-marketing.webp',
         aspect: 1.015,
-        pw: 25,
+        pw: 21.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -132,8 +132,8 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Marketing',
         image: '/assets/cat-oc-pics/miran-ocvp-marketing.webp',
         aspect: 0.662,
-        pw: 17,
-        bottom: 'calc(-0.5 * var(--k))',
+        pw: 17.5,
+        bottom: 'calc(-6 * var(--k))',
       },
     ],
   },
@@ -149,7 +149,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Del & Events',
         image: '/assets/cat-oc-pics/vindhi-akmeemana-ocvp-delegates-and-events.webp',
         aspect: 0.608,
-        pw: 16,
+        pw: 13.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -157,7 +157,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Del & Events',
         image: '/assets/cat-oc-pics/binushi-ocvp-delegates-and-events.webp',
         aspect: 0.601,
-        pw: 16,
+        pw: 13.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -165,7 +165,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Del & Events',
         image: '/assets/cat-oc-pics/tharuka-ocvp-delegates-and-events.webp',
         aspect: 0.671,
-        pw: 17,
+        pw: 14.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -173,8 +173,8 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Del & Events',
         image: '/assets/cat-oc-pics/isuri-muthumalee-ocvp-delegates-and-events.webp',
         aspect: 0.904,
-        pw: 24,
-        bottom: 'calc(-0.5 * var(--k))',
+        pw: 23.5,
+        bottom: 'calc(-6 * var(--k))',
       },
     ],
   },
@@ -190,8 +190,8 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Del & Log',
         image: '/assets/cat-oc-pics/adithya-ocvp-del-x-log.webp',
         aspect: 0.565,
-        pw: 15,
-        bottom: 'calc(-0.5 * var(--k))',
+        pw: 15.0,
+        bottom: 'calc(-6 * var(--k))',
       },
     ],
   },
@@ -207,15 +207,15 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Logistics',
         image: '/assets/cat-oc-pics/yehan-ocvp-logistics.webp',
         aspect: 0.400,
-        pw: 11,
+        pw: 8.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
         name: 'Maneesha Gunathilake',
         role: 'OCVP Logistics',
         image: '/assets/cat-oc-pics/maneesha-ocvp-logistics.webp',
-        aspect: 0.563,
-        pw: 15,
+        aspect: 0.562,
+        pw: 12.0,
         bottom: 'calc(-0.5 * var(--k))',
       },
       {
@@ -223,7 +223,7 @@ const SECTIONS: SectionData[] = [
         role: 'OCVP Logistics',
         image: '/assets/cat-oc-pics/lakwan-ocvp-logistics.webp',
         aspect: 0.654,
-        pw: 17,
+        pw: 13.5,
         bottom: 'calc(-0.5 * var(--k))',
       },
     ],
@@ -491,16 +491,25 @@ export default function OcPosterPage() {
             <section key={section.id} id={section.id} className="poster-section">
               {/* Seamless dark red torn-paper divider at the top of OCVP sections */}
               {sIdx > 0 && (
-                <div className="w-full overflow-hidden leading-none -mt-1 -mb-3 sm:-mb-5 md:-mb-7 relative z-20 pointer-events-none">
+                <div
+                  className="w-full overflow-hidden leading-none relative z-20 pointer-events-none"
+                  style={{
+                    height: 'calc(6 * var(--k))',
+                    marginTop: 'calc(-0.5 * var(--k))',
+                    marginBottom: 'calc(-4 * var(--k))',
+                  }}
+                >
                   <svg
                     viewBox="0 0 1200 48"
                     preserveAspectRatio="none"
-                    className="w-full h-6 sm:h-9 md:h-12 block overflow-visible"
+                    className="w-full h-full block overflow-visible"
                   >
+                    {/* Seamless pink fill below wave to match header */}
                     <path
-                      d="M 0 0 L 0 32 C 2.5 29.7, 8.3 17.3, 15 18 C 21.7 18.7, 30.8 35.7, 40 36 C 49.2 36.3, 60.0 18.7, 70 20 C 80.0 21.3, 90.0 43.7, 100 44 C 110.0 44.3, 120.0 23.0, 130 22 C 140.0 21.0, 150.0 38.7, 160 38 C 170.0 37.3, 180.0 17.3, 190 18 C 200.0 18.7, 210.0 41.3, 220 42 C 230.0 42.7, 240.0 22.3, 250 22 C 260.0 21.7, 270.0 40.7, 280 40 C 290.0 39.3, 300.0 17.3, 310 18 C 320.0 18.7, 330.0 43.0, 340 44 C 350.0 45.0, 360.0 25.0, 370 24 C 380.0 23.0, 390.0 38.7, 400 38 C 410.0 37.3, 420.0 19.3, 430 20 C 440.0 20.7, 450.0 42.3, 460 42 C 470.0 41.7, 480.0 18.7, 490 18 C 500.0 17.3, 510.0 37.3, 520 38 C 530.0 38.7, 540.0 21.0, 550 22 C 560.0 23.0, 570.0 45.0, 580 44 C 590.0 43.0, 600.0 16.7, 610 16 C 620.0 15.3, 630.0 38.7, 640 40 C 650.0 41.3, 660.0 23.7, 670 24 C 680.0 24.3, 690.0 43.0, 700 42 C 710.0 41.0, 720.0 18.7, 730 18 C 740.0 17.3, 750.0 37.7, 760 38 C 770.0 38.3, 780.0 19.0, 790 20 C 800.0 21.0, 810.0 43.7, 820 44 C 830.0 44.3, 840.0 22.7, 850 22 C 860.0 21.3, 870.0 40.7, 880 40 C 890.0 39.3, 900.0 18.3, 910 18 C 920.0 17.7, 930.0 36.7, 940 38 C 950.0 39.3, 960.0 25.0, 970 26 C 980.0 27.0, 990.0 45.7, 1000 44 C 1010.0 42.3, 1020.0 17.3, 1030 16 C 1040.0 14.7, 1050.0 35.0, 1060 36 C 1070.0 37.0, 1080.0 21.0, 1090 22 C 1100.0 23.0, 1110.0 42.7, 1120 42 C 1130.0 41.3, 1140.8 18.7, 1150 18 C 1159.2 17.3, 1166.7 37.0, 1175 38 C 1183.3 39.0, 1195.8 26.3, 1200 24 L 1200 0 Z"
-                      fill="#9a0d2a"
+                      d="M 0 48 L 0 32  C 2.5 29.7, 8.3 17.3, 15 18 C 21.7 18.7, 30.8 35.7, 40 36 C 49.2 36.3, 60.0 18.7, 70 20 C 80.0 21.3, 90.0 43.7, 100 44 C 110.0 44.3, 120.0 23.0, 130 22 C 140.0 21.0, 150.0 38.7, 160 38 C 170.0 37.3, 180.0 17.3, 190 18 C 200.0 18.7, 210.0 41.3, 220 42 C 230.0 42.7, 240.0 22.3, 250 22 C 260.0 21.7, 270.0 40.7, 280 40 C 290.0 39.3, 300.0 17.3, 310 18 C 320.0 18.7, 330.0 43.0, 340 44 C 350.0 45.0, 360.0 25.0, 370 24 C 380.0 23.0, 390.0 38.7, 400 38 C 410.0 37.3, 420.0 19.3, 430 20 C 440.0 20.7, 450.0 42.3, 460 42 C 470.0 41.7, 480.0 18.7, 490 18 C 500.0 17.3, 510.0 37.3, 520 38 C 530.0 38.7, 540.0 21.0, 550 22 C 560.0 23.0, 570.0 45.0, 580 44 C 590.0 43.0, 600.0 16.7, 610 16 C 620.0 15.3, 630.0 38.7, 640 40 C 650.0 41.3, 660.0 23.7, 670 24 C 680.0 24.3, 690.0 43.0, 700 42 C 710.0 41.0, 720.0 18.7, 730 18 C 740.0 17.3, 750.0 37.7, 760 38 C 770.0 38.3, 780.0 19.0, 790 20 C 800.0 21.0, 810.0 43.7, 820 44 C 830.0 44.3, 840.0 22.7, 850 22 C 860.0 21.3, 870.0 40.7, 880 40 C 890.0 39.3, 900.0 18.3, 910 18 C 920.0 17.7, 930.0 36.7, 940 38 C 950.0 39.3, 960.0 25.0, 970 26 C 980.0 27.0, 990.0 45.7, 1000 44 C 1010.0 42.3, 1020.0 17.3, 1030 16 C 1040.0 14.7, 1050.0 35.0, 1060 36 C 1070.0 37.0, 1080.0 21.0, 1090 22 C 1100.0 23.0, 1110.0 42.7, 1120 42 C 1130.0 41.3, 1140.8 18.7, 1150 18 C 1159.2 17.3, 1166.7 37.0, 1175 38 C 1183.3 39.0, 1195.8 26.3, 1200 24 L 1200 48 Z"
+                      fill="#e8abb6"
                     />
+                    {/* Black ink wave border */}
                     <path
                       d="M 0 32 C 2.5 29.7, 8.3 17.3, 15 18 C 21.7 18.7, 30.8 35.7, 40 36 C 49.2 36.3, 60.0 18.7, 70 20 C 80.0 21.3, 90.0 43.7, 100 44 C 110.0 44.3, 120.0 23.0, 130 22 C 140.0 21.0, 150.0 38.7, 160 38 C 170.0 37.3, 180.0 17.3, 190 18 C 200.0 18.7, 210.0 41.3, 220 42 C 230.0 42.7, 240.0 22.3, 250 22 C 260.0 21.7, 270.0 40.7, 280 40 C 290.0 39.3, 300.0 17.3, 310 18 C 320.0 18.7, 330.0 43.0, 340 44 C 350.0 45.0, 360.0 25.0, 370 24 C 380.0 23.0, 390.0 38.7, 400 38 C 410.0 37.3, 420.0 19.3, 430 20 C 440.0 20.7, 450.0 42.3, 460 42 C 470.0 41.7, 480.0 18.7, 490 18 C 500.0 17.3, 510.0 37.3, 520 38 C 530.0 38.7, 540.0 21.0, 550 22 C 560.0 23.0, 570.0 45.0, 580 44 C 590.0 43.0, 600.0 16.7, 610 16 C 620.0 15.3, 630.0 38.7, 640 40 C 650.0 41.3, 660.0 23.7, 670 24 C 680.0 24.3, 690.0 43.0, 700 42 C 710.0 41.0, 720.0 18.7, 730 18 C 740.0 17.3, 750.0 37.7, 760 38 C 770.0 38.3, 780.0 19.0, 790 20 C 800.0 21.0, 810.0 43.7, 820 44 C 830.0 44.3, 840.0 22.7, 850 22 C 860.0 21.3, 870.0 40.7, 880 40 C 890.0 39.3, 900.0 18.3, 910 18 C 920.0 17.7, 930.0 36.7, 940 38 C 950.0 39.3, 960.0 25.0, 970 26 C 980.0 27.0, 990.0 45.7, 1000 44 C 1010.0 42.3, 1020.0 17.3, 1030 16 C 1040.0 14.7, 1050.0 35.0, 1060 36 C 1070.0 37.0, 1080.0 21.0, 1090 22 C 1100.0 23.0, 1110.0 42.7, 1120 42 C 1130.0 41.3, 1140.8 18.7, 1150 18 C 1159.2 17.3, 1166.7 37.0, 1175 38 C 1183.3 39.0, 1195.8 26.3, 1200 24"
                       fill="none"

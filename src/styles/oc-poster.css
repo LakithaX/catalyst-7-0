@@ -168,9 +168,9 @@
 
 .oc-poster-page .ghost {
   position: absolute;
-  top: calc(7.5 * var(--k));
-  height: calc(32 * var(--k));
-  width: calc(32 * var(--k) * var(--ar, 0.75));
+  top: calc(9.5 * var(--k));
+  height: calc(23 * var(--k));
+  width: calc(23 * var(--k) * var(--ar, 0.75));
   background: var(--ph) top center / contain no-repeat;
   opacity: 0.3;
   filter: saturate(0.35);
