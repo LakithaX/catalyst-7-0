@@ -489,10 +489,21 @@ export default function OcPosterPage() {
                   <svg
                     viewBox="0 0 1200 48"
                     preserveAspectRatio="none"
-                    className="w-full h-6 sm:h-9 md:h-12 block"
-                    fill="#9a0d2a"
+                    className="w-full h-6 sm:h-9 md:h-12 block overflow-visible"
                   >
-                    <path d="M 0 0 L 1200 0 L 1200 24 L 1175 38 L 1150 18 L 1120 42 L 1090 22 L 1060 36 L 1030 16 L 1000 44 L 970 26 L 940 38 L 910 18 L 880 40 L 850 22 L 820 44 L 790 20 L 760 38 L 730 18 L 700 42 L 670 24 L 640 40 L 610 16 L 580 44 L 550 22 L 520 38 L 490 18 L 460 42 L 430 20 L 400 38 L 370 24 L 340 44 L 310 18 L 280 40 L 250 22 L 220 42 L 190 18 L 160 38 L 130 22 L 100 44 L 70 20 L 40 36 L 15 18 L 0 32 Z" />
+                    <path
+                      d="M 0 0 L 1200 0 L 1200 24 L 1175 38 L 1150 18 L 1120 42 L 1090 22 L 1060 36 L 1030 16 L 1000 44 L 970 26 L 940 38 L 910 18 L 880 40 L 850 22 L 820 44 L 790 20 L 760 38 L 730 18 L 700 42 L 670 24 L 640 40 L 610 16 L 580 44 L 550 22 L 520 38 L 490 18 L 460 42 L 430 20 L 400 38 L 370 24 L 340 44 L 310 18 L 280 40 L 250 22 L 220 42 L 190 18 L 160 38 L 130 22 L 100 44 L 70 20 L 40 36 L 15 18 L 0 32 Z"
+                      fill="#9a0d2a"
+                    />
+                    <path
+                      d="M 0 32 L 15 18 L 40 36 L 70 20 L 100 44 L 130 22 L 160 38 L 190 18 L 220 42 L 250 22 L 280 40 L 310 18 L 340 44 L 370 24 L 400 38 L 430 20 L 460 42 L 490 18 L 520 38 L 550 22 L 580 44 L 610 16 L 640 40 L 670 24 L 700 42 L 730 18 L 760 38 L 790 20 L 820 44 L 850 22 L 880 40 L 910 18 L 940 38 L 970 26 L 1000 44 L 1030 16 L 1060 36 L 1090 22 L 1120 42 L 1150 18 L 1175 38 L 1200 24"
+                      fill="none"
+                      stroke="#000000"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      vectorEffect="non-scaling-stroke"
+                    />
                   </svg>
                 </div>
               )}
