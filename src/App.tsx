@@ -20,7 +20,7 @@ export default function App() {
     setIsLoading(true);
     // Wait for the new route's DOM to mount
     const tick = setTimeout(() => {
-      const images = Array.from(document.images);
+      const images = Array.from(document.images).filter(img => img.loading !== 'lazy');
       
       const imagePromises = images.map((img) => {
         if (img.complete) return Promise.resolve();
