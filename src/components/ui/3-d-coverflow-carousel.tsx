@@ -262,9 +262,21 @@ export function CoverFlowCarousel({
         />
       </div>
 
-      {/* ── Bushido Combat Samurai: Dynamic Warrior Flanking the Merch Showcase (Desktop Only) ── */}
+      {/* ── Traditional Pagoda Watermark (Left Flank) ── */}
       <div
-        className="pointer-events-none absolute right-0 xl:right-4 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[320px] lg:max-w-[370px] xl:max-w-[420px] h-auto transition-opacity"
+        className="pointer-events-none absolute left-0 xl:left-4 bottom-0 z-0 select-none hidden lg:flex items-end justify-start max-w-[260px] lg:max-w-[320px] h-auto opacity-[0.06]"
+        aria-hidden="true"
+      >
+        <img
+          src="/assets/illustrations/gdj-building-8171699.svg"
+          alt=""
+          className="w-full h-auto object-contain filter grayscale"
+        />
+      </div>
+
+      {/* ── Bushido Combat Samurai: Authentic Woodblock Art Flanking the Merch Showcase (Desktop Only) ── */}
+      <div
+        className="pointer-events-none absolute right-0 xl:right-4 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[280px] lg:max-w-[330px] xl:max-w-[370px] h-auto transition-opacity"
         aria-hidden="true"
       >
         {/* Soft Crimson Backlight */}
@@ -275,8 +287,8 @@ export function CoverFlowCarousel({
           }}
         />
         <img
-          src="/assets/samurai/samurai-combat.png"
-          alt=""
+          src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
+          alt="Catalyst 7.0 Bushido Samurai"
           className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.22)]"
         />
       </div>
@@ -663,7 +675,7 @@ export function CoverFlowCarousel({
               }}
             />
             <img
-              src="/assets/samurai/samurai-combat.png"
+              src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
               alt="Catalyst 7.0 Bushido Samurai"
               className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
             />

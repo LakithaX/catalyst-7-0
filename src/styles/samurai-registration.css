@@ -1,0 +1,769 @@
+/* Catalyst 7.0 - The Samurai's Journey Registration Styles */
+
+.samurai-registration-page {
+  --serif: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif;
+  --bg: #a80f2d;
+  --panel: #8f0c26;
+  --red: #fff;
+  --redd: #6e0a1c;
+  --ink: #fff;
+  --mut: #f6cdd5;
+  --edge: rgba(255, 255, 255, 0.6);
+  --bad: #ffe08a;
+
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  color: var(--ink);
+  font: 400 17px/1.5 'DM Sans', system-ui, sans-serif;
+  background: var(--bg);
+  box-sizing: border-box;
+}
+
+.samurai-registration-page * {
+  box-sizing: border-box;
+}
+
+.samurai-registration-page a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.samurai-registration-page a:hover {
+  color: #fff;
+}
+
+.samurai-registration-page a:focus-visible,
+.samurai-registration-page button:focus-visible,
+.samurai-registration-page summary:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+/* Header Top Band */
+.samurai-registration-page .top {
+  max-width: none;
+  margin: 0;
+  position: relative;
+  overflow: hidden;
+  padding: 20px max(24px, calc((100vw - 1052px) / 2)) 52px;
+  background: linear-gradient(#f0bcc6, #dd7b8e);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.samurai-registration-page .top::before {
+  content: "CATALYST";
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  font: 700 clamp(5rem, 22vw, 8.5rem)/1 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  pointer-events: none;
+  letter-spacing: 0.04em;
+}
+
+.samurai-registration-page .top::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 26px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14' viewBox='0 0 40 14' preserveAspectRatio='none'%3E%3Cpath d='M0 14V8l5-5 5 6 6-7 6 6 6-4 6 6 6-4v8z' fill='white'/%3E%3C/svg%3E") 0 0/40px 13px repeat-x,
+              url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='14' viewBox='0 0 40 14' preserveAspectRatio='none'%3E%3Crect width='40' height='14' fill='%23a80f2d'/%3E%3Cpath d='M0 0v6l5 5 5-6 6 7 6-6 6 4 6-6 6 4V0z' fill='white'/%3E%3C/svg%3E") 0 100%/40px 13px repeat-x;
+}
+
+.samurai-registration-page .top > * {
+  position: relative;
+  z-index: 2;
+}
+
+.samurai-registration-page .logo {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #7a0a1e;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.samurai-registration-page .top nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.samurai-registration-page .top nav a {
+  color: #5c0617;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  padding: 8px 4px;
+  text-transform: uppercase;
+  transition: color 0.2s ease;
+}
+
+.samurai-registration-page .top nav a:hover {
+  color: #fff;
+}
+
+/* Main Layout */
+.samurai-registration-page main {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+  gap: 56px;
+  align-items: start;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 64px;
+}
+
+.samurai-registration-page .col {
+  max-width: 520px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.samurai-registration-page h1 {
+  margin: 0 0 6px;
+  text-align: center;
+  color: #fff;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  font-size: clamp(2rem, 7vw, 2.8rem);
+  line-height: 1.05;
+  letter-spacing: 0.03em;
+  font-weight: 700;
+}
+
+.samurai-registration-page .sub {
+  text-align: center;
+  margin: 0 0 24px;
+  color: var(--mut);
+  font-size: 1.05rem;
+}
+
+/* Guide Accordion */
+.samurai-registration-page .guide {
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid var(--edge);
+  border-radius: 16px;
+  padding: 0 16px;
+  margin: 0 0 28px;
+}
+
+.samurai-registration-page .guide summary {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-weight: 700;
+  color: #fff;
+  font-family: 'DM Sans', sans-serif;
+}
+
+.samurai-registration-page .guide ul {
+  margin: 0 0 14px;
+  padding-left: 1.2em;
+  color: var(--ink);
+}
+
+.samurai-registration-page .guide li {
+  margin: 6px 0;
+}
+
+/* Progress Tracker */
+.samurai-registration-page .trk {
+  display: flex;
+  gap: 6px;
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+
+.samurai-registration-page .trk li {
+  flex: 1;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+  transition: background 0.3s ease;
+}
+
+.samurai-registration-page .trk li.on {
+  background: #fff;
+}
+
+.samurai-registration-page .pl {
+  color: var(--mut);
+  font-size: 0.9rem;
+  margin: 0 0 24px;
+  font-weight: 500;
+}
+
+/* Headings & Descriptions */
+.samurai-registration-page h2 {
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 1.7rem;
+  letter-spacing: 0.03em;
+  margin: 0;
+  outline: 0;
+  color: #fff;
+}
+
+.samurai-registration-page .kj {
+  color: #fff;
+  margin-right: 0.4em;
+  font-family: var(--serif);
+  font-style: normal;
+}
+
+.samurai-registration-page .d {
+  color: var(--mut);
+  margin: 4px 0 24px;
+  font-size: 1.05rem;
+}
+
+/* Fields & Inputs */
+.samurai-registration-page .f {
+  border: 0;
+  padding: 0;
+  margin: 0 0 24px;
+  min-width: 0;
+}
+
+.samurai-registration-page .f > label,
+.samurai-registration-page legend {
+  display: block;
+  font-weight: 500;
+  font-size: 1.05rem;
+  padding: 0;
+  margin: 0 0 6px 4px;
+  color: #fff;
+}
+
+.samurai-registration-page .h {
+  color: var(--mut);
+  font-size: 0.9rem;
+  margin: -2px 0 8px 4px;
+}
+
+.samurai-registration-page .op {
+  font-weight: 400;
+  color: var(--mut);
+  margin-left: 0.5em;
+  font-size: 0.9rem;
+}
+
+.samurai-registration-page .in {
+  display: block;
+  width: 100%;
+  height: 52px;
+  padding: 0 20px;
+  font: inherit;
+  font-size: 16px;
+  color: #2a0a10;
+  background: #fff;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.samurai-registration-page textarea.in {
+  height: auto;
+  min-height: 120px;
+  padding: 14px 20px;
+  border-radius: 20px;
+  resize: vertical;
+}
+
+.samurai-registration-page .in::placeholder {
+  color: #8a6a70;
+}
+
+.samurai-registration-page .in:focus {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.samurai-registration-page .bad .in {
+  border-color: var(--bad);
+  box-shadow: 0 0 0 3px rgba(255, 224, 138, 0.5);
+}
+
+.samurai-registration-page .cnt {
+  color: var(--mut);
+  font-size: 0.85rem;
+  text-align: right;
+  margin: 4px 8px 0 0;
+}
+
+.samurai-registration-page .err {
+  color: var(--bad);
+  font-size: 0.9rem;
+  margin: 6px 0 0 8px;
+}
+
+.samurai-registration-page .err:empty {
+  display: none;
+}
+
+/* Radio Option Cards */
+.samurai-registration-page .opts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 8px;
+}
+
+.samurai-registration-page .opts.wide {
+  grid-template-columns: 1fr;
+}
+
+.samurai-registration-page .opt {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  min-height: 48px;
+  padding: 12px 16px;
+  border: 2px solid var(--edge);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.samurai-registration-page .opt input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.samurai-registration-page .dot {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--mut);
+  margin-top: 2px;
+  transition: all 0.2s ease;
+}
+
+.samurai-registration-page .opt:has(input:checked) {
+  background: #fff;
+  color: #7a0a1e;
+  border-color: #fff;
+}
+
+.samurai-registration-page .opt:has(input:checked) small {
+  color: #8a3a48;
+}
+
+.samurai-registration-page .opt:has(input:checked) .dot {
+  border-color: #a80f2d;
+  background: radial-gradient(#a80f2d 0 45%, transparent 50%);
+}
+
+.samurai-registration-page .opt:has(input:focus-visible),
+.samurai-registration-page .drop:has(input:focus-visible) {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.samurai-registration-page .opt b {
+  display: block;
+  font-weight: 600;
+}
+
+.samurai-registration-page .opt small {
+  display: block;
+  color: var(--mut);
+  font-size: 0.9rem;
+  font-weight: normal;
+}
+
+.samurai-registration-page .bad .opt,
+.samurai-registration-page .bad .drop {
+  border-color: var(--bad);
+}
+
+.samurai-registration-page .sp {
+  margin-top: 12px;
+}
+
+/* File Drop Area */
+.samurai-registration-page .drop {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 76px;
+  padding: 14px 18px;
+  border: 2px dashed #fff;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.samurai-registration-page .drop input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.samurai-registration-page .scr {
+  font: 800 2rem/1 var(--serif);
+  color: #fff;
+  font-style: normal;
+}
+
+.samurai-registration-page .drop small {
+  display: block;
+  color: var(--mut);
+  font-size: 0.9rem;
+}
+
+.samurai-registration-page .fn {
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+
+/* Buttons & Navigation */
+.samurai-registration-page .nav {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.samurai-registration-page .btn {
+  height: 56px;
+  padding: 0 28px;
+  font-family: 'Oswald', 'Arial Narrow', sans-serif;
+  font-style: italic;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  border-radius: 999px;
+  border: 2px solid #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.samurai-registration-page .go {
+  flex: 1;
+  background: #fff;
+  color: #a80f2d;
+  border-color: #fff;
+}
+
+.samurai-registration-page .go:hover {
+  background: #ffe3e8;
+}
+
+.samurai-registration-page .bk {
+  background: transparent;
+  border-color: var(--edge);
+  color: #fff;
+}
+
+.samurai-registration-page .bk:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.samurai-registration-page .btn:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.samurai-registration-page .btn:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+/* Step Animations */
+.samurai-registration-page .step:not([hidden]) {
+  animation: samuraiStepIn 0.25s ease-out;
+}
+
+@keyframes samuraiStepIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Completion Seal */
+.samurai-registration-page #done {
+  text-align: center;
+}
+
+.samurai-registration-page #done p {
+  color: var(--mut);
+  margin: 12px auto 0;
+  max-width: 36ch;
+}
+
+.samurai-registration-page .seal {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 20px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  color: #a80f2d;
+  font: 800 52px var(--serif);
+  border-radius: 12px;
+  transform: rotate(-4deg);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+/* Aside: Art Disc & Map */
+.samurai-registration-page .art {
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28px;
+}
+
+.samurai-registration-page .disc {
+  width: min(100%, 380px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #f6c3cc;
+  box-shadow: 0 0 0 5px #fff, 0 0 70px rgba(255, 255, 255, 0.3);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.samurai-registration-page .disc-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8%;
+  transition: opacity 0.3s ease, transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.samurai-registration-page .map {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+  width: min(100%, 320px);
+}
+
+.samurai-registration-page .map li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  color: var(--mut);
+  transition: color 0.2s ease;
+}
+
+.samurai-registration-page .map i {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--edge);
+  font: 800 1rem var(--serif);
+  font-style: normal;
+  transition: all 0.2s ease;
+}
+
+.samurai-registration-page .map small {
+  display: block;
+  font-size: 0.85rem;
+}
+
+.samurai-registration-page .map .done i {
+  border-color: #fff;
+  color: #fff;
+}
+
+.samurai-registration-page .map .cur {
+  color: #fff;
+}
+
+.samurai-registration-page .map .cur i {
+  background: #fff;
+  border-color: #fff;
+  color: #a80f2d;
+}
+
+/* Touch & Mobile Optimizations */
+.samurai-registration-page button,
+.samurai-registration-page summary,
+.samurai-registration-page .opt,
+.samurai-registration-page .drop,
+.samurai-registration-page a {
+  touch-action: manipulation;
+}
+
+.samurai-registration-page .opt:active,
+.samurai-registration-page .drop:active {
+  transform: scale(0.985);
+}
+
+.samurai-registration-page .btn:active {
+  filter: brightness(1.15);
+}
+
+@media (hover: none) {
+  .samurai-registration-page .go:hover {
+    background: #fff;
+  }
+}
+
+/* Mobile Responsive */
+@media (max-width: 860px) {
+  .samurai-registration-page main {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 0 16px 32px;
+  }
+
+  .samurai-registration-page .top {
+    padding: 12px 16px 44px;
+  }
+
+  .samurai-registration-page .top nav {
+    gap: 8px;
+  }
+
+  .samurai-registration-page .top nav a {
+    padding: 8px 4px;
+    font-size: 0.85rem;
+  }
+
+  .samurai-registration-page .art {
+    order: -1;
+    position: static;
+  }
+
+  .samurai-registration-page .disc {
+    width: 92px;
+    box-shadow: 0 0 0 4px #fff, 0 0 40px rgba(255, 59, 54, 0.3);
+  }
+
+  .samurai-registration-page .map {
+    display: none;
+  }
+
+  .samurai-registration-page h1 {
+    font-size: 1.6rem;
+  }
+
+  .samurai-registration-page .sub {
+    margin-bottom: 16px;
+    font-size: 0.95rem;
+  }
+
+  .samurai-registration-page .guide {
+    margin-bottom: 16px;
+  }
+
+  .samurai-registration-page #prog {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    z-index: 5;
+    margin: 0 -16px 20px;
+    padding: 10px 16px 0;
+    background: rgba(168, 15, 45, 0.96);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .samurai-registration-page .pl {
+    margin-bottom: 10px;
+  }
+
+  .samurai-registration-page .step {
+    scroll-margin-top: 96px;
+  }
+
+  .samurai-registration-page h2 {
+    font-size: 1.35rem;
+  }
+
+  .samurai-registration-page .d {
+    margin-bottom: 20px;
+  }
+
+  .samurai-registration-page .f {
+    margin-bottom: 20px;
+  }
+
+  .samurai-registration-page .nav {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+    margin: 8px -16px 0;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: linear-gradient(transparent, var(--bg) 28%);
+  }
+
+  .samurai-registration-page .btn {
+    height: 54px;
+  }
+}
+
+@media (max-width: 380px) {
+  .samurai-registration-page .opts {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 860px) and (max-height: 480px) {
+  .samurai-registration-page #prog,
+  .samurai-registration-page .nav {
+    position: static;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .samurai-registration-page *,
+  .samurai-registration-page *::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}

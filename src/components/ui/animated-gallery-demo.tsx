@@ -471,8 +471,8 @@ const TextRevealZone = () => {
           }}
         />
         <img
-          src="/assets/samurai/samurai-pointing.png"
-          alt=""
+          src="/assets/illustrations/benkageyama-coy-5135969_1920.png"
+          alt="Catalyst 7.0 Japanese Koi"
           className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.22)]"
         />
       </motion.div>
@@ -680,8 +680,8 @@ const TextRevealZone = () => {
               }}
             />
             <img
-              src="/assets/samurai/samurai-pointing.png"
-              alt="Catalyst 7.0 Samurai Leader"
+              src="/assets/illustrations/benkageyama-coy-5135969_1920.png"
+              alt="Catalyst 7.0 Japanese Koi"
               className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
             />
           </div>

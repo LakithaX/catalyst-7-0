@@ -31,7 +31,15 @@ export const MerchPage: React.FC = () => {
       </main>
 
       {/* Outro / Merch Footer */}
-      <footer className="w-full bg-[#F3ECE0] border-t border-[#252321]/10 py-12 px-4 sm:px-6 lg:px-8 text-center select-none">
+      <footer className="w-full bg-[#F3ECE0] border-t border-[#252321]/10 py-12 px-4 sm:px-6 lg:px-8 text-center select-none relative overflow-hidden">
+        {/* Subtle swimming koi watermark */}
+        <div className="pointer-events-none absolute right-6 -bottom-6 w-32 h-auto opacity-[0.08] select-none hidden sm:block">
+          <img
+            src="/assets/illustrations/benkageyama-coy-5135969_1920.png"
+            alt=""
+            className="w-full h-auto object-contain"
+          />
+        </div>
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
           <div className="flex items-center gap-3">
             <img

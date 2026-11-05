@@ -10,9 +10,21 @@ export const MerchBrandStatement: React.FC = () => {
         </span>
       </div>
 
+      {/* ── Traditional Bonsai Watermark (Left Flank) ── */}
+      <div
+        className="pointer-events-none absolute left-2 sm:left-6 lg:left-12 xl:left-20 bottom-0 z-0 select-none hidden lg:flex items-end justify-start max-w-[220px] lg:max-w-[260px] h-auto opacity-[0.06]"
+        aria-hidden="true"
+      >
+        <img
+          src="/assets/illustrations/gdj-bonsai-tree-8143900.svg"
+          alt=""
+          className="w-full h-auto object-contain filter grayscale"
+        />
+      </div>
+
       {/* ── Bushido Guardian Sentinel Illustration (Desktop Flanking Sentinel) ── */}
       <div
-        className="pointer-events-none absolute right-2 sm:right-6 lg:right-12 xl:right-20 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] h-auto opacity-95 transition-opacity"
+        className="pointer-events-none absolute right-2 sm:right-6 lg:right-12 xl:right-20 bottom-0 z-10 select-none hidden lg:flex items-end justify-end max-w-[280px] lg:max-w-[320px] xl:max-w-[360px] h-auto opacity-95 transition-opacity"
         aria-hidden="true"
       >
         {/* Soft Crimson Backlight */}
@@ -23,8 +35,8 @@ export const MerchBrandStatement: React.FC = () => {
           }}
         />
         <img
-          src="/assets/samurai/samurai-guardian.png"
-          alt=""
+          src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
+          alt="Catalyst 7.0 Bushido Samurai"
           className="w-full h-auto object-contain filter drop-shadow-[0_16px_36px_rgba(37,35,33,0.2)]"
         />
       </div>
@@ -65,7 +77,7 @@ export const MerchBrandStatement: React.FC = () => {
               }}
             />
             <img
-              src="/assets/samurai/samurai-guardian.png"
+              src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
               alt="Catalyst 7.0 Guardian Sentinel"
               className="w-full h-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.22)]"
             />

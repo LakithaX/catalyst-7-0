@@ -54,8 +54,12 @@ export const CartDrawer: React.FC = () => {
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
               {cartItems.length === 0 ? (
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
-                  <div className="w-16 h-16 rounded-full bg-[#252321]/5 flex items-center justify-center text-[#736B63] mb-4">
-                    <ShoppingBag size={28} />
+                  <div className="w-20 h-20 rounded-full bg-[#252321]/5 flex items-center justify-center p-3 mb-4">
+                    <img
+                      src="/assets/illustrations/jakeloris-fan-7039967.png"
+                      alt="Japanese Fan"
+                      className="w-full h-auto object-contain filter drop-shadow-[0_4px_10px_rgba(201,54,43,0.18)]"
+                    />
                   </div>
                   <h4 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
                     YOUR CART IS EMPTY

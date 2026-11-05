@@ -16,6 +16,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
   const { totalCartCount } = useMerch();
 
   const isHome = location.pathname === '/' || location.pathname === '';
+  const isAbout = location.pathname.startsWith('/about') || location.pathname.startsWith('/oc');
+  const isRegister = location.pathname.startsWith('/register') || location.pathname.startsWith('/registration');
   const isGallery = location.pathname.startsWith('/gallery');
   const isMerch = location.pathname.startsWith('/merch');
   const isGame = location.pathname.startsWith('/game');
@@ -35,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
       }
 
       // Always show navbar when at or near top
-      if (currentScrollY <= 30) {
+      if (currentScrollY <= 15) {
         setIsVisible(true);
       } else if (isGallery) {
         // On Gallery page:
@@ -48,17 +50,17 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
           setIsVisible(false);
         } else {
           // Below intro in chapter mosaic grids: reveal on scroll up, hide on scroll down
-          if (scrollDiff > 6) {
+          if (scrollDiff > 4) {
             setIsVisible(false);
-          } else if (scrollDiff < -8) {
+          } else if (scrollDiff < -6) {
             setIsVisible(true);
           }
         }
       } else {
         // On all other pages: hide as soon as scrolling down, reveal smoothly on scroll up
-        if (scrollDiff > 6) {
+        if (scrollDiff > 4) {
           setIsVisible(false);
-        } else if (scrollDiff < -8) {
+        } else if (scrollDiff < -6) {
           setIsVisible(true);
         }
       }
@@ -140,11 +142,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
           HOME
         </Link>
         <Link
-          to="/#about"
-          onClick={handleAboutClick}
-          className="hover:opacity-60 transition-opacity cursor-pointer whitespace-nowrap text-[#0e1118]"
+          to="/about"
+          className={`transition-all cursor-pointer whitespace-nowrap ${
+            isAbout ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+          }`}
         >
           ABOUT
+        </Link>
+        <Link
+          to="/register"
+          className={`transition-all cursor-pointer whitespace-nowrap ${
+            isRegister ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+          }`}
+        >
+          REGISTER
         </Link>
         <Link
           to="/gallery"

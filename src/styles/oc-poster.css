@@ -1,0 +1,338 @@
+/* Catalyst 7.0 OC Poster Styles */
+.oc-poster-page {
+  --ph: url("/assets/cat-oc-pics/nethuli-trimmed.png");
+  --ar: 0.717;
+  --pw: 36;
+  --bg: #f3e9eb;
+  --red: #a50f2d;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  font-family: 'Oswald', system-ui, sans-serif;
+  box-sizing: border-box;
+}
+
+/* every size is in cqw, so the poster keeps the same proportions at any width */
+.oc-poster-page .page {
+  container-type: inline-size;
+  background: #fff;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.oc-poster-page .poster {
+  background: #fff;
+  overflow: hidden;
+  width: 100%;
+  --k: 1cqw;
+  --kn: 1;
+  --po: 3.5cqw;
+  --no: 12cqw;
+  --bo: -4cqw;
+  --gl: 22cqw;
+  --gr: 24cqw;
+}
+
+@container (min-width: 600px) {
+  .oc-poster-page .poster {
+    --k: 0.8cqw;
+    --kn: 0.8;
+    --po: 4.5cqw;
+    --no: 14cqw;
+    --bo: -2cqw;
+    --gl: 24cqw;
+    --gr: 26cqw;
+  }
+}
+@container (min-width: 900px) {
+  .oc-poster-page .poster {
+    --k: 0.65cqw;
+    --kn: 0.65;
+    --po: 6cqw;
+    --no: 18cqw;
+    --bo: 4cqw;
+    --gl: 28cqw;
+    --gr: 30cqw;
+  }
+}
+@container (min-width: 1200px) {
+  .oc-poster-page .poster {
+    --k: 0.55cqw;
+    --kn: 0.55;
+    --po: 8cqw;
+    --no: 22cqw;
+    --bo: 7cqw;
+    --gl: 31cqw;
+    --gr: 33cqw;
+  }
+}
+@container (min-width: 1700px) {
+  .oc-poster-page .poster {
+    --k: 0.45cqw;
+    --kn: 0.45;
+    --po: 10cqw;
+    --no: 25cqw;
+    --bo: 9cqw;
+    --gl: 33cqw;
+    --gr: 35cqw;
+  }
+}
+
+.oc-poster-page .head {
+  position: relative;
+  height: calc(45 * var(--k));
+  margin-bottom: calc(-8 * var(--k));
+  background: linear-gradient(#e8abb6 0, #cb4a60 calc(37 * var(--k)));
+  text-align: center;
+  overflow: hidden;
+}
+
+.oc-poster-page .wm,
+.oc-poster-page .ttl {
+  position: absolute;
+  left: 0;
+  right: 0;
+  margin: 0;
+  font-family: 'Permanent Marker', 'Impact', cursive;
+  font-weight: 400;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.oc-poster-page .wm {
+  top: calc(3 * var(--k));
+  font-size: calc(30 * var(--k));
+  color: rgba(255, 255, 255, 0.38);
+  transform: scaleY(1.15);
+}
+
+.oc-poster-page .ttl {
+  top: calc(9 * var(--k));
+  font-size: calc(14 * var(--k));
+  color: var(--red);
+  letter-spacing: 0.01em;
+}
+
+.oc-poster-page .ttl span {
+  position: absolute;
+  margin-left: calc(1 * var(--k));
+  font-size: calc(4 * var(--k));
+  top: calc(-1 * var(--k));
+}
+
+.oc-poster-page .tag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(25 * var(--k));
+  margin: 0;
+  font-weight: 500;
+  font-size: calc(4.3 * var(--k));
+  letter-spacing: 0.05em;
+  color: var(--red);
+}
+
+.oc-poster-page .row {
+  position: relative;
+  height: calc(30 * var(--k));
+}
+
+.oc-poster-page .bg {
+  position: absolute;
+  inset: calc(-8 * var(--k)) 0;
+  background: linear-gradient(#b21335, #9a0d2a);
+}
+
+.oc-poster-page .big {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 400 calc(31 * var(--k)) / 1 'Anton', 'Impact', sans-serif;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.16);
+}
+
+.oc-poster-page .ghost {
+  position: absolute;
+  top: calc(7.5 * var(--k));
+  height: calc(32 * var(--k));
+  width: calc(32 * var(--k) * var(--ar, 0.75));
+  background: var(--ph) top center / contain no-repeat;
+  opacity: 0.3;
+  filter: saturate(0.35);
+}
+
+.oc-poster-page .pic-wrap {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.oc-poster-page .pic {
+  position: absolute;
+  width: calc(var(--pw, 34) * var(--k));
+  height: calc(calc(var(--pw, 34) * var(--k)) / var(--ar, 0.75));
+  bottom: var(--p-bot, calc(-1 * var(--k)));
+}
+
+.oc-poster-page .pic i {
+  position: absolute;
+  inset: 0;
+  background: var(--ph) bottom center / contain no-repeat;
+  filter: drop-shadow(max(2px, calc(0.45 * var(--k))) 0 0 #fff)
+    drop-shadow(min(-2px, calc(-0.45 * var(--k))) 0 0 #fff)
+    drop-shadow(0 max(2px, calc(0.45 * var(--k))) 0 #fff)
+    drop-shadow(0 min(-2px, calc(-0.45 * var(--k))) 0 #fff)
+    drop-shadow(0 0 calc(0.8 * var(--k)) rgba(255, 190, 205, 0.7));
+}
+
+.oc-poster-page .nm {
+  position: absolute;
+  top: calc(7 * var(--k));
+  margin: 0;
+  font: 500 calc(4.8 * var(--k)) / 1 'Oswald', sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  transform: rotate(-2deg) skewX(-8deg);
+  text-shadow: 0 calc(0.2 * var(--k)) calc(0.6 * var(--k)) rgba(0, 0, 0, 0.25);
+  font-size: max(11px, calc(3.9 * var(--k)));
+  white-space: nowrap;
+  line-height: 1.1;
+  z-index: 10;
+}
+
+.oc-poster-page .nm h2 {
+  margin: 0;
+  font: inherit;
+}
+
+.oc-poster-page .nm p {
+  margin: calc(1.1 * var(--k)) 0 0;
+  font: 500 max(8.5px, calc(2.4 * var(--k))) / 1 'Oswald', sans-serif;
+  letter-spacing: 0.16em;
+  color: #ffd0d8;
+  text-shadow: none;
+}
+
+.oc-poster-page .l .big {
+  right: var(--bo);
+}
+.oc-poster-page .r .big {
+  left: var(--bo);
+}
+
+.oc-poster-page .l .ghost {
+  right: var(--gl);
+}
+.oc-poster-page .r .ghost {
+  left: var(--gr);
+}
+
+.oc-poster-page .l .pic {
+  left: var(--po);
+}
+.oc-poster-page .r .pic {
+  right: var(--po);
+}
+
+.oc-poster-page .l .nm {
+  right: var(--no);
+  text-align: right;
+}
+.oc-poster-page .r .nm {
+  left: var(--no);
+  text-align: left;
+}
+
+/* Animations */
+@keyframes ocPosterDrop {
+  from {
+    opacity: 0;
+    translate: 0 calc(-4 * var(--k));
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes ocPosterFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.oc-poster-page.anim .ttl {
+  animation: ocPosterDrop 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 0.1s both;
+}
+.oc-poster-page.anim .wm {
+  animation: ocPosterFade 1.4s ease both;
+}
+.oc-poster-page.anim .tag {
+  animation: ocPosterFade 1s ease 0.6s both;
+}
+
+.oc-poster-page.anim .pic {
+  opacity: 0;
+  translate: calc(-14 * var(--k)) 0;
+  transition: opacity 0.35s ease, translate 0.35s ease, scale 0.35s ease;
+}
+.oc-poster-page.anim .r .pic {
+  translate: calc(14 * var(--k)) 0;
+}
+.oc-poster-page.anim .big {
+  opacity: 0;
+  translate: calc(8 * var(--k)) 0;
+  transition: opacity 0.35s ease, translate 0.35s ease;
+}
+.oc-poster-page.anim .r .big {
+  translate: calc(-8 * var(--k)) 0;
+}
+.oc-poster-page.anim .ghost {
+  opacity: 0;
+  scale: 0.92;
+  transform-origin: 50% 100%;
+  transition: opacity 0.35s ease, scale 0.35s ease;
+}
+.oc-poster-page.anim .nm {
+  opacity: 0;
+  translate: 0 calc(1.5 * var(--k));
+  transition: opacity 0.35s ease, translate 0.35s ease;
+}
+
+.oc-poster-page.anim .row.in .pic {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.8s ease var(--row-delay, 0s),
+              translate 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) var(--row-delay, 0s),
+              scale 0.35s ease;
+}
+.oc-poster-page.anim .row.in .big {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 1s ease calc(var(--row-delay, 0s) + 0.12s),
+              translate 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--row-delay, 0s) + 0.12s);
+}
+.oc-poster-page.anim .row.in .ghost {
+  opacity: 0.28;
+  scale: 1;
+  transition: opacity 1s ease calc(var(--row-delay, 0s) + 0.3s),
+              scale 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--row-delay, 0s) + 0.3s);
+}
+.oc-poster-page.anim .row.in .nm {
+  opacity: 1;
+  translate: 0 0;
+  transition: opacity 0.7s ease calc(var(--row-delay, 0s) + 0.2s),
+              translate 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--row-delay, 0s) + 0.2s);
+}
+.oc-poster-page.anim .row.in .pic:hover {
+  scale: 1.03;
+}

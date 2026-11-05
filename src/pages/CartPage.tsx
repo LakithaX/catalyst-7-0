@@ -55,8 +55,12 @@ export const CartPage: React.FC = () => {
 
         {cartItems.length === 0 ? (
           <div className="py-20 text-center rounded-2xl bg-white border border-[#E5DDD0] p-8 max-w-xl mx-auto shadow-xs">
-            <div className="w-20 h-20 rounded-full bg-[#F8F3E9] border border-[#E5DDD0] mx-auto flex items-center justify-center text-[#736B63] mb-6">
-              <ShoppingBag size={36} />
+            <div className="w-24 h-24 rounded-full bg-[#F8F3E9] border border-[#E5DDD0] mx-auto flex items-center justify-center p-3 mb-6 shadow-xs">
+              <img
+                src="/assets/illustrations/jakeloris-fan-7039967.png"
+                alt="Japanese Fan"
+                className="w-full h-auto object-contain filter drop-shadow-[0_4px_12px_rgba(201,54,43,0.2)]"
+              />
             </div>
 
             <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#252321] mb-3">

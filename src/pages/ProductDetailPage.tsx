@@ -154,11 +154,13 @@ export const ProductDetailPage: React.FC = () => {
           <div className="lg:col-span-7 flex flex-col items-center">
             {/* Main Stage Card */}
             <div className="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] max-h-[640px] rounded-2xl bg-white border border-[#E5DDD0] overflow-hidden shadow-[0_15px_40px_rgba(37,35,33,0.08)] flex items-center justify-center p-8 group">
-              {/* Giant Subtle Background Watermark */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-[0.03] pointer-events-none select-none">
-                <span className="font-['Bison',sans-serif] text-[35vw] lg:text-[18vw] font-black text-[#252321]">
-                  7.0
-                </span>
+              {/* Giant Subtle Background Watermark & Bonsai Tree */}
+              <div className="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none select-none">
+                <img
+                  src="/assets/illustrations/gdj-bonsai-tree-8143900.svg"
+                  alt=""
+                  className="w-3/5 h-auto object-contain filter grayscale"
+                />
               </div>
 
               {/* Radial Studio Spotlight */}

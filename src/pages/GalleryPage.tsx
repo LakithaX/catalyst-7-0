@@ -1,8 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, Sparkles } from 'lucide-react';
 import Navbar from '../components/Navbar';
-import { RegistrationModal } from '../components/RegistrationModal';
 
 // Authentic Catalyst 7.0 seminar photographs
 const GALLERY_IMAGES = [
@@ -80,7 +79,6 @@ const SPANS: [number, number][] = [
 ];
 
 export const GalleryPage: React.FC = () => {
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const introRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
@@ -308,6 +306,24 @@ export const GalleryPage: React.FC = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-[#B51E23]/90 via-[#B51E23]/95 to-[#8F171B]" />
         </div>
 
+        {/* Traditional Japanese Dragon Vector Watermark */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none select-none">
+          <img
+            src="/assets/illustrations/gdj-dragon-8095373.svg"
+            alt=""
+            className="w-[85vw] max-w-[1200px] h-auto object-contain filter invert"
+          />
+        </div>
+
+        {/* Swimming Koi Accent (Right Flank) */}
+        <div className="absolute bottom-0 right-4 sm:right-12 w-[180px] sm:w-[260px] opacity-25 pointer-events-none select-none hidden sm:block">
+          <img
+            src="/assets/illustrations/benkageyama-coy-5135969_1920.png"
+            alt=""
+            className="w-full h-auto object-contain filter brightness-125"
+          />
+        </div>
+
         {/* Soft Japanese Mon Watermark */}
         <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none select-none">
           <span className="font-['Shippori_Mincho',serif] text-[28vw] font-black">
@@ -334,13 +350,13 @@ export const GalleryPage: React.FC = () => {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
-            <button
-              onClick={() => setIsRegisterOpen(true)}
+            <Link
+              to="/register"
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-full bg-white text-[#B51E23] hover:bg-[#FAF6EE] font-['Montserrat',sans-serif] text-xs font-bold tracking-[0.2em] uppercase shadow-[0_8px_25px_rgba(0,0,0,0.25)] hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer group"
             >
               <span>REGISTER FOR EVENT</span>
               <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
-            </button>
+            </Link>
 
             <Link
               to="/merch"
@@ -352,9 +368,6 @@ export const GalleryPage: React.FC = () => {
           </div>
         </div>
       </footer>
-
-      {/* Registration Modal */}
-      <RegistrationModal isOpen={isRegisterOpen} onClose={() => setIsRegisterOpen(false)} />
 
       {/* Scoped High-Performance CSS matching Garden Wedding Scroll Gallery Engine */}
       <style>{`

@@ -39,11 +39,11 @@ export const GameComingSoonPage: React.FC = () => {
             className="relative mb-6 sm:mb-8"
           >
             <motion.img
-              src="/assets/samurai/samurai-combat.png"
+              src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
               alt="Catalyst 7.0 Samurai"
               animate={{ y: [-6, 6, -6] }}
               transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              className="w-48 sm:w-64 md:w-72 h-auto object-contain filter drop-shadow-[0_20px_35px_rgba(37,35,33,0.18)] select-none pointer-events-none"
+              className="w-48 sm:w-60 md:w-68 h-auto object-contain filter drop-shadow-[0_20px_35px_rgba(37,35,33,0.18)] select-none pointer-events-none"
             />
           </motion.div>
 

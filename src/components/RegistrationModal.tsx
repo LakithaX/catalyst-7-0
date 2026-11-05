@@ -62,6 +62,15 @@ export const RegistrationModal: React.FC<RegistrationModalProps> = ({ isOpen, on
             {/* Top Crimson Accent Strip */}
             <div className="h-1.5 w-full bg-gradient-to-r from-[#8F171B] via-[#C9362B] to-[#B51E23]" />
 
+            {/* Subtle Japanese Crest Watermark Backdrop */}
+            <div className="pointer-events-none absolute -bottom-10 -right-10 w-48 h-auto opacity-[0.04] select-none">
+              <img
+                src="/assets/illustrations/clker-free-vector-images-luck-24155_1920.png"
+                alt=""
+                className="w-full h-auto object-contain"
+              />
+            </div>
+
             {/* Close Button */}
             <button
               onClick={handleResetAndClose}

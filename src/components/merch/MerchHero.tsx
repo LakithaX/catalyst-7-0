@@ -194,12 +194,28 @@ const JapaneseSumiLandscape = () => (
 
         {/* Tier 1 (Base Roof) */}
         <path d="M45 116 L6 134 C22 138, 68 138, 84 134 Z" />
-        {/* Base Hall Foundation & Columns */}
         <rect x="25" y="134" width="40" height="18" />
-        {/* Base Platform */}
         <rect x="18" y="152" width="54" height="6" rx="1" />
       </g>
     </svg>
+
+    {/* Detailed Japanese Pagoda Illustration from collection */}
+    <div className="absolute right-[6%] sm:right-[12%] bottom-0 w-36 sm:w-56 md:w-72 h-auto opacity-30 pointer-events-none select-none z-10">
+      <img
+        src="/assets/illustrations/gdj-building-8171699.svg"
+        alt=""
+        className="w-full h-auto object-contain filter grayscale contrast-125"
+      />
+    </div>
+
+    {/* Traditional Japanese Blossom Tree Illustration */}
+    <div className="absolute left-[3%] sm:left-[8%] bottom-0 w-32 sm:w-48 md:w-60 h-auto opacity-20 pointer-events-none select-none z-10">
+      <img
+        src="/assets/illustrations/susannp4-tree-1586365_1920.png"
+        alt=""
+        className="w-full h-auto object-contain filter grayscale"
+      />
+    </div>
   </div>
 );
 
@@ -260,7 +276,15 @@ export const MerchHero: React.FC = () => {
       {/* ── Main Content Container ── */}
       <div className="relative z-20 max-w-7xl mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center my-auto">
         {/* ── Left Column: Editorial Typography & CTAs (Exact Reference Match) ── */}
-        <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-6 sm:pt-0">
+        <div className="lg:col-span-6 flex flex-col items-start text-left z-20 pt-6 sm:pt-0 relative">
+          {/* Traditional Fan Watermark */}
+          <div className="absolute -top-10 -left-8 w-40 sm:w-52 h-auto opacity-[0.06] pointer-events-none select-none z-0">
+            <img
+              src="/assets/illustrations/jakeloris-fan-7039967.png"
+              alt=""
+              className="w-full h-auto object-contain"
+            />
+          </div>
           {/* Eyebrow Badge: [ 公式商品 ] */}
           <motion.div
             key={`badge-${currentSlide}`}

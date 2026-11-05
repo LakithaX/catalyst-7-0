@@ -1,17 +1,14 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Link } from 'react-router-dom'
 import { ArrowRight, ShoppingBag } from 'lucide-react'
 import Component from './festivity-hero'
 import Navbar from '../Navbar'
-import { RegistrationModal } from '../RegistrationModal'
 
 interface DemoProps {
   shouldAnimate?: boolean
 }
 
 export default function Default({ shouldAnimate = false }: DemoProps) {
-  const [isRegisterOpen, setIsRegisterOpen] = useState(false)
-
   return (
     <div className="relative w-full h-screen overflow-hidden bg-[#F8F3E9] text-[#252321] select-none">
       {/* 3D WebGL Spheres Canvas */}
@@ -33,13 +30,13 @@ export default function Default({ shouldAnimate = false }: DemoProps) {
       <div className="absolute top-[64%] sm:top-[66%] left-0 right-0 z-30 flex items-center justify-center px-4 pointer-events-none">
         <div className="pointer-events-auto flex items-center justify-center gap-3 sm:gap-4 flex-row">
           {/* Register Button */}
-          <button
-            onClick={() => setIsRegisterOpen(true)}
+          <Link
+            to="/register"
             className="inline-flex items-center justify-center gap-2 px-5 sm:px-7 py-3 sm:py-3.5 rounded-full bg-[#B51E23] hover:bg-[#9E171C] text-white font-['Montserrat',sans-serif] text-[11px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_6px_22px_rgba(181,30,35,0.38)] hover:shadow-[0_10px_28px_rgba(181,30,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer group"
           >
             <span>REGISTER NOW</span>
             <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
-          </button>
+          </Link>
 
           {/* Go to Merch Button */}
           <Link
@@ -111,12 +108,6 @@ export default function Default({ shouldAnimate = false }: DemoProps) {
           DRAG CURSOR TO PERFECT
         </span>
       </div>
-
-      {/* Delegate Registration Modal */}
-      <RegistrationModal
-        isOpen={isRegisterOpen}
-        onClose={() => setIsRegisterOpen(false)}
-      />
     </div>
   )
 }
