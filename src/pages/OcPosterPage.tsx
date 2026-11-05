@@ -43,7 +43,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/monali-edirisinghe-ocvp-finance.webp',
         aspect: 0.399,
         pw: 14,
-        bottom: 'calc(-1 * var(--k))',
+        bottom: 'calc(-2.5 * var(--k))',
       },
     ],
   },
@@ -84,7 +84,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/gihansa-ocvp-pd.webp',
         aspect: 1.207,
         pw: 34,
-        bottom: 'calc(-0.5 * var(--k))',
+        bottom: 'calc(-1 * var(--k))',
       },
       {
         name: 'Hari Branavan Arulnathan',
@@ -92,7 +92,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/hari-ocvp-pd.webp',
         aspect: 0.931,
         pw: 31,
-        bottom: 'calc(-1 * var(--k))',
+        bottom: 'calc(-2.5 * var(--k))',
       },
     ],
   },
@@ -133,7 +133,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/miran-ocvp-marketing.webp',
         aspect: 0.662,
         pw: 23,
-        bottom: 'calc(-1 * var(--k))',
+        bottom: 'calc(-2.5 * var(--k))',
       },
     ],
   },
@@ -174,7 +174,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/isuri-muthumalee-ocvp-delegates-and-events.webp',
         aspect: 0.904,
         pw: 30,
-        bottom: 'calc(-1 * var(--k))',
+        bottom: 'calc(-2.5 * var(--k))',
       },
     ],
   },
@@ -191,7 +191,7 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/adithya-ocvp-del-x-log.webp',
         aspect: 0.565,
         pw: 20,
-        bottom: 'calc(-1 * var(--k))',
+        bottom: 'calc(-2.5 * var(--k))',
       },
     ],
   },
@@ -349,11 +349,17 @@ export default function OcPosterPage() {
             }
           }
           if (picWrap && E[i + 1]) {
-            // Bottom white line cuts the image so it doesn't show past the white line
-            picWrap.style.clipPath =
-              'polygon(0% -200%, 100% -200%, ' +
-              line(E[i + 1], E[i + 1].a, R - g, true).join(',') +
-              ')';
+            if (isLastRow && !isLastSection) {
+              // Last row of a section: don't clip the portrait in mid-air!
+              // Allow the portrait to extend seamlessly down and tuck cleanly behind the section divider
+              picWrap.style.clipPath = 'none';
+            } else {
+              // Bottom white line cuts the image so it doesn't show past the white line
+              picWrap.style.clipPath =
+                'polygon(0% -200%, 100% -200%, ' +
+                line(E[i + 1], E[i + 1].a, R - g, true).join(',') +
+                ')';
+            }
           }
         });
       });
