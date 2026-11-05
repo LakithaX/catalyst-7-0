@@ -16,28 +16,28 @@ const DATA: MemberData[] = [
   {
     name: 'Nethuli Gunathilaka',
     role: 'OCVP Partnership Development',
-    image: '/assets/cat-oc-pics/nethuli-trimmed.png',
+    image: '/assets/cat-oc-pics/nethuli-trimmed.webp',
     aspect: 0.717,
     pw: 34,
   },
   {
     name: 'Chetha Atapattu',
     role: 'OCVP Partnership Development',
-    image: '/assets/cat-oc-pics/chetha-trimmed.png',
+    image: '/assets/cat-oc-pics/chetha-trimmed.webp',
     aspect: 0.74,
     pw: 34,
   },
   {
     name: 'Vimarshi Suraweera',
     role: 'OCVP Partnership Development',
-    image: '/assets/cat-oc-pics/vimarshi-trimmed.png',
+    image: '/assets/cat-oc-pics/vimarshi-trimmed.webp',
     aspect: 0.832,
     pw: 35,
   },
   {
     name: 'Gihansa Hasithmi',
     role: 'OCVP Partnership Development',
-    image: '/assets/cat-oc-pics/gihansa-trimmed.png',
+    image: '/assets/cat-oc-pics/gihansa-trimmed.webp',
     aspect: 1.209,
     pw: 37,
     bottom: 'calc(-0.5 * var(--k))',
@@ -45,7 +45,7 @@ const DATA: MemberData[] = [
   {
     name: 'Hari Branavan Arulnathan',
     role: 'OCVP Partnership Development',
-    image: '/assets/cat-oc-pics/hari-trimmed.png',
+    image: '/assets/cat-oc-pics/hari-trimmed.webp',
     aspect: 0.931,
     pw: 35,
   },
@@ -241,10 +241,10 @@ export default function OcPosterPage() {
           </header>
 
           <div className="rows">
-            {DATA.map((member, i) => {
+            {DATA.map((member, index) => {
               const first = member.name.split(' ')[0];
               const fs = Math.min(31, 189 / first.length);
-              const isOdd = i % 2 !== 0;
+              const isOdd = index % 2 !== 0;
 
               return (
                 <section
@@ -256,7 +256,7 @@ export default function OcPosterPage() {
                       '--ar': member.aspect,
                       '--pw': member.pw,
                       '--p-bot': member.bottom || 'calc(-1 * var(--k))',
-                      '--row-delay': `${Math.min(i, 2) * 0.12}s`,
+                      '--row-delay': `${Math.min(index, 2) * 0.12}s`,
                     } as React.CSSProperties
                   }
                 >
@@ -282,8 +282,10 @@ export default function OcPosterPage() {
                       <img
                         src={member.image}
                         alt={member.name}
+                        loading={index < 2 ? "eager" : "lazy"}
+                        fetchPriority={index < 2 ? "high" : "auto"}
+                        decoding="async"
                         className="pic-img"
-                        loading="eager"
                       />
                     </div>
                   </div>

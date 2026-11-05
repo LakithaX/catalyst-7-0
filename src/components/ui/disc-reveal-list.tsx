@@ -273,7 +273,7 @@ export function DiscRevealList({
                   }
                 >
                   {current.media.kind === "photos" ? (
-                    <FloatingPicture src={current.media.images[i]} />
+                    <FloatingPicture src={current.media.images[i]} index={i} />
                   ) : (
                     <Disc
                       src={current.media.images[i]}
@@ -499,7 +499,7 @@ function Disc({ src, hue, delay }: { src: string; hue: string; delay: number }) 
   );
 }
 
-function FloatingPicture({ src }: { src: string }) {
+function FloatingPicture({ src, index = 0 }: { src: string; index?: number }) {
   const isCutout =
     src.toLowerCase().endsWith(".png") ||
     src.toLowerCase().endsWith(".webp") ||
@@ -511,6 +511,9 @@ function FloatingPicture({ src }: { src: string }) {
         src={src}
         alt=""
         draggable={false}
+        loading={index < 2 ? "eager" : "lazy"}
+        fetchPriority={index < 2 ? "high" : "auto"}
+        decoding="async"
         className={cn(
           "w-full h-auto select-none pointer-events-none",
           isCutout
