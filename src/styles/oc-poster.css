@@ -29,8 +29,8 @@
   width: 100%;
   --k: 1cqw;
   --kn: 1;
-  --po: 3.5cqw;
-  --no: 12cqw;
+  --po: 2.5cqw;
+  --no: 8cqw;
   --bo: -4cqw;
   --gl: 22cqw;
   --gr: 24cqw;
@@ -42,8 +42,8 @@
 }
 
 .oc-poster-page .poster-section + .poster-section {
-  margin-top: calc(10 * var(--k));
-  padding-top: calc(2 * var(--k));
+  margin-top: calc(3 * var(--k));
+  padding-top: 0;
 }
 
 @container (min-width: 600px) {
