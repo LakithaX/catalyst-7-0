@@ -140,7 +140,7 @@ html, body {
 .sky-bg {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.png");
+  background-image: url("/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.webp");
   background-position: 50% 35px;
   background-size: cover;
   pointer-events: none;
@@ -162,7 +162,8 @@ html, body {
   transform: translateX(-50%);
   pointer-events: none;
   z-index: 2; /* Sits behind Asset 2 (Mt. Fuji at z-index 3) */
-  transition: transform 0.15s ease-out, box-shadow 0.6s ease, background 0.6s ease;
+  will-change: transform;
+  transition: box-shadow 0.6s ease, background 0.6s ease;
 }
 
 .celestial-body.is-sun {
@@ -223,7 +224,7 @@ html, body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.55rem;
+  gap: clamp(2.4rem, 5.5vw, 4rem);
 }
 
 .title-presenter {
@@ -249,9 +250,9 @@ html, body {
   font-family: 'Osaka Bright', 'Bison', sans-serif;
   font-size: clamp(1.85rem, 8.2vw, 7.8rem);
   font-weight: 400;
-  line-height: 1;
+  line-height: 1.15;
   margin: 0;
-  padding: 0;
+  padding: 0.18em 0 0;
   color: #ffffff;
   text-shadow: 0 6px 35px rgba(0, 0, 0, 0.95), 0 0 55px rgba(239, 68, 68, 0.75);
   text-transform: uppercase;
@@ -282,6 +283,12 @@ html, body {
   -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
   line-height: 1;
+}
+
+/* Osaka Bright's painted strokes extend well above its font line box. */
+.brush-heading {
+  padding-top: 0.35em;
+  line-height: 1.2;
 }
 
 /* Calligraphic Japanese Sumi Brush Tip */
@@ -322,7 +329,7 @@ html, body {
   left: 0;
   right: 0;
   height: 48vh;
-  background-image: url("/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.png");
+  background-image: url("/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.webp");
   background-position: 50% 100%;
   background-repeat: no-repeat;
   background-size: auto min(36vh, 360px);
@@ -343,7 +350,7 @@ html, body {
   left: -20%;
   right: -20%;
   height: 22vh;
-  background-image: url("/assets/aistudio/Asset_12___Drifting_Mist_Layer_e20761d0.png");
+  background-image: url("/assets/aistudio/Asset_12___Drifting_Mist_Layer_e20761d0.webp");
   background-position: 50% 100%;
   background-repeat: repeat-x;
   background-size: 1300px auto;
@@ -366,7 +373,7 @@ html, body {
   left: -8vw;
   width: 68vw;
   height: 46vh;
-  background-image: url("/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.png");
+  background-image: url("/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.webp");
   background-position: left bottom;
   background-repeat: no-repeat;
   background-size: auto 100%;
@@ -386,7 +393,7 @@ html, body {
   right: -8vw;
   width: 68vw;
   height: 46vh;
-  background-image: url("/assets/aistudio/Asset_5_clean.png");
+  background-image: url("/assets/aistudio/Asset_5_clean.webp");
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: auto 100%;
@@ -407,7 +414,7 @@ html, body {
   left: 0;
   right: 0;
   height: 42vh;
-  background-image: url("/assets/aistudio/Asset_3_clean.png");
+  background-image: url("/assets/aistudio/Asset_3_clean.webp");
   background-position: 50% 0%;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -442,7 +449,7 @@ html, body {
 .torii-back-pillars {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.png");
+  background-image: url("/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.webp");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -459,7 +466,7 @@ html, body {
 .torii-front-gate {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.png");
+  background-image: url("/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.webp");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -478,7 +485,7 @@ html, body {
   transform: translateX(-50%);
   width: min(65vw, 660px);
   aspect-ratio: 1774 / 831;
-  background-image: url("/assets/aistudio/Asset_10_clean.png");
+  background-image: url("/assets/aistudio/Asset_10_clean.webp");
   background-size: 100% 100%;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -628,7 +635,7 @@ html, body {
     font-size: clamp(0.85rem, 3.2vw, 1.15rem);
   }
   .catalyst-word-wrapper {
-    gap: 0.35rem;
+    gap: 2.4rem;
   }
   .mt-fuji-layer {
     bottom: calc(15vh + 36px);
@@ -689,7 +696,7 @@ html, body {
     width: 98vw;
   }
   .title-catalyst {
-    font-size: clamp(3.675rem, calc(8.8vw + 30px), 4.675rem);
+    font-size: clamp(3.1rem, calc(8vw + 24px), 4rem);
     gap: 0.03em;
   }
   .title-presenter {
@@ -703,7 +710,7 @@ html, body {
     padding-left: 0.18em;
   }
   .catalyst-word-wrapper {
-    gap: 0.25rem;
+    gap: 3rem;
   }
   .mt-fuji-layer {
     bottom: calc(12vh + 36px);
@@ -759,7 +766,7 @@ html, body {
     height: 110px;
   }
   .title-catalyst {
-    font-size: clamp(3.2rem, calc(8.2vw + 26px), 3.9rem);
+    font-size: clamp(2.8rem, calc(8vw + 23px), 3.25rem);
     gap: 0.02em;
   }
   .title-presenter {
