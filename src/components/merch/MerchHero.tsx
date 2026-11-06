@@ -13,7 +13,7 @@ const HERO_SLIDES = [
     description: 'Premium merch from Catalyst 7.0 — crafted for dreamers, creators and change-makers.',
     productName: 'DELEGATE TEE',
     productVariant: 'OBSIDIAN BLACK · BUSHIDO EDITION',
-    image: '/assets/catalyst-merch/del-black-front.png',
+    image: '/assets/catalyst-merch/del-black-front.webp',
     badge: '公式商品',
   },
   {
@@ -24,7 +24,7 @@ const HERO_SLIDES = [
     description: 'Minimalist off-white edition tailored in luxury heavyweight slub cotton with subtle gold foil accents.',
     productName: 'DELEGATE TEE',
     productVariant: 'PURE IVORY · LIMITED SERIES',
-    image: '/assets/catalyst-merch/del-white-front.png',
+    image: '/assets/catalyst-merch/del-white-front.webp',
     badge: '限定品',
   },
   {
@@ -35,7 +35,7 @@ const HERO_SLIDES = [
     description: 'Structured silhouette woven from water-resistant matte black twill with tonal Catalyst mon embroidery.',
     productName: 'BUCKET HAT',
     productVariant: 'TOKYO EDITION · WATER-RESISTANT',
-    image: '/assets/catalyst-merch/del-bucket-hat.png',
+    image: '/assets/catalyst-merch/del-bucket-hat.webp',
     badge: '公式商品',
   },
 ];
