@@ -82,7 +82,7 @@ export const ProductDetailPage: React.FC = () => {
       <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col">
         <Navbar />
         <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl text-[#252321] mb-4">
+          <h2 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-4xl text-[#252321] mb-4">
             PIECE NOT FOUND
           </h2>
           <p className="font-['Droid_Serif',Georgia,serif] italic text-[#736B63] mb-8">
@@ -124,22 +124,22 @@ export const ProductDetailPage: React.FC = () => {
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
         {/* Sleek Inline Breadcrumb & Collection Return */}
-        <div className="flex items-center justify-between pb-4 mb-6 border-b border-[#252321]/10 text-xs font-['Montserrat',sans-serif]">
-          <div className="flex items-center gap-2 text-[11px] tracking-wider uppercase font-semibold">
-            <Link to="/" className="text-[#736B63] hover:text-[#252321] transition-colors">
+        <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-[#252321]/10 text-xs font-['Montserrat',sans-serif]">
+          <div className="flex min-w-0 items-center gap-2 text-[11px] tracking-wider uppercase font-semibold">
+            <Link to="/" className="hidden sm:inline text-[#736B63] hover:text-[#252321] transition-colors">
               HOME
             </Link>
-            <span className="text-[#252321]/20">/</span>
-            <Link to="/merch" className="text-[#736B63] hover:text-[#252321] transition-colors">
+            <span className="hidden sm:inline text-[#252321]/20">/</span>
+            <Link to="/merch" className="hidden sm:inline text-[#736B63] hover:text-[#252321] transition-colors">
               COLLECTION
             </Link>
-            <span className="text-[#252321]/20">/</span>
-            <span className="text-[#C9362B] font-bold">{product.category}</span>
+            <span className="hidden sm:inline text-[#252321]/20">/</span>
+            <span className="text-[#C9362B] font-bold whitespace-nowrap">{product.category}</span>
           </div>
 
           <Link
             to="/merch"
-            className="inline-flex items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase text-[#736B63] hover:text-[#C9362B] transition-colors"
+            className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase whitespace-nowrap text-[#736B63] hover:text-[#C9362B] transition-colors"
           >
             <ArrowLeft size={13} />
             <span>ALL PIECES (9)</span>
@@ -261,7 +261,7 @@ export const ProductDetailPage: React.FC = () => {
           <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
             <div>
               {/* Category & Collection Eyebrow */}
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-5">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B]" />
                 <span className="font-['Montserrat',sans-serif] text-xs tracking-[0.25em] text-[#C9362B] uppercase font-bold">
                   {product.category} / CATALYST 7.0
@@ -269,17 +269,17 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               {/* Product Headline & Price */}
-              <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-2">
-                <h1 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-[#252321] leading-none">
+              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-x-4 gap-y-3 mb-5">
+                <h1 className="brush-heading min-w-0 font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-[#252321]">
                   {product.name}
                 </h1>
-                <span className="font-['Bison',sans-serif] text-3xl sm:text-4xl font-black text-[#C9362B] tracking-wider whitespace-nowrap">
+                <span className="shrink-0 font-['Bison',sans-serif] text-3xl sm:text-4xl font-black text-[#C9362B] tracking-wider whitespace-nowrap leading-none">
                   {product.priceDisplay}
                 </span>
               </div>
 
               {/* Variant Subtitle */}
-              <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl sm:text-3xl uppercase tracking-widest text-[#736B63] mb-6">
+              <h2 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl sm:text-3xl uppercase tracking-widest text-[#736B63] mb-6">
                 {product.variant}
               </h2>
 
@@ -401,10 +401,10 @@ export const ProductDetailPage: React.FC = () => {
         <section className="mt-24 pt-16 border-t border-[#252321]/10">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <span className="font-['Montserrat',sans-serif] text-[10px] tracking-[0.25em] text-[#C9362B] uppercase font-bold block mb-1">
+              <span className="font-['Montserrat',sans-serif] text-[10px] tracking-[0.25em] text-[#C9362B] uppercase font-bold block mb-3">
                 DISCOVER MORE
               </span>
-              <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321]">
+              <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321]">
                 RELATED PIECES
               </h3>
             </div>
