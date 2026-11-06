@@ -23,11 +23,11 @@ interface SectionData {
 
 const SECTIONS: SectionData[] = [
   {
-    id: 'leadership',
-    navLabel: 'Leadership',
-    title: 'LEADERSHIP',
-    tag: 'PRESIDENCY & FINANCE',
-    watermark: 'OC',
+    id: 'ocp',
+    navLabel: 'OCP',
+    title: 'OCP',
+    tag: 'ORGANIZING COMMITTEE PRESIDENT',
+    watermark: 'OCP',
     members: [
       {
         name: 'Mahdy Hassan',
@@ -233,7 +233,7 @@ const SECTIONS: SectionData[] = [
 export default function OcPosterPage() {
   const posterRef = useRef<HTMLDivElement>(null);
   const [isRevealing, setIsRevealing] = useState(true);
-  const [activeSection, setActiveSection] = useState<string>('leadership');
+  const [activeSection, setActiveSection] = useState<string>('ocp');
 
   // Always scroll to top immediately upon mounting
   useLayoutEffect(() => {
@@ -497,6 +497,7 @@ export default function OcPosterPage() {
                     height: 'calc(6 * var(--k))',
                     marginTop: 'calc(-0.5 * var(--k))',
                     marginBottom: 'calc(-4 * var(--k))',
+                    backgroundColor: '#9a0d2a',
                   }}
                 >
                   <svg
