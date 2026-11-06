@@ -44,7 +44,7 @@ export default function HomePage() {
   const sakuraEnabled = true;
   const mistEnabled = false;
   const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [mouseVelX, setMouseVelX] = useState<number>(0);
+  const petalWindRef = useRef(0);
   const [isLockedToHero, setIsLockedToHero] = useState<boolean>(false);
   const isLockedToHeroRef = useRef<boolean>(false);
   const [isSection2Active, setIsSection2Active] = useState<boolean>(false);
@@ -184,7 +184,7 @@ export default function HomePage() {
     const now = Date.now();
     const dt = Math.max(1, now - lastMouseTimeRef.current);
     const vx = (e.clientX - lastMouseXRef.current) / dt;
-    setMouseVelX(Math.max(-4, Math.min(4, vx * 1.5)));
+    petalWindRef.current = Math.max(-4, Math.min(4, vx * 1.5));
     lastMouseXRef.current = e.clientX;
     lastMouseTimeRef.current = now;
 
@@ -218,6 +218,10 @@ export default function HomePage() {
 
   // Combined Parallax & Scroll Animation Loop (60fps)
   useEffect(() => {
+    if (isLockedToHero) return;
+    let lastX = NaN;
+    let lastY = NaN;
+    let lastProgress = NaN;
     const render = () => {
       const factor = 0.08;
       currentX.current += (targetX.current - currentX.current) * factor;
@@ -230,6 +234,15 @@ export default function HomePage() {
       const x = currentX.current;
       const y = currentY.current;
       const sp = currentScroll.current;
+
+      // Once interpolation settles, leave composited layers alone until input changes.
+      if (Math.abs(x - lastX) < 0.001 && Math.abs(y - lastY) < 0.001 && Math.abs(sp - lastProgress) < 0.00001) {
+        rafId.current = requestAnimationFrame(render);
+        return;
+      }
+      lastX = x;
+      lastY = y;
+      lastProgress = sp;
 
       // Hermite smoothstep for natural, gradual ease-in and ease-out curves
       const smoothstep = (min: number, max: number, v: number) => {
@@ -504,7 +517,7 @@ export default function HomePage() {
       window.removeEventListener('deviceorientation', handleDeviceOrientation);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [handleMouseMove, handleTouchMove, handleDeviceOrientation]);
+  }, [handleMouseMove, handleTouchMove, handleDeviceOrientation, isLockedToHero]);
 
   // Active view: Natural Daylight (Red Sun)
   const currentFilter = {
@@ -540,7 +553,7 @@ export default function HomePage() {
           style={{ filter: currentFilter.filter }}
         >
         {/* Floating Sakura Petals Particle Simulation (confined exclusively to Section 1) */}
-        <SakuraPetals enabled={sakuraEnabled} mouseVelX={mouseVelX} className="absolute inset-0 pointer-events-none z-20 w-full h-full" />
+        <SakuraPetals enabled={sakuraEnabled} windRef={petalWindRef} className="absolute inset-0 pointer-events-none z-20 w-full h-full" />
 
         {/* Sky Background */}
         <div className="sky-bg" />
