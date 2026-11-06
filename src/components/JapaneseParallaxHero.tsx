@@ -4,21 +4,31 @@ import { ArrowRight, ShoppingBag, ChevronDown } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { SakuraPetals } from './SakuraPetals';
 
-// Exact Japanese samurai-inspired visual assets from public/assets/hero-section-assets/
+// Assets in public/assets/hero-section-assets/
+// NOTE: foreground-landscape is a .PNG in your folder (not .webp) – that was the broken image.
 const SUN_IMG = '/assets/hero-section-assets/red-enso-sun.webp';
 const MOUNTAINS_IMG = '/assets/hero-section-assets/background-mountains.webp';
 const MIST_IMG = '/assets/hero-section-assets/atmospheric-mist.webp';
 const PAGODA_IMG = '/assets/hero-section-assets/pagoda.webp';
 const TORII_IMG = '/assets/hero-section-assets/torii-gate.webp';
 const BRUSH_IMG = '/assets/hero-section-assets/brush-strokes.webp';
-const FOREGROUND_IMG = '/assets/hero-section-assets/foreground-landscape.webp';
+const FOREGROUND_IMG = '/assets/hero-section-assets/foreground-landscape.png';
 const SAKURA_IMG = '/assets/hero-section-assets/sakura-branch.webp';
 const LOGO_IMG = '/assets/catalyst_7_logo.png';
 
-export const JapaneseParallaxHero: React.FC = () => {
-  const containerRef = useRef<HTMLDivElement>(null);
+// Copy – edit here
+const EVENT_TAGLINE = 'A two-day leadership seminar by AIESEC in SLIIT';
+const EVENT_DETAILS = ''; // e.g. '12–13 December · SLIIT Malabe' – shown under the tagline when filled
 
-  // Parallax layer inner element refs (nested wrappers prevent any CSS transform collisions)
+// Soft-fade masks so image edges never show as hard rectangles
+const maskStyle = (gradient: string): React.CSSProperties => ({
+  WebkitMaskImage: gradient,
+  maskImage: gradient,
+});
+const FADE_TOP = maskStyle('linear-gradient(to bottom, transparent 0%, #000 38%, #000 100%)');
+const FADE_BOTH = maskStyle('linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%)');
+
+export const JapaneseParallaxHero: React.FC = () => {
   const sunRef = useRef<HTMLDivElement>(null);
   const mountainsRef = useRef<HTMLDivElement>(null);
   const mistRef = useRef<HTMLDivElement>(null);
@@ -29,44 +39,40 @@ export const JapaneseParallaxHero: React.FC = () => {
   const sakuraRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
 
-  // Parallax coordinates & smooth interpolation refs
-  const targetX = useRef<number>(0);
-  const targetY = useRef<number>(0);
-  const currentX = useRef<number>(0);
-  const currentY = useRef<number>(0);
+  const targetX = useRef(0);
+  const targetY = useRef(0);
+  const currentX = useRef(0);
+  const currentY = useRef(0);
   const rafId = useRef<number | null>(null);
 
-  // Track scroll for depth effects and mouse velocity for petals
-  const [mouseVelX, setMouseVelX] = useState<number>(0);
-  const lastMouseX = useRef<number>(0);
-  const lastMouseTime = useRef<number>(Date.now());
-  const [isMobile, setIsMobile] = useState<boolean>(false);
+  // Mouse velocity lives in a ref (no re-render per mouse move); only a rounded copy goes to state for the petals
+  const velRef = useRef(0);
+  const lastMouseX = useRef(0);
+  const lastMouseTime = useRef(Date.now());
+  const isMobileRef = useRef(false);
+  const [mouseVelX, setMouseVelX] = useState(0);
 
-  // Handle window resizing
   useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth < 768);
+    const onResize = () => {
+      isMobileRef.current = window.innerWidth < 768;
     };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  // Desktop Mouse Movement
   const handleMouseMove = useCallback((e: MouseEvent) => {
     const now = Date.now();
     const dt = Math.max(1, now - lastMouseTime.current);
     const vx = (e.clientX - lastMouseX.current) / dt;
-    setMouseVelX(Math.max(-4, Math.min(4, vx * 1.5)));
+    velRef.current = Math.max(-4, Math.min(4, vx * 1.5));
     lastMouseX.current = e.clientX;
     lastMouseTime.current = now;
 
-    const { innerWidth, innerHeight } = window;
-    targetX.current = (e.clientX / innerWidth - 0.5) * 2; // -1 to +1
-    targetY.current = (e.clientY / innerHeight - 0.5) * 2; // -1 to +1
+    targetX.current = (e.clientX / window.innerWidth - 0.5) * 2;
+    targetY.current = (e.clientY / window.innerHeight - 0.5) * 2;
   }, []);
 
-  // Mobile Device Orientation (Gyroscope Parallax)
   const handleDeviceOrientation = useCallback((e: DeviceOrientationEvent) => {
     if (e.gamma !== null && e.beta !== null) {
       targetX.current = Math.max(-1, Math.min(1, e.gamma / 25));
@@ -74,87 +80,52 @@ export const JapaneseParallaxHero: React.FC = () => {
     }
   }, []);
 
-  // Smooth 60fps RequestAnimationFrame Parallax Engine
   useEffect(() => {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduceMotion) return;
+
     let scrollY = window.scrollY;
     const onScroll = () => {
       scrollY = window.scrollY;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
 
+    let frame = 0;
+    const set = (el: HTMLDivElement | null, px: number, py: number) => {
+      if (el) el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
+    };
+
     const render = () => {
-      // Butter-smooth lerp factor
-      const lerpFactor = 0.06;
-      currentX.current += (targetX.current - currentX.current) * lerpFactor;
-      currentY.current += (targetY.current - currentY.current) * lerpFactor;
+      const lerp = 0.07;
+      currentX.current += (targetX.current - currentX.current) * lerp;
+      currentY.current += (targetY.current - currentY.current) * lerp;
 
       const x = currentX.current;
       const y = currentY.current;
-      const sy = scrollY;
-      const mob = isMobile;
+      const vh = window.innerHeight;
+      const sy = Math.min(scrollY, vh * 1.2); // stop parallax once hero is gone
+      const m = isMobileRef.current ? 0.55 : 1; // mobile = gentler motion
 
-      // 1. Red Enso Sun (deepest, subtle celestial motion)
-      if (sunRef.current) {
-        const sx = x * (mob ? 4 : 7);
-        const syVal = y * (mob ? 3 : 5) + sy * 0.09;
-        sunRef.current.style.transform = `translate3d(${sx.toFixed(2)}px, ${syVal.toFixed(2)}px, 0)`;
-      }
+      // Back -> front. Scroll factor grows with depth: far layers move slow, near layers move fast.
+      set(sunRef.current, x * 7 * m, y * 5 * m + sy * 0.08);
+      set(mountainsRef.current, x * 13 * m, y * 8 * m + sy * 0.16);
+      set(mistRef.current, x * 20 * m, y * 11 * m + sy * 0.24);
+      set(foregroundRef.current, x * 26 * m, 0);
+      set(toriiRef.current, x * -22 * m, y * 17 * m + sy * 0.34);
+      set(pagodaRef.current, x * 22 * m, y * 17 * m + sy * 0.34);
+      set(brushRef.current, x * -12 * m, y * -8 * m + sy * 0.18);
+      set(sakuraRef.current, x * -32 * m, y * -16 * m + sy * 0.46);
 
-      // 2. Background Mountains (distant horizon)
-      if (mountainsRef.current) {
-        const mx = x * (mob ? 7 : 13);
-        const my = y * (mob ? 4 : 8) + sy * 0.15;
-        mountainsRef.current.style.transform = `translate3d(${mx.toFixed(2)}px, ${my.toFixed(2)}px, 0)`;
-      }
-
-      // 3. Atmospheric Mist (soft mid-depth drift)
-      if (mistRef.current) {
-        const mistX = x * (mob ? 10 : 20);
-        const mistY = y * (mob ? 6 : 11) + sy * 0.22;
-        mistRef.current.style.transform = `translate3d(${mistX.toFixed(2)}px, ${mistY.toFixed(2)}px, 0)`;
-      }
-
-      // 4. Foreground Landscape (dark terrain grounding base)
-      if (foregroundRef.current) {
-        const fgX = x * (mob ? 14 : 26);
-        // Firmly grounded base stays flush to the very bottom; horizontal drift provides rich 3D depth
-        const fgY = 0;
-        foregroundRef.current.style.transform = `translate3d(${fgX.toFixed(2)}px, ${fgY.toFixed(2)}px, 0)`;
-      }
-
-      // 5. Torii Gate (sacred entrance on left)
-      if (toriiRef.current) {
-        const tx = x * (mob ? -12 : -22);
-        const ty = y * (mob ? 9 : 17) + sy * 0.36;
-        toriiRef.current.style.transform = `translate3d(${tx.toFixed(2)}px, ${ty.toFixed(2)}px, 0)`;
-      }
-
-      // 6. Pagoda (architectural feature on right)
-      if (pagodaRef.current) {
-        const px = x * (mob ? 12 : 22);
-        const py = y * (mob ? 9 : 17) + sy * 0.36;
-        pagodaRef.current.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
-      }
-
-      // 7. Brush Strokes (restrained calligraphic accent in upper right)
-      if (brushRef.current) {
-        const bx = x * (mob ? -6 : -12);
-        const by = y * (mob ? -4 : -8) + sy * 0.18;
-        brushRef.current.style.transform = `translate3d(${bx.toFixed(2)}px, ${by.toFixed(2)}px, 0)`;
-      }
-
-      // 8. Sakura Branch (near foreground top-left framing)
-      if (sakuraRef.current) {
-        const skX = x * (mob ? -18 : -32);
-        const skY = y * (mob ? -9 : -16) + sy * 0.44;
-        sakuraRef.current.style.transform = `translate3d(${skX.toFixed(2)}px, ${skY.toFixed(2)}px, 0)`;
-      }
-
-      // 9. Central Logo & CTAs (stable foreground)
       if (logoRef.current) {
-        const lx = x * (mob ? 3 : 6);
-        const ly = y * (mob ? 2 : 4) + sy * 0.14;
-        logoRef.current.style.transform = `translate3d(${lx.toFixed(2)}px, ${ly.toFixed(2)}px, 0)`;
+        logoRef.current.style.transform = `translate3d(${(x * 6 * m).toFixed(2)}px, ${(y * 4 * m + sy * 0.12).toFixed(2)}px, 0)`;
+        logoRef.current.style.opacity = String(Math.max(0, 1 - sy / (vh * 0.8)));
+      }
+
+      // Decay velocity and push to React state only every few frames (and only if changed)
+      velRef.current *= 0.92;
+      if (++frame % 4 === 0) {
+        const v = Math.round(velRef.current * 10) / 10;
+        setMouseVelX((prev) => (prev === v ? prev : v));
       }
 
       rafId.current = requestAnimationFrame(render);
@@ -164,7 +135,6 @@ export const JapaneseParallaxHero: React.FC = () => {
     if (window.DeviceOrientationEvent && typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
       window.addEventListener('deviceorientation', handleDeviceOrientation);
     }
-
     rafId.current = requestAnimationFrame(render);
 
     return () => {
@@ -173,71 +143,73 @@ export const JapaneseParallaxHero: React.FC = () => {
       window.removeEventListener('scroll', onScroll);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [handleMouseMove, handleDeviceOrientation, isMobile]);
+  }, [handleMouseMove, handleDeviceOrientation]);
 
   const scrollToNext = () => {
-    const galleryEl = document.getElementById('gallery');
-    if (galleryEl) {
-      galleryEl.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
-    }
+    const el = document.getElementById('gallery');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    else window.scrollTo({ top: window.innerHeight, behavior: 'smooth' });
   };
 
   return (
     <section
-      ref={containerRef}
       id="hero-scene"
       className="relative w-full h-screen min-h-[640px] max-h-[1200px] overflow-hidden bg-[#F8F3E9] text-[#252321] select-none"
     >
-      {/* ── Floating Sakura Petals Particle Layer ── */}
-      <SakuraPetals enabled mouseVelX={mouseVelX} className="absolute inset-0 pointer-events-none z-25 w-full h-full" />
+      {/* Petals */}
+      <SakuraPetals enabled mouseVelX={mouseVelX} className="absolute inset-0 pointer-events-none z-[25] w-full h-full" />
 
-      {/* ── PARALLAX LAYER 1: Red Enso Sun (Centered Halo directly behind Catalyst Title) ── */}
+      {/* L1: Enso sun */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[58%] sm:-translate-y-[55%] md:-translate-y-[53%] w-[min(65vw,320px)] sm:w-[min(54vw,400px)] md:w-[min(48vw,480px)] aspect-square pointer-events-none z-10">
         <div ref={sunRef} className="w-full h-full will-change-transform">
           <img
             src={SUN_IMG}
-            alt="Japanese Red Enso Sun"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="w-full h-full object-contain filter drop-shadow-[0_12px_36px_rgba(181,30,35,0.2)] opacity-95"
+            className="w-full h-full object-contain drop-shadow-[0_12px_36px_rgba(181,30,35,0.2)] opacity-95"
           />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 2: Background Mountains (Panoramic spanning full width) ── */}
-      <div className="absolute bottom-[10%] sm:bottom-[12%] md:bottom-[15%] left-0 right-0 w-full h-[32vh] sm:h-[40vh] md:h-[48vh] pointer-events-none z-12">
+      {/* L2: Mountains – wider than the screen so parallax drift never exposes an edge, top faded */}
+      <div className="absolute bottom-[10%] sm:bottom-[12%] md:bottom-[14%] left-[-4%] right-[-4%] h-[30vh] sm:h-[36vh] md:h-[42vh] pointer-events-none z-[12]">
         <div ref={mountainsRef} className="w-full h-full will-change-transform">
           <img
             src={MOUNTAINS_IMG}
-            alt="Japanese Ink Wash Panoramic Mountains"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
+            style={FADE_TOP}
             className="w-full h-full object-cover object-bottom opacity-95"
           />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 3: Atmospheric Mist (Floating Mid-Depth Mist) ── */}
-      <div className="absolute bottom-[6%] sm:bottom-[8%] md:bottom-[10%] left-0 right-0 w-full h-[28vh] sm:h-[35vh] md:h-[42vh] pointer-events-none z-14">
+      {/* L3: Mist – faded top and bottom so it blends into everything */}
+      <div className="absolute bottom-[6%] sm:bottom-[8%] md:bottom-[9%] left-[-5%] right-[-5%] h-[28vh] sm:h-[34vh] md:h-[40vh] pointer-events-none z-[14]">
         <div ref={mistRef} className="w-full h-full will-change-transform">
           <img
             src={MIST_IMG}
-            alt="Atmospheric Mountain Mist"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="w-full h-full object-cover object-bottom opacity-75"
+            style={FADE_BOTH}
+            className="w-full h-full object-cover object-bottom opacity-80"
           />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 4: Dark Foreground Landscape (Grounding Terrain Base) ── */}
-      <div className="absolute bottom-0 left-[-3%] right-[-3%] w-[106%] h-[28vh] sm:h-[35vh] md:h-[42vh] lg:h-[48vh] min-h-[220px] max-h-[520px] pointer-events-none z-16 leading-none overflow-hidden">
+      {/* L4: Foreground landscape (PNG!) */}
+      <div className="absolute bottom-0 left-[-4%] right-[-4%] h-[24vh] sm:h-[30vh] md:h-[36vh] lg:h-[40vh] min-h-[180px] max-h-[440px] pointer-events-none z-[16] leading-none overflow-hidden">
         <div ref={foregroundRef} className="w-full h-full will-change-transform">
           <img
             src={FOREGROUND_IMG}
-            alt="Foreground Ink Wash Landscape"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
             className="w-full h-full object-cover object-bottom"
@@ -245,150 +217,135 @@ export const JapaneseParallaxHero: React.FC = () => {
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 5: Torii Gate (Sacred Entrance on Bottom-Left) ── */}
-      <div className="absolute bottom-[1%] sm:bottom-[1.5%] md:bottom-[2%] left-[2%] sm:left-[3%] md:left-[4%] lg:left-[8%] h-[min(25vh,170px)] sm:h-[min(34vh,260px)] md:h-[min(40vh,320px)] lg:h-[min(48vh,420px)] w-auto pointer-events-none z-20">
+      {/* L5: Torii (nudged right on desktop so it clears the bottom-left text) */}
+      <div className="absolute -bottom-[3%] sm:-bottom-[3%] md:-bottom-[3.5%] left-[2%] sm:left-[3%] md:left-[4%] lg:left-[12%] h-[min(25vh,170px)] sm:h-[min(34vh,260px)] md:h-[min(40vh,320px)] lg:h-[min(48vh,420px)] w-auto pointer-events-none z-20">
         <div ref={toriiRef} className="h-full w-auto will-change-transform">
           <img
             src={TORII_IMG}
-            alt="Sacred Torii Gate"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="h-full w-auto object-contain filter drop-shadow-[0_14px_28px_rgba(37,35,33,0.22)]"
+            className="h-full w-auto object-contain drop-shadow-[0_14px_28px_rgba(37,35,33,0.22)]"
           />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 6: Japanese Pagoda (Architectural Anchor on Bottom-Right) ── */}
-      <div className="absolute bottom-[1%] sm:bottom-[1.5%] md:bottom-[2%] right-[2%] sm:right-[3%] md:right-[4%] lg:right-[8%] h-[min(33vh,220px)] sm:h-[min(44vh,340px)] md:h-[min(50vh,420px)] lg:h-[min(60vh,540px)] w-auto pointer-events-none z-20">
+      {/* L6: Pagoda */}
+      <div className="absolute -bottom-[3%] sm:-bottom-[3%] md:-bottom-[3.5%] right-[2%] sm:right-[3%] md:right-[4%] lg:right-[8%] h-[min(33vh,220px)] sm:h-[min(44vh,340px)] md:h-[min(50vh,420px)] lg:h-[min(60vh,540px)] w-auto pointer-events-none z-20">
         <div ref={pagodaRef} className="h-full w-auto will-change-transform">
           <img
             src={PAGODA_IMG}
-            alt="Traditional Japanese Pagoda"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="h-full w-auto object-contain filter drop-shadow-[0_16px_32px_rgba(37,35,33,0.2)]"
+            className="h-full w-auto object-contain drop-shadow-[0_16px_32px_rgba(37,35,33,0.2)]"
           />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 7: Dynamic Brush Strokes (Restrained Calligraphic Accent) ── */}
-      <div className="absolute top-[2%] right-[-1%] w-[min(30vw,180px)] sm:w-[min(25vw,240px)] md:w-[min(24vw,320px)] pointer-events-none z-11 opacity-35">
+      {/* Ground strip: sits in front of the torii/pagoda bases so they look planted, not floating (also hides parallax drift) */}
+      <div className="absolute inset-x-0 bottom-0 h-[10vh] min-h-[56px] z-[22] pointer-events-none bg-gradient-to-t from-[#0d0b0a] via-[#14110f]/85 to-transparent" />
+
+      {/* Dark scrim at the bottom so cream text is readable over the dark landscape */}
+      <div className="absolute inset-x-0 bottom-0 h-[34vh] z-[17] pointer-events-none bg-gradient-to-t from-[#14110f]/75 via-[#14110f]/35 to-transparent" />
+
+      {/* L7: Brush strokes */}
+      <div className="absolute top-[2%] right-[-1%] w-[min(30vw,180px)] sm:w-[min(25vw,240px)] md:w-[min(24vw,320px)] pointer-events-none z-[11] opacity-35">
         <div ref={brushRef} className="w-full h-auto will-change-transform">
-          <img
-            src={BRUSH_IMG}
-            alt="Calligraphic Japanese Brush Strokes"
-            loading="eager"
-            decoding="async"
-            className="w-full h-auto object-contain"
-          />
+          <img src={BRUSH_IMG} alt="" aria-hidden="true" loading="eager" decoding="async" className="w-full h-auto object-contain" />
         </div>
       </div>
 
-      {/* ── PARALLAX LAYER 8: Sakura Branch (Near Foreground Upper-Left Corner Framing) ── */}
-      <div className="absolute -top-[1%] -left-[1%] w-[min(48vw,230px)] sm:w-[min(42vw,340px)] md:w-[min(38vw,480px)] lg:w-[min(38vw,540px)] pointer-events-none z-24">
+      {/* L8: Sakura branch */}
+      <div className="absolute -top-[1%] -left-[1%] w-[min(48vw,230px)] sm:w-[min(42vw,340px)] md:w-[min(38vw,480px)] lg:w-[min(34vw,500px)] pointer-events-none z-[24]">
         <div ref={sakuraRef} className="w-full h-auto will-change-transform">
           <img
             src={SAKURA_IMG}
-            alt="Framing Sakura Branch"
+            alt=""
+            aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="w-full h-auto object-contain filter drop-shadow-[0_8px_24px_rgba(37,35,33,0.15)] [transform:scaleY(-1)]"
+            className="w-full h-auto object-contain drop-shadow-[0_8px_24px_rgba(37,35,33,0.15)] [transform:scaleY(-1)]"
           />
         </div>
       </div>
 
-      {/* ── BRANDING & INTERACTIVE CONTENT OVERLAY (z-30) ── */}
-
-      {/* Top Navbar */}
+      {/* Navbar */}
       <Navbar isHero />
 
-      {/* Center Group: Catalyst 7.0 Logo + Action CTAs */}
+      {/* Center: logo + CTAs */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none select-none px-4 sm:px-6">
         <div ref={logoRef} className="flex flex-col items-center justify-center will-change-transform">
-          {/* Catalyst 7.0 Official Logo */}
-          <div className="relative transform -translate-y-2 sm:-translate-y-4">
+          <div className="relative -translate-y-2 sm:-translate-y-4">
+            {/* Soft cream glow so the black brush logo stays readable over the mountains */}
+            <div
+              aria-hidden="true"
+              className="absolute inset-x-[-10%] inset-y-[-18%] -z-10 blur-xl bg-[radial-gradient(ellipse_at_center,rgba(248,243,233,0.92)_0%,rgba(248,243,233,0.6)_45%,rgba(248,243,233,0)_72%)]"
+            />
             <img
               src={LOGO_IMG}
               alt="CATALYST 7.0"
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="w-[84vw] max-w-[260px] sm:max-w-[360px] md:max-w-[460px] lg:max-w-[560px] h-auto object-contain filter drop-shadow-[0_12px_36px_rgba(0,0,0,0.22)] drop-shadow-[0_2px_8px_rgba(181,30,35,0.25)]"
+              className="w-[84vw] max-w-[260px] sm:max-w-[360px] md:max-w-[460px] lg:max-w-[560px] h-auto object-contain drop-shadow-[0_12px_36px_rgba(0,0,0,0.22)] drop-shadow-[0_2px_8px_rgba(181,30,35,0.25)]"
             />
           </div>
 
-          {/* Central Action CTAs */}
-          <div className="pointer-events-auto flex items-center justify-center gap-2 sm:gap-3.5 flex-row mt-2.5 sm:mt-4">
-            {/* Register Button */}
+          <div className="pointer-events-auto flex items-center justify-center gap-2 sm:gap-3.5 mt-2.5 sm:mt-4">
             <Link
               to="/register"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#B51E23] hover:bg-[#9E171C] text-white font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_6px_22px_rgba(181,30,35,0.38)] hover:shadow-[0_10px_28px_rgba(181,30,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer group"
+              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#B51E23] hover:bg-[#9E171C] text-white font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_6px_22px_rgba(181,30,35,0.38)] hover:shadow-[0_10px_28px_rgba(181,30,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
             >
               <span>REGISTER NOW</span>
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
             </Link>
 
-            {/* Explore Merch Button */}
             <Link
               to="/merch"
-              className="inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#FAF6EE]/90 hover:bg-[#252321] text-[#252321] hover:text-[#FAF6EE] border border-[#252321]/30 hover:border-[#252321] font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_4px_16px_rgba(37,35,33,0.06)] hover:shadow-[0_8px_24px_rgba(37,35,33,0.15)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer backdrop-blur-xs group"
+              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#FAF6EE]/90 hover:bg-[#252321] text-[#252321] hover:text-[#FAF6EE] border border-[#252321]/30 hover:border-[#252321] font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_4px_16px_rgba(37,35,33,0.06)] hover:shadow-[0_8px_24px_rgba(37,35,33,0.15)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer backdrop-blur-sm"
             >
               <ShoppingBag size={14} className="text-[#C9362B] group-hover:text-[#FAF6EE] transition-colors" />
-              <span>EXPLORE MERCH</span>
+              <span>SHOP MERCH</span>
             </Link>
+          </div>
+
+          {/* Moved here from the left side – it was colliding with the sakura branch */}
+          <div className="hidden sm:flex flex-col items-center mt-4 text-center font-['Montserrat',sans-serif] text-[#0e1118] [text-shadow:0_0_10px_rgba(248,243,233,0.95),0_0_20px_rgba(248,243,233,0.8)]">
+            <p className="text-sm font-semibold">{EVENT_TAGLINE}</p>
+            {EVENT_DETAILS && <p className="text-xs font-bold tracking-wide mt-1">{EVENT_DETAILS}</p>}
           </div>
         </div>
       </div>
 
-      {/* Left Middle Info (Large Desktop only) */}
-      <div className="absolute left-5 lg:left-10 top-1/4 z-30 pointer-events-none hidden lg:block">
-        <h3 className="text-sm sm:text-base font-bold text-[#0e1118] tracking-tight">
-          Catalyst 7.0
-        </h3>
-        <p className="text-xs sm:text-sm text-gray-700 font-sans mt-0.5">
-          AIESEC in SLIIT &middot; Leadership Seminar
-        </p>
-        <div className="w-6 sm:w-7 h-[3px] bg-[#B51E23] mt-2.5 rounded-full" />
-      </div>
-
-      {/* Bottom Left Info (Large Desktop) */}
-      <div className="hidden lg:block absolute bottom-5 lg:bottom-8 left-5 lg:left-10 z-30 pointer-events-none">
-        <div className="font-['Bison',sans-serif] text-5xl sm:text-7xl md:text-8xl font-black text-[#0e1118] leading-[0.8] tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
-          7.0
-        </div>
-        <div className="mt-2 sm:mt-3">
-          <h4 className="text-xs sm:text-sm font-bold text-[#0e1118] tracking-tight uppercase">
-            Two-day leadership experience
-          </h4>
-        </div>
-      </div>
-
-      {/* Bottom Center Motto (Large Desktop) */}
-      <div className="hidden lg:block absolute bottom-5 lg:bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
-        <span className="font-['Bison',sans-serif] text-xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-[0.16em] sm:tracking-[0.22em] text-[#0e1118] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.12)] leading-none">
+      {/* Bottom-center motto (desktop) */}
+      <div className="hidden lg:block absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
+        <span className="font-['Bison',sans-serif] text-[2.6rem] font-black tracking-[0.22em] text-[#FAF6EE] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] leading-none">
           DARE BEYOND DEFINITION
         </span>
       </div>
 
-      {/* Mobile / Tablet Bottom Layout (< lg: Clean compact center stack between Torii and Pagoda) */}
+      {/* Bottom (mobile / tablet) */}
       <div className="lg:hidden absolute bottom-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center text-center max-w-[210px] w-full px-1">
         <div className="flex items-center justify-center gap-1.5">
-          <span className="font-['Bison',sans-serif] text-xl font-black text-[#0e1118] leading-none">7.0</span>
-          <span className="text-[9px] font-bold text-[#0e1118] uppercase tracking-wider leading-none">Leadership Seminar</span>
+          <span className="font-['Bison',sans-serif] text-xl font-black text-[#FAF6EE] leading-none drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">7.0</span>
+          <span className="text-[9px] font-bold text-[#FAF6EE] uppercase tracking-wider leading-none">Leadership Seminar</span>
         </div>
-        <span className="font-['Bison',sans-serif] text-xs font-black tracking-[0.16em] text-[#0e1118] uppercase mt-0.5 whitespace-nowrap">
+        <span className="font-['Bison',sans-serif] text-xs font-black tracking-[0.16em] text-[#FAF6EE] uppercase mt-0.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] whitespace-nowrap">
           DARE BEYOND DEFINITION
         </span>
       </div>
 
-      {/* ── Scroll Down Indicator (Bottom Right) ── */}
+      {/* Scroll indicator */}
       <button
         onClick={scrollToNext}
-        className="absolute bottom-5 right-5 sm:right-8 z-30 hidden sm:flex items-center gap-2 text-[#0e1118]/70 hover:text-[#B51E23] transition-colors font-mono text-[10px] uppercase tracking-[0.2em] font-bold cursor-pointer group"
+        className="group absolute bottom-5 right-5 sm:right-8 z-30 hidden sm:flex items-center gap-2 text-[#FAF6EE]/85 hover:text-white transition-colors font-mono text-[10px] uppercase tracking-[0.2em] font-bold cursor-pointer"
         title="Scroll to Gallery"
       >
         <span>EXPLORE</span>
-        <div className="w-6 h-6 rounded-full border border-[#0e1118]/25 group-hover:border-[#B51E23] flex items-center justify-center transition-all group-hover:translate-y-0.5">
+        <div className="w-6 h-6 rounded-full border border-[#FAF6EE]/50 group-hover:border-white flex items-center justify-center transition-all group-hover:translate-y-0.5">
           <ChevronDown size={13} />
         </div>
       </button>
