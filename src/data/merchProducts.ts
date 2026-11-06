@@ -32,8 +32,8 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "OBSIDIAN BLACK",
     category: "APPAREL",
     images: [
-      "/assets/catalyst-merch/del-black-front.png",
-      "/assets/catalyst-merch/del-black-back.png"
+      "/assets/catalyst-merch/del-black-front.webp",
+      "/assets/catalyst-merch/del-black-back.webp"
     ],
     description: "Crafted from ultra-heavyweight 280 GSM Japanese combed cotton with a structured streetwear drop-shoulder fit. Features the metallic Catalyst 7.0 crest on the chest and an intricate Bushido warrior calligraphy artwork silk-screened across the back.",
     options: {
@@ -64,7 +64,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "TOKYO EDITION",
     category: "ACCESSORIES",
     images: [
-      "/assets/catalyst-merch/del-bucket-hat.png"
+      "/assets/catalyst-merch/del-bucket-hat.webp"
     ],
     description: "Structured all-weather canvas bucket hat inspired by Tokyo street culture. Features high-density 3D tonal embroidery of the Catalyst emblem with reinforced brim stitching.",
     options: {
@@ -94,7 +94,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "PURE IVORY",
     category: "APPAREL",
     images: [
-      "/assets/catalyst-merch/del-white-front.png"
+      "/assets/catalyst-merch/del-white-front.webp"
     ],
     description: "Minimalist off-white edition tailored in luxury heavyweight slub cotton. Features the understated Catalyst seal in samurai crimson and gold foil on the chest with a clean tailored silhouette.",
     options: {
@@ -125,7 +125,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "BUSHIDO SET",
     category: "COLLECTIBLES",
     images: [
-      "/assets/catalyst-merch/stickers-pack-1.png"
+      "/assets/catalyst-merch/stickers-pack-1.webp"
     ],
     description: "Curated collector sheet of weatherproof die-cut vinyl stickers with matte laminate finish, highlighting traditional ukiyo-e motifs, Catalyst samurai emblems, and Japanese typography.",
     tag: "#CollectorPack",
@@ -148,7 +148,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "SHINOBI SET",
     category: "COLLECTIBLES",
     images: [
-      "/assets/catalyst-merch/stickers-pack-2.png"
+      "/assets/catalyst-merch/stickers-pack-2.webp"
     ],
     description: "Custom holographic & matte vinyl decal set designed for laptops, skateboards, and bottles. Scratch-resistant, UV-proof, and precision laser-cut.",
     tag: "#CollectorPack",
@@ -171,7 +171,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "SANDSTONE BEIGE",
     category: "ACCESSORIES",
     images: [
-      "/assets/catalyst-merch/wristband-beige.png"
+      "/assets/catalyst-merch/wristband-beige.webp"
     ],
     description: "Jacquard woven festival band crafted from recycled satin threads. Accented with an antique brushed gold slide-lock and embossed Catalyst 7.0 coordinates.",
     tag: "#Accessory",
@@ -194,7 +194,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "IMPERIAL PURPLE",
     category: "ACCESSORIES",
     images: [
-      "/assets/catalyst-merch/wristband-purple.png"
+      "/assets/catalyst-merch/wristband-purple.webp"
     ],
     description: "Commemorative imperial purple edition woven with shimmering silver metallic threads, honoring the delegate spirit of AIESEC in SLIIT.",
     tag: "#Accessory",
@@ -217,7 +217,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "EDITION I",
     category: "SPECIAL SERIES",
     images: [
-      "/assets/catalyst-merch/catalyst-s1.png"
+      "/assets/catalyst-merch/S1.webp"
     ],
     description: "Exclusive commemorative release crafted specifically for Catalyst 7.0 delegates. Features bespoke insignia and numbered authenticity seal.",
     tag: "#ExclusiveDrop",
@@ -239,7 +239,7 @@ export const MERCH_PRODUCTS: MerchProduct[] = [
     variant: "EDITION II",
     category: "SPECIAL SERIES",
     images: [
-      "/assets/catalyst-merch/catalyst-s2.png"
+      "/assets/catalyst-merch/S2.webp"
     ],
     description: "Limited archival release celebrating leadership through connection. A signature souvenir of the two-day Catalyst experience.",
     tag: "#ExclusiveDrop",
