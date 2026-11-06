@@ -117,7 +117,8 @@ export const JapaneseParallaxHero: React.FC = () => {
       // 4. Foreground Landscape (dark terrain grounding base)
       if (foregroundRef.current) {
         const fgX = x * (mob ? 14 : 26);
-        const fgY = y * (mob ? 8 : 15) + sy * 0.30;
+        // Firmly grounded base stays flush to the very bottom; horizontal drift provides rich 3D depth
+        const fgY = 0;
         foregroundRef.current.style.transform = `translate3d(${fgX.toFixed(2)}px, ${fgY.toFixed(2)}px, 0)`;
       }
 
@@ -232,7 +233,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* ── PARALLAX LAYER 4: Dark Foreground Landscape (Grounding Terrain Base) ── */}
-      <div className="absolute -bottom-[2%] sm:-bottom-[4%] md:-bottom-[6%] left-0 right-0 w-full h-[24vh] sm:h-[30vh] md:h-[38vh] pointer-events-none z-16">
+      <div className="absolute bottom-0 left-[-3%] right-[-3%] w-[106%] h-[28vh] sm:h-[35vh] md:h-[42vh] lg:h-[48vh] min-h-[220px] max-h-[520px] pointer-events-none z-16 leading-none overflow-hidden">
         <div ref={foregroundRef} className="w-full h-full will-change-transform">
           <img
             src={FOREGROUND_IMG}
@@ -245,7 +246,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* ── PARALLAX LAYER 5: Torii Gate (Sacred Entrance on Bottom-Left) ── */}
-      <div className="absolute bottom-[6%] sm:bottom-[7%] md:bottom-[8%] lg:bottom-[10%] left-[2%] sm:left-[3%] md:left-[4%] lg:left-[10%] h-[min(26vh,180px)] sm:h-[min(30vh,230px)] md:h-[min(35vh,270px)] lg:h-[min(44vh,420px)] w-auto pointer-events-none z-20">
+      <div className="absolute bottom-[1%] sm:bottom-[1.5%] md:bottom-[2%] left-[2%] sm:left-[3%] md:left-[4%] lg:left-[8%] h-[min(25vh,170px)] sm:h-[min(34vh,260px)] md:h-[min(40vh,320px)] lg:h-[min(48vh,420px)] w-auto pointer-events-none z-20">
         <div ref={toriiRef} className="h-full w-auto will-change-transform">
           <img
             src={TORII_IMG}
@@ -258,7 +259,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* ── PARALLAX LAYER 6: Japanese Pagoda (Architectural Anchor on Bottom-Right) ── */}
-      <div className="absolute bottom-[4%] sm:bottom-[5%] md:bottom-[6%] lg:bottom-[8%] right-[2%] sm:right-[3%] md:right-[4%] lg:right-[9%] h-[min(34vh,240px)] sm:h-[min(40vh,320px)] md:h-[min(46vh,380px)] lg:h-[min(58vh,540px)] w-auto pointer-events-none z-20">
+      <div className="absolute bottom-[1%] sm:bottom-[1.5%] md:bottom-[2%] right-[2%] sm:right-[3%] md:right-[4%] lg:right-[8%] h-[min(33vh,220px)] sm:h-[min(44vh,340px)] md:h-[min(50vh,420px)] lg:h-[min(60vh,540px)] w-auto pointer-events-none z-20">
         <div ref={pagodaRef} className="h-full w-auto will-change-transform">
           <img
             src={PAGODA_IMG}
@@ -351,7 +352,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* Bottom Left Info (Large Desktop) */}
-      <div className="hidden lg:block absolute bottom-6 lg:bottom-10 left-5 lg:left-10 z-30 pointer-events-none">
+      <div className="hidden lg:block absolute bottom-5 lg:bottom-8 left-5 lg:left-10 z-30 pointer-events-none">
         <div className="font-['Bison',sans-serif] text-5xl sm:text-7xl md:text-8xl font-black text-[#0e1118] leading-[0.8] tracking-tight drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)]">
           7.0
         </div>
@@ -363,19 +364,19 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* Bottom Center Motto (Large Desktop) */}
-      <div className="hidden lg:block absolute bottom-6 lg:bottom-10 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
+      <div className="hidden lg:block absolute bottom-5 lg:bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
         <span className="font-['Bison',sans-serif] text-xl sm:text-3xl md:text-4xl lg:text-[2.6rem] font-black tracking-[0.16em] sm:tracking-[0.22em] text-[#0e1118] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.12)] leading-none">
           DARE BEYOND DEFINITION
         </span>
       </div>
 
-      {/* Mobile / Tablet Bottom Layout (< lg: Clean vertical stack avoiding any logo overlap) */}
-      <div className="lg:hidden absolute bottom-3 left-4 right-4 z-30 pointer-events-none flex flex-col items-center text-center">
-        <div className="flex items-center gap-2">
-          <span className="font-['Bison',sans-serif] text-2xl font-black text-[#0e1118] leading-none">7.0</span>
-          <span className="text-[10px] font-bold text-[#0e1118] uppercase tracking-wider">Two-day leadership experience</span>
+      {/* Mobile / Tablet Bottom Layout (< lg: Clean compact center stack between Torii and Pagoda) */}
+      <div className="lg:hidden absolute bottom-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center text-center max-w-[210px] w-full px-1">
+        <div className="flex items-center justify-center gap-1.5">
+          <span className="font-['Bison',sans-serif] text-xl font-black text-[#0e1118] leading-none">7.0</span>
+          <span className="text-[9px] font-bold text-[#0e1118] uppercase tracking-wider leading-none">Leadership Seminar</span>
         </div>
-        <span className="font-['Bison',sans-serif] text-sm font-black tracking-[0.16em] text-[#0e1118] uppercase mt-1">
+        <span className="font-['Bison',sans-serif] text-xs font-black tracking-[0.16em] text-[#0e1118] uppercase mt-0.5 whitespace-nowrap">
           DARE BEYOND DEFINITION
         </span>
       </div>
