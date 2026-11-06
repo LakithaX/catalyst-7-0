@@ -78,12 +78,12 @@ export default function AboutPage() {
       media: {
         kind: "photos",
         images: [
-          "/assets/catalyst-merch/del-black-front.png",
-          "/assets/catalyst-merch/del-bucket-hat.png",
-          "/assets/catalyst-merch/del-white-front.png",
-          "/assets/catalyst-merch/del-black-back.png",
-          "/assets/catalyst-merch/wristband-beige.png",
-          "/assets/catalyst-merch/stickers-pack-1.png",
+          "/assets/catalyst-merch/del-black-front.webp",
+          "/assets/catalyst-merch/del-bucket-hat.webp",
+          "/assets/catalyst-merch/del-white-front.webp",
+          "/assets/catalyst-merch/del-black-back.webp",
+          "/assets/catalyst-merch/wristband-beige.webp",
+          "/assets/catalyst-merch/stickers-pack-1.webp",
         ],
       },
     },
