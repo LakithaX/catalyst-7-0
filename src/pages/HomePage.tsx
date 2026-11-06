@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ChevronDown } from 'lucide-react';
 import { SakuraPetals } from '../components/SakuraPetals';
-import FestivityDemo from '../components/ui/demo';
+import { JapaneseParallaxHero } from '../components/JapaneseParallaxHero';
 import AnimatedGalleryDemo from '../components/ui/animated-gallery-demo';
 import FullScreenScrollFXDemo from '../components/ui/full-screen-scroll-fx-demo';
 import CoverFlowCarouselDemo from '../components/ui/3-d-coverflow-carousel-demo';
@@ -45,14 +45,14 @@ export default function HomePage() {
   const mistEnabled = false;
   const [scrollProgress, setScrollProgress] = useState<number>(0);
   const [mouseVelX, setMouseVelX] = useState<number>(0);
-  const [isLockedToBubbles, setIsLockedToBubbles] = useState<boolean>(false);
-  const isLockedToBubblesRef = useRef<boolean>(false);
+  const [isLockedToHero, setIsLockedToHero] = useState<boolean>(false);
+  const isLockedToHeroRef = useRef<boolean>(false);
   const [isSection2Active, setIsSection2Active] = useState<boolean>(false);
-  const hasTriggeredBubblesRef = useRef<boolean>(false);
+  const hasTriggeredHeroRef = useRef<boolean>(false);
 
   const lockToSection2 = useCallback(() => {
-    if (isLockedToBubblesRef.current) return;
-    isLockedToBubblesRef.current = true;
+    if (isLockedToHeroRef.current) return;
+    isLockedToHeroRef.current = true;
 
     // Seamlessly transition: remove curtain transform and make relative in same frame
     if (secondSectionRef.current) {
@@ -62,14 +62,14 @@ export default function HomePage() {
 
     requestAnimationFrame(() => {
       window.scrollTo({ top: 0, behavior: 'instant' });
-      setIsLockedToBubbles(true);
+      setIsLockedToHero(true);
     });
   }, []);
 
   // When Section 1 collapses and Section 2 becomes normal relative scroll,
   // recalculate all GSAP ScrollTrigger pin and scroll coordinates immediately.
   useEffect(() => {
-    if (isLockedToBubbles) {
+    if (isLockedToHero) {
       const refreshTriggers = () => {
         ScrollTrigger.refresh(true);
       };
@@ -84,7 +84,7 @@ export default function HomePage() {
     } else {
       document.documentElement.classList.remove('smooth-scroll-active');
     }
-  }, [isLockedToBubbles]);
+  }, [isLockedToHero]);
 
   // Handle URL hash navigation (e.g. from /#gallery, /#about, /#contact)
   useEffect(() => {
@@ -142,7 +142,7 @@ export default function HomePage() {
 
   // Scroll listener for continuous scroll animation
   useEffect(() => {
-    if (isLockedToBubbles) return;
+    if (isLockedToHero) return;
 
     const handleScroll = () => {
       const scrollY = window.scrollY;
@@ -157,15 +157,15 @@ export default function HomePage() {
     handleScroll();
     currentScroll.current = targetScroll.current;
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLockedToBubbles]);
+  }, [isLockedToHero]);
 
   const scrollToStory = () => {
     const heroEl = heroTrackRef.current;
     if (heroEl) {
-      if (!hasTriggeredBubblesRef.current) {
-        hasTriggeredBubblesRef.current = true;
+      if (!hasTriggeredHeroRef.current) {
+        hasTriggeredHeroRef.current = true;
         setIsSection2Active(true);
-        window.dispatchEvent(new CustomEvent('catalyst-trigger-bubbles'));
+        // Hero entrance triggered
       }
       const targetY = heroEl.offsetHeight - window.innerHeight;
       window.scrollTo({ top: targetY, behavior: 'smooth' });
@@ -465,7 +465,7 @@ export default function HomePage() {
       // The completed vista (Section 1) is held firmly from 0.50 to 0.76.
       // From 0.76 to 0.98, Section 2 slides smoothly upwards from 100% to 0% as a solid opaque curtain.
       // This completely eliminates double-exposure / ghosting between Section 1 and Section 2.
-      if (!isLockedToBubblesRef.current) {
+      if (!isLockedToHeroRef.current) {
         const transProg = sp < 0.76 ? 0 : Math.min(1, Math.max(0, (sp - 0.76) / 0.22));
         const slideY = (1 - transProg) * 100;
         if (secondSectionRef.current) {
@@ -474,10 +474,10 @@ export default function HomePage() {
         }
 
         // Trigger bubble entrance animation as soon as Section 2 begins sliding into view!
-        if (!hasTriggeredBubblesRef.current && sp >= 0.76) {
-          hasTriggeredBubblesRef.current = true;
+        if (!hasTriggeredHeroRef.current && sp >= 0.76) {
+          hasTriggeredHeroRef.current = true;
           setIsSection2Active(true);
-          window.dispatchEvent(new CustomEvent('catalyst-trigger-bubbles'));
+          // Hero entrance triggered
         }
 
         // Once the curtain slide completes at sp >= 0.98, lock permanently into Section 2!
@@ -517,7 +517,7 @@ export default function HomePage() {
     <div className={`relative bg-[#F8F3E9] ${theme === 'classic' ? 'theme-classic' : ''}`}>
 
       {/* Top Crimson Accent Stripe (Section 1 only) */}
-      {!isLockedToBubbles && (
+      {!isLockedToHero && (
         <motion.div
           className="fixed top-0 left-1/2 w-36 sm:w-52 md:w-64 h-2 sm:h-2.5 bg-[#bf3030] z-40 rounded-b cursor-pointer origin-top"
           style={{ left: '50%', x: '-50%' }}
@@ -533,7 +533,7 @@ export default function HomePage() {
       <div
         ref={heroTrackRef}
         className="relative h-[320vh] w-full"
-        style={{ display: isLockedToBubbles ? 'none' : 'block' }}
+        style={{ display: isLockedToHero ? 'none' : 'block' }}
       >
         <div
           className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none select-none z-10"
@@ -666,18 +666,18 @@ export default function HomePage() {
       <div
         ref={secondSectionRef}
         className={`w-full z-30 bg-[#F8F3E9] ${
-          isLockedToBubbles
+          isLockedToHero
             ? 'relative pointer-events-auto'
             : 'fixed inset-0 h-screen overflow-hidden pointer-events-none'
         }`}
         style={{
-          transform: isLockedToBubbles ? 'none' : 'translate3d(0, 100%, 0)',
+          transform: isLockedToHero ? 'none' : 'translate3d(0, 100%, 0)',
         }}
       >
-        {/* SECTION 2: FESTIVITY 3D INTERACTIVE HERO */}
-        <section id="about" className="relative w-full h-screen overflow-hidden catalyst-section-isolate">
-          <FestivityDemo shouldAnimate={isSection2Active || isLockedToBubbles} />
-        </section>
+                {/* SECTION 2: JAPANESE SAMURAI PARALLAX HERO */}
+        <div id="hero" className="w-full catalyst-section-isolate">
+          <JapaneseParallaxHero />
+        </div>
 
         {/* SECTION 3: ANIMATED GALLERY */}
         <div id="gallery" className="w-full catalyst-section-isolate">
