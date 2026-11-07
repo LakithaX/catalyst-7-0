@@ -26,19 +26,69 @@ interface Petal {
 
 interface SakuraPetalsProps {
   enabled: boolean;
+  /** Simple numeric wind input (used by the hero). */
   mouseVelX?: number;
+  /** Preferred: a ref that is mutated every frame — no React re-render needed. */
+  velRef?: React.MutableRefObject<number>;
   className?: string;
+  /** Override petal count (defaults: 30 desktop / 18 mobile). */
+  count?: number;
 }
 
-export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX = 0, className }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const animIdRef = useRef<number | null>(null);
-  const smoothedWindRef = useRef<number>(0);
-  const mouseVelRef = useRef<number>(mouseVelX);
+// The petal is drawn ONCE into a small offscreen sprite, then stamped with drawImage.
+// This replaces 34 gradient creations + bezier paths per frame.
+const SPRITE_SIZE = 96;
+const PETAL_LEN = 88;
 
-  // Keep mouse velocity updated in a ref so the main loop is not torn down on every mouse move
+const createPetalSprite = (): HTMLCanvasElement => {
+  const sprite = document.createElement('canvas');
+  sprite.width = SPRITE_SIZE;
+  sprite.height = SPRITE_SIZE;
+  const c = sprite.getContext('2d');
+  if (!c) return sprite;
+
+  c.translate(SPRITE_SIZE / 2, SPRITE_SIZE / 2);
+
+  const halfW = PETAL_LEN * 0.52;
+  const length = PETAL_LEN;
+
+  const grad = c.createLinearGradient(0, -length * 0.5, 0, length * 0.5);
+  grad.addColorStop(0, 'rgba(255, 246, 249, 1)');
+  grad.addColorStop(0.35, 'rgba(255, 192, 209, 0.97)');
+  grad.addColorStop(0.8, 'rgba(244, 114, 156, 0.92)');
+  grad.addColorStop(1, 'rgba(225, 78, 126, 0.88)');
+
+  c.fillStyle = grad;
+  c.beginPath();
+  c.moveTo(0, length * 0.5);
+  c.bezierCurveTo(-halfW * 1.05, length * 0.22, -halfW * 1.15, -length * 0.2, -halfW * 0.45, -length * 0.5);
+  c.quadraticCurveTo(0, -length * 0.32, halfW * 0.45, -length * 0.5);
+  c.bezierCurveTo(halfW * 1.15, -length * 0.2, halfW * 1.05, length * 0.22, 0, length * 0.5);
+  c.closePath();
+  c.fill();
+
+  c.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+  c.lineWidth = 2.4;
+  c.beginPath();
+  c.moveTo(0, length * 0.38);
+  c.quadraticCurveTo(halfW * 0.06, 0, 0, -length * 0.22);
+  c.stroke();
+
+  return sprite;
+};
+
+export const SakuraPetals: React.FC<SakuraPetalsProps> = ({
+  enabled,
+  mouseVelX = 0,
+  velRef,
+  className,
+  count,
+}) => {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const propVelRef = useRef<number>(mouseVelX);
+
   useEffect(() => {
-    mouseVelRef.current = mouseVelX;
+    propVelRef.current = mouseVelX;
   }, [mouseVelX]);
 
   useEffect(() => {
@@ -49,28 +99,36 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let dpr = window.devicePixelRatio || 1;
+    const sprite = createPetalSprite();
+
+    // Cap DPR: petals are soft shapes, 2x is plenty and 3x phones would triple the fill cost.
+    const getDpr = () => Math.min(window.devicePixelRatio || 1, 2);
+    let dpr = getDpr();
     let width = window.innerWidth;
     let height = window.innerHeight;
 
-    const updateSize = () => {
-      if (!canvas) return;
-      dpr = window.devicePixelRatio || 1;
+    const allocate = () => {
+      dpr = getDpr();
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = Math.round(width * dpr);
       canvas.height = Math.round(height * dpr);
-      canvas.style.width = `${width}px`;
-      canvas.style.height = `${height}px`;
     };
+    allocate();
 
-    updateSize();
-    window.addEventListener('resize', updateSize);
+    // Mobile browsers fire `resize` while scrolling (URL bar collapsing). Re-allocating the
+    // canvas each time causes flicker + dropped frames, so ignore small height-only changes.
+    const onResize = () => {
+      const w = window.innerWidth;
+      const h = window.innerHeight;
+      if (w === width && Math.abs(h - height) < 160) return;
+      allocate();
+    };
+    window.addEventListener('resize', onResize);
 
-    // 34 organic cherry blossom petals across realistic depth planes
-    const count = 34;
+    const petalCount = count ?? (width < 768 ? 18 : 30);
     const petals: Petal[] = [];
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < petalCount; i++) {
       const z = Math.random();
       petals.push({
         x: Math.random() * (width + 200) - 100,
@@ -91,93 +149,55 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
         opacity: 0.55 + z * 0.4,
       });
     }
+    // Depth order is fixed, so sort ONCE (was sorting every frame).
+    petals.sort((a, b) => a.z - b.z);
 
-    // Authentic notched sakura petal path (proportional, non-distorted)
-    const drawPetal = (
-      c: CanvasRenderingContext2D,
-      x: number,
-      y: number,
-      size: number,
-      rotZ: number,
-      scaleX: number,
-      scaleY: number,
-      opacity: number
-    ) => {
-      c.save();
-      c.translate(x, y);
-      c.rotate(rotZ);
-      c.scale(scaleX, scaleY);
+    let wind = 0;
+    let rafId = 0;
+    let running = false;
+    let inView = true;
+    let last = 0;
 
-      const halfW = size * 0.52;
-      const length = size;
+    const frame = (now: number) => {
+      if (!running) return;
 
-      // Soft cherry blossom gradient: translucent blush ivory to rich sakura rose
-      const grad = c.createLinearGradient(0, -length * 0.5, 0, length * 0.5);
-      grad.addColorStop(0, `rgba(255, 244, 247, ${opacity})`);
-      grad.addColorStop(0.35, `rgba(255, 192, 209, ${opacity * 0.96})`);
-      grad.addColorStop(0.8, `rgba(244, 114, 156, ${opacity * 0.9})`);
-      grad.addColorStop(1, `rgba(225, 78, 126, ${opacity * 0.85})`);
+      // Frame-rate independent: 1.0 == one 60fps frame, so 144Hz screens move at the same speed.
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const f = dt * 60;
 
-      c.fillStyle = grad;
-      c.beginPath();
-
-      // Signature notched sakura petal silhouette
-      // Start at base tip
-      c.moveTo(0, length * 0.5);
-      // Left side curve outward towards upper lobe
-      c.bezierCurveTo(-halfW * 1.05, length * 0.22, -halfW * 1.15, -length * 0.2, -halfW * 0.45, -length * 0.5);
-      // Notched indentation at the petal crown
-      c.quadraticCurveTo(0, -length * 0.32, halfW * 0.45, -length * 0.5);
-      // Right side curve back down to base
-      c.bezierCurveTo(halfW * 1.15, -length * 0.2, halfW * 1.05, length * 0.22, 0, length * 0.5);
-      c.closePath();
-      c.fill();
-
-      // Delicate translucent center vein
-      c.strokeStyle = `rgba(255, 255, 255, ${opacity * 0.45})`;
-      c.lineWidth = 0.9;
-      c.beginPath();
-      c.moveTo(0, length * 0.38);
-      c.quadraticCurveTo(halfW * 0.06, 0, 0, -length * 0.22);
-      c.stroke();
-
-      c.restore();
-    };
-
-    const loop = () => {
-      // Clear with DPR scale
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
-      // Smoothly react to mouse velocity for responsive wind gusts
-      const targetWind = Math.max(-2.0, Math.min(2.0, mouseVelRef.current * 0.4));
-      smoothedWindRef.current += (targetWind - smoothedWindRef.current) * 0.05;
-      const wind = smoothedWindRef.current;
+      const vel = velRef ? velRef.current : propVelRef.current;
+      const targetWind = Math.max(-2.0, Math.min(2.0, vel * 0.4));
+      wind += (targetWind - wind) * (1 - Math.exp(-dt * 3));
 
-      // Sort by depth (far to near)
-      petals.sort((a, b) => a.z - b.z);
+      for (let i = 0; i < petals.length; i++) {
+        const p = petals[i];
+        p.phase += p.swaySpeed * f;
 
-      for (const p of petals) {
-        p.phase += p.swaySpeed;
-
-        // Gentle undulating drift simulating air currents
         const sway = Math.sin(p.phase) * p.swayAmount;
-        p.x += p.vx + wind + sway;
-        p.y += p.vy;
+        p.x += (p.vx + wind + sway) * f;
+        p.y += p.vy * f;
 
-        // Meditative 3D tumbling rotation
-        p.rotationX += p.vRotX;
-        p.rotationY += p.vRotY;
-        p.rotationZ += p.vRotZ + Math.cos(p.phase) * 0.004;
+        p.rotationX += p.vRotX * f;
+        p.rotationY += p.vRotY * f;
+        p.rotationZ += (p.vRotZ + Math.cos(p.phase) * 0.004) * f;
 
-        // Natural fluttering aspect ratio
         const scaleX = Math.abs(Math.cos(p.rotationY)) * 0.65 + 0.35;
         const scaleY = Math.abs(Math.sin(p.rotationX)) * 0.65 + 0.35;
 
-        drawPetal(ctx, p.x, p.y, p.size, p.rotationZ, scaleX, scaleY, p.opacity);
+        // Build the matrix by hand: one setTransform + one drawImage per petal (no save/restore).
+        const k = p.size / PETAL_LEN;
+        const sx = scaleX * k * dpr;
+        const sy = scaleY * k * dpr;
+        const cos = Math.cos(p.rotationZ);
+        const sin = Math.sin(p.rotationZ);
+        ctx.setTransform(cos * sx, sin * sx, -sin * sy, cos * sy, p.x * dpr, p.y * dpr);
+        ctx.globalAlpha = p.opacity;
+        ctx.drawImage(sprite, -SPRITE_SIZE / 2, -SPRITE_SIZE / 2);
 
-        // Respawn gracefully when drifting out of view
         if (p.y > height + 40) {
           p.y = -35;
           p.x = Math.random() * (width + 300) - 150;
@@ -188,24 +208,56 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
           p.x = width + 60;
         }
       }
+      ctx.globalAlpha = 1;
 
-      animIdRef.current = requestAnimationFrame(loop);
+      rafId = requestAnimationFrame(frame);
     };
 
-    loop();
+    const start = () => {
+      if (running || !inView || document.hidden) return;
+      running = true;
+      last = performance.now();
+      rafId = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(rafId);
+    };
+
+    // Pause the loop whenever the canvas is off-screen (e.g. the hero's petals while the
+    // entrance scene is showing, or the entrance's petals after the curtain covers them).
+    let observer: IntersectionObserver | null = null;
+    if (typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          inView = entries[entries.length - 1].isIntersecting;
+          if (inView) start();
+          else stop();
+        },
+        { threshold: 0 }
+      );
+      observer.observe(canvas);
+    }
+
+    const onVisibility = () => (document.hidden ? stop() : start());
+    document.addEventListener('visibilitychange', onVisibility);
+
+    start();
 
     return () => {
-      window.removeEventListener('resize', updateSize);
-      if (animIdRef.current) cancelAnimationFrame(animIdRef.current);
+      stop();
+      observer?.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+      window.removeEventListener('resize', onResize);
     };
-  }, [enabled]);
+  }, [enabled, velRef, count]);
 
   if (!enabled) return null;
 
   return (
     <canvas
       ref={canvasRef}
-      className={className || "absolute inset-0 pointer-events-none z-20 w-full h-full"}
+      className={className || 'absolute inset-0 pointer-events-none z-20 w-full h-full'}
     />
   );
 };

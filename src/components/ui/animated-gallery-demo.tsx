@@ -1,9 +1,12 @@
-import React, { useRef } from "react"
+import React, { useLayoutEffect, useRef } from "react"
 import { Link } from "react-router-dom"
-import { useIsMobile } from "@/components/blocks/animated-gallery"
 import { Button } from "@/components/ui/button"
-import { motion, useInView, useReducedMotion } from "motion/react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ArrowRight } from "lucide-react"
+
+gsap.registerPlugin(ScrollTrigger)
+ScrollTrigger.config({ ignoreMobileResize: true })
 
 // ============================================================================
 // JAPANESE SUMI-E DESIGN SYSTEM (Warm Ivory, Samurai Red, Ink Black)
@@ -21,9 +24,9 @@ const GALLERY_CONFIG = {
     overlayRed: "rgba(201, 54, 43, 0.12)",
   },
   fonts: {
-    heading: "'Shippori Mincho', 'Noto Serif JP', 'Cormorant Garamond', serif",
     body: "'Inter', system-ui, -apple-system, sans-serif",
     label: "'Noto Sans JP', 'Montserrat', sans-serif",
+    kanji: "'Noto Serif JP', serif",
   },
   content: {
     eyebrow: "CATALYST 7.0 · SLIIT LEADERSHIP FORUM",
@@ -40,21 +43,34 @@ const GALLERY_CONFIG = {
   },
 } as const
 
-// ============================================================================
-// FONTS (self-hosted from /public/fonts)
-// Add these @font-face rules to src/index.css:
-//
-// @font-face { font-family: "Brusher";    src: url("/fonts/Brusher.ttf") format("truetype");    font-display: swap; }
-// @font-face { font-family: "Shinkansen"; src: url("/fonts/shinkansen.otf") format("opentype"); font-display: swap; }
-// @font-face { font-family: "Akashii";    src: url("/fonts/Akashii-ywOVm.ttf") format("truetype"); font-display: swap; }
-// @font-face { font-family: "Osaka Bright"; src: url("/fonts/OsakaBrightDemoRegular.otf") format("opentype"); font-display: swap; }
-//
-// Swap guide: change SUBHEADING_FONT to 'Akashii' (traditional) or 'Osaka Bright' (modern).
-// ============================================================================
-const HEADING_FONT = "'Brusher', 'Shippori Mincho', 'Noto Serif JP', serif"
-const SUBHEADING_FONT = "'Shinkansen', 'Brusher', 'Noto Serif JP', serif"
+// Brush heading font, loaded from /public/fonts via @font-face in index.css:
+//   @font-face { font-family: "Jansina"; src: url("/fonts/JANSINA.ttf") format("truetype"); font-display: swap; }
+//   @font-face { font-family: "Brusher"; src: url("/fonts/Brusher.ttf") format("truetype"); font-display: swap; }
+const HEADING_FONT = "'Jansina', 'Brusher', 'Shippori Mincho', serif"
 
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+const PILLARS = [
+  {
+    kanji: "導",
+    title: "Lead",
+    body: "Find the courage to act on what you believe in, and take others with you.",
+  },
+  {
+    kanji: "育",
+    title: "Grow",
+    body: "Learn by doing, reflecting and being challenged by people who see things differently.",
+  },
+  {
+    kanji: "縁",
+    title: "Connect",
+    body: "Meet the people who will shape how you think about leadership long after the forum.",
+  },
+]
+
+const MARQUEE_PHRASES = [
+  "LEAD WITH PURPOSE",
+  "GROW THROUGH CONNECTION",
+  "CATALYST 7.0",
+]
 
 export interface GalleryImageItem {
   src: string
@@ -160,42 +176,13 @@ const ALL_IMAGES: GalleryImageItem[] = [
   },
 ]
 
-// Desktop 3-column grouping
-const DESK_COL_1 = ALL_IMAGES.filter((_, i) => i % 3 === 0)
-const DESK_COL_2 = ALL_IMAGES.filter((_, i) => i % 3 === 1)
-const DESK_COL_3 = ALL_IMAGES.filter((_, i) => i % 3 === 2)
+// 12 columns of 2 photos each, used by the horizontal scroll gallery
+const COLUMNS: GalleryImageItem[][] = Array.from({ length: 12 }, (_, c) => [
+  ALL_IMAGES[c * 2],
+  ALL_IMAGES[c * 2 + 1],
+])
 
-// Mobile 2-column grouping
-const MOB_COL_1 = ALL_IMAGES.filter((_, i) => i % 2 === 0)
-const MOB_COL_2 = ALL_IMAGES.filter((_, i) => i % 2 === 1)
-
-// ============================================================================
-// PHOTO CARD
-// ============================================================================
-const PhotoCard = ({ item, index = 0 }: { item: GalleryImageItem; index?: number }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 24 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true, margin: "-30px" }}
-    transition={{ duration: 0.5, delay: (index % 4) * 0.06, ease: EASE }}
-    className="relative aspect-video w-full overflow-hidden rounded-lg sm:rounded-xl border border-[#E5DDD0] shadow-[0_4px_16px_rgba(37,35,33,0.06)] bg-white group transition-all duration-300 hover:shadow-[0_12px_28px_rgba(201,54,43,0.18)] hover:-translate-y-1"
-  >
-    <img
-      src={item.src}
-      alt={item.alt}
-      loading="lazy"
-      decoding="async"
-      className="block h-full w-full object-cover transition-transform duration-500 group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
-    />
-    <div
-      className="pointer-events-none absolute inset-0 rounded-lg sm:rounded-xl transition-opacity duration-300 opacity-0 group-hover:opacity-75"
-      style={{
-        background: `radial-gradient(ellipse at center, ${GALLERY_CONFIG.colors.overlayWarm} 0%, ${GALLERY_CONFIG.colors.overlayRed} 100%)`,
-      }}
-      aria-hidden="true"
-    />
-  </motion.div>
-)
+const TILTS = ["-rotate-1", "rotate-1", "rotate-[0.6deg]", "-rotate-[0.8deg]"]
 
 // ============================================================================
 // ICONS
@@ -239,92 +226,262 @@ const SakuraPetal = ({ className = "" }: { className?: string }) => (
   </svg>
 )
 
+/** Splits text into per-character spans so GSAP can stagger them */
+const SplitChars = ({ text }: { text: string }) => (
+  <span aria-label={text} className="whitespace-nowrap">
+    {Array.from(text).map((ch, i) => (
+      <span
+        key={i}
+        aria-hidden="true"
+        className="char inline-block will-change-transform"
+      >
+        {ch === " " ? "\u00A0" : ch}
+      </span>
+    ))}
+  </span>
+)
+
 // ============================================================================
-// INTRO ZONE: LEAD WITH PURPOSE / GROW THROUGH CONNECTION
+// GALLERY CARD: paper-mounted photo with a red hanko stamp
+// (outer figure is animated by GSAP; the inner layers keep CSS tilt + hover)
+// ============================================================================
+const GalleryCard = ({ item, n }: { item: GalleryImageItem; n: number }) => (
+  <figure className="gallery-card m-0 w-[min(78vw,42vh)] shrink-0">
+    <div className={`group ${TILTS[n % TILTS.length]}`}>
+      <div className="relative overflow-hidden rounded-[3px] bg-[#FBF8F1] p-2 shadow-[0_18px_40px_rgba(37,35,33,0.18)] ring-1 ring-[#252321]/10 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_26px_50px_rgba(201,54,43,0.28)] sm:p-3">
+        <div className="relative aspect-[4/3] overflow-hidden">
+          <div className="parallax-img absolute inset-y-0 -inset-x-[8%] will-change-transform">
+            <img
+              src={item.src}
+              alt={item.alt}
+              loading="lazy"
+              decoding="async"
+              draggable={false}
+              className="block h-full w-full object-cover transition-transform duration-700 group-hover:scale-105 motion-reduce:transition-none"
+            />
+          </div>
+          <span
+            aria-hidden="true"
+            className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-[3px] bg-[#C9362B] text-[10px] font-bold tracking-wider text-[#F8F3E9] shadow-md"
+            style={{ fontFamily: GALLERY_CONFIG.fonts.label }}
+          >
+            {String(n + 1).padStart(2, "0")}
+          </span>
+        </div>
+      </div>
+    </div>
+  </figure>
+)
+
+// ============================================================================
+// INTRO ZONE
 // ============================================================================
 const PETALS = [
-  { top: "14%", left: "46%", size: 14, delay: 0 },
-  { top: "30%", left: "90%", size: 12, delay: 1.5 },
-  { top: "68%", left: "44%", size: 14, delay: 3 },
-  { top: "80%", left: "70%", size: 11, delay: 2.2 },
-  { top: "18%", left: "70%", size: 13, delay: 4 },
-  { top: "55%", left: "94%", size: 12, delay: 3.5 },
+  { top: "14%", left: "46%", size: 14 },
+  { top: "30%", left: "90%", size: 12 },
+  { top: "68%", left: "44%", size: 14 },
+  { top: "80%", left: "70%", size: 11 },
+  { top: "18%", left: "70%", size: 13 },
+  { top: "55%", left: "94%", size: 12 },
 ]
 
-const TextRevealZone = () => {
-  const ref = useRef<HTMLDivElement>(null)
-  const reduce = useReducedMotion()
-  const inView = useInView(ref, { once: true, margin: "-10% 0px" })
-  const show = inView || !!reduce
+const TextRevealZone = ({ active }: { active: boolean }) => {
+  const rootRef = useRef<HTMLDivElement>(null)
 
-  const rise = (delay = 0, y = 20) => ({
-    initial: { opacity: 0, y },
-    animate: show ? { opacity: 1, y: 0 } : { opacity: 0, y },
-    transition: { duration: 0.65, delay, ease: EASE },
-  })
+  useLayoutEffect(() => {
+    const root = rootRef.current
+    if (!root || !active) return
+
+    const mm = gsap.matchMedia()
+
+    mm.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        const q = gsap.utils.selector(root)
+
+        // ---- Main entrance timeline (plays when the section scrolls into view)
+        const tl = gsap.timeline({
+          defaults: { ease: "power3.out" },
+          scrollTrigger: { trigger: root, start: "top 70%", once: true },
+        })
+
+        tl.from(q(".koi-wrap"), {
+          opacity: 0,
+          x: -70,
+          scale: 0.92,
+          duration: 1.3,
+        })
+          .fromTo(
+            q(".enso path"),
+            { strokeDashoffset: 1 },
+            { strokeDashoffset: 0, duration: 2, ease: "power2.inOut" },
+            0.3
+          )
+          .from(q(".eyebrow"), { opacity: 0, y: -18, duration: 0.8 }, 0.2)
+
+        const lines = gsap.utils.toArray<HTMLElement>(".heading-line", root)
+        lines.forEach((line, i) => {
+          tl.from(
+            line.querySelectorAll(".char"),
+            {
+              opacity: 0,
+              y: 55,
+              rotate: 6,
+              duration: 0.9,
+              stagger: 0.035,
+              ease: i === 1 ? "back.out(1.7)" : "power3.out",
+            },
+            0.45 + i * 0.22
+          )
+        })
+
+        tl.from(
+          q(".brush-underline"),
+          {
+            scaleX: 0,
+            transformOrigin: "left center",
+            duration: 1,
+            ease: "power2.out",
+          },
+          ">-0.35"
+        )
+          .from(q(".divider"), { opacity: 0, scaleX: 0.4, duration: 0.7 }, "<0.1")
+          .from(q(".body-copy"), { opacity: 0, y: 20, duration: 0.8 }, "<0.1")
+          .from(
+            q(".cta"),
+            { opacity: 0, y: 20, stagger: 0.12, duration: 0.7 },
+            "<0.15"
+          )
+
+        // ---- Idle motion
+        gsap.to(q(".koi-float"), {
+          y: -14,
+          duration: 3.2,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        })
+
+        gsap.to(q(".enso"), {
+          rotate: 360,
+          duration: 90,
+          ease: "none",
+          repeat: -1,
+          transformOrigin: "50% 50%",
+        })
+
+        q(".petal").forEach((petal, i) => {
+          gsap.fromTo(
+            petal,
+            { opacity: 0 },
+            { opacity: 1, duration: 1.2, delay: 0.8 + i * 0.2 }
+          )
+          gsap.to(petal, {
+            y: gsap.utils.random(24, 40),
+            x: gsap.utils.random(-14, 16),
+            rotation: gsap.utils.random(-30, 30),
+            duration: 4 + i * 0.8,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            delay: i * 0.4,
+          })
+        })
+
+        // ---- Scroll parallax on the kanji watermark
+        gsap.to(q(".kanji-mark"), {
+          yPercent: -14,
+          ease: "none",
+          scrollTrigger: {
+            trigger: root,
+            start: "top bottom",
+            end: "bottom top",
+            scrub: 1,
+          },
+        })
+
+        // ---- Pillar cards
+        gsap.from(q(".pillar"), {
+          opacity: 0,
+          y: 50,
+          duration: 0.9,
+          stagger: 0.15,
+          ease: "power3.out",
+          scrollTrigger: { trigger: q(".pillars")[0], start: "top 88%", once: true },
+        })
+      },
+      root
+    )
+
+    return () => mm.revert()
+  }, [active])
 
   return (
     <div
-      ref={ref}
+      ref={rootRef}
       className="relative z-20 w-full overflow-hidden px-5 py-20 sm:px-8 sm:py-28 lg:py-32"
       style={{
         background:
           "radial-gradient(ellipse at 30% 40%, #FAF8F2 0%, #F8F3E9 60%, #F4ECE0 100%)",
       }}
     >
-      {/* Kanji watermark (永), behind everything. Stays on Noto Serif JP for kanji support. */}
-      <span
+      {/* Kanji watermark (永), behind everything */}
+      <div
         aria-hidden="true"
-        className="pointer-events-none absolute -right-6 top-1/2 z-0 -translate-y-1/2 select-none text-[22rem] leading-none text-[#252321] opacity-[0.05] lg:text-[34rem]"
-        style={{ fontFamily: "'Noto Serif JP', serif" }}
+        className="pointer-events-none absolute -right-6 top-1/2 z-0 -translate-y-1/2 select-none"
       >
-        永
-      </span>
+        <span
+          className="kanji-mark block text-[22rem] leading-none text-[#252321] opacity-[0.05] lg:text-[34rem]"
+          style={{ fontFamily: GALLERY_CONFIG.fonts.kanji }}
+        >
+          永
+        </span>
+      </div>
 
-      {/* Petals: behind content (z-0), gently drifting */}
+      {/* Petals */}
       <div className="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
         {PETALS.map((p, i) => (
-          <motion.div
+          <div
             key={i}
-            className="absolute"
+            className="petal absolute"
             style={{ top: p.top, left: p.left, width: p.size }}
-            animate={
-              reduce
-                ? undefined
-                : { y: [0, 28, 0], x: [0, 10, 0], rotate: [0, 25, 0] }
-            }
-            transition={{
-              duration: 8 + i,
-              delay: p.delay,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
           >
             <SakuraPetal className="h-auto w-full" />
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      {/* Two-column grid: art | text. Nothing can overlap. */}
+      {/* Two-column grid: art | text */}
       <div className="relative z-10 mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:gap-16">
         {/* ── Koi ── */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={show ? { opacity: 1, x: 0 } : { opacity: 0, x: -30 }}
-          transition={{ duration: 0.9, delay: 0.1, ease: EASE }}
-          className="pointer-events-none mx-auto w-full max-w-[260px] select-none sm:max-w-[320px] lg:max-w-none"
+        <div
+          className="koi-wrap pointer-events-none mx-auto w-full max-w-[260px] select-none sm:max-w-[320px] lg:max-w-none"
           aria-hidden="true"
         >
-          <motion.div
-            animate={reduce ? undefined : { y: [0, -12, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-            className="relative"
-          >
-            {/* soft red glow, circular, behind the art */}
+          <div className="koi-float relative">
+            {/* soft red glow behind the art */}
             <div
               className="absolute inset-[8%] rounded-full opacity-50 blur-3xl"
               style={{ background: "rgba(201,54,43,0.30)" }}
             />
+
+            {/* hand-drawn ink enso ring that draws itself around the koi */}
+            <svg
+              viewBox="0 0 100 100"
+              fill="none"
+              className="enso absolute -inset-[4%] h-[108%] w-[108%]"
+            >
+              <path
+                d="M50 5 C78 3, 97 25, 95 52 C93 79, 70 97, 45 95 C21 93, 4 72, 6 46 C8 22, 27 8, 56 8"
+                pathLength={1}
+                strokeDasharray={1}
+                stroke="#252321"
+                strokeWidth="1.1"
+                strokeLinecap="round"
+                opacity="0.75"
+              />
+            </svg>
+
             <img
               src="/assets/illustrations/benkageyama-coy-5135969_1920.png"
               alt=""
@@ -339,16 +496,13 @@ const TextRevealZone = () => {
                 mixBlendMode: "multiply",
               }}
             />
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* ── Text ── */}
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           {/* Eyebrow */}
-          <motion.div
-            {...rise(0, -14)}
-            className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2"
-          >
+          <div className="eyebrow mb-6 inline-flex items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2">
             <SakuraIcon className="h-3.5 w-3.5 shrink-0 text-[#C9362B]" />
             <span
               className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-[#252321] sm:text-xs sm:tracking-[0.24em]"
@@ -356,41 +510,28 @@ const TextRevealZone = () => {
             >
               {GALLERY_CONFIG.content.eyebrow}
             </span>
-          </motion.div>
+          </div>
 
-          {/* Headline: brush lockup (Brusher for big words, Shinkansen for lead-ins) */}
-          <h2 className="uppercase leading-[1.05] tracking-[0.04em]">
-            <motion.span
-              {...rise(0.1)}
-              className="block text-[clamp(1.5rem,3vw,2.25rem)] tracking-[0.12em] text-[#252321]"
-              style={{ fontFamily: SUBHEADING_FONT }}
-            >
-              {GALLERY_CONFIG.content.headingLine1}
-            </motion.span>
-            <motion.span
-              {...rise(0.2)}
-              className="block text-[clamp(3.25rem,7.5vw,6rem)] text-[#C9362B]"
-              style={{ fontFamily: HEADING_FONT }}
-            >
-              {GALLERY_CONFIG.content.headingLine2}
-            </motion.span>
-            <motion.span
-              {...rise(0.3)}
-              className="mt-2 block text-[clamp(1.5rem,3vw,2.25rem)] tracking-[0.12em] text-[#252321]"
-              style={{ fontFamily: SUBHEADING_FONT }}
-            >
-              {GALLERY_CONFIG.content.headingLine3}
-            </motion.span>
-            <motion.span
-              {...rise(0.4)}
-              className="relative inline-block text-[clamp(2.5rem,5.6vw,4.5rem)] text-[#252321]"
-              style={{ fontFamily: HEADING_FONT }}
-            >
-              {GALLERY_CONFIG.content.headingLine4}
+          {/* Headline: brush-style lockup */}
+          <h2
+            className="leading-[1.05] tracking-[0.03em]"
+            style={{ fontFamily: HEADING_FONT }}
+          >
+            <span className="heading-line block text-[clamp(1.5rem,3vw,2.25rem)] text-[#252321]">
+              <SplitChars text={GALLERY_CONFIG.content.headingLine1} />
+            </span>
+            <span className="heading-line block text-[clamp(3.25rem,7.5vw,6rem)] text-[#C9362B]">
+              <SplitChars text={GALLERY_CONFIG.content.headingLine2} />
+            </span>
+            <span className="heading-line mt-2 block text-[clamp(1.5rem,3vw,2.25rem)] text-[#252321]">
+              <SplitChars text={GALLERY_CONFIG.content.headingLine3} />
+            </span>
+            <span className="heading-line relative inline-block text-[clamp(2.5rem,5.6vw,4.5rem)] text-[#252321]">
+              <SplitChars text={GALLERY_CONFIG.content.headingLine4} />
               <svg
                 viewBox="0 0 420 28"
                 fill="none"
-                className="mt-[-2px] block h-4 w-full sm:h-5"
+                className="brush-underline mt-[-2px] block h-4 w-full sm:h-5"
                 aria-hidden="true"
               >
                 <path
@@ -398,57 +539,147 @@ const TextRevealZone = () => {
                   fill="#C9362B"
                 />
               </svg>
-            </motion.span>
+            </span>
           </h2>
 
           {/* Divider */}
-          <motion.div {...rise(0.5, 0)} className="my-7 flex items-center gap-3">
+          <div className="divider my-7 flex items-center gap-3">
             <span className="h-px w-12 bg-gradient-to-r from-transparent to-[#252321]/30 sm:w-20" />
             <SakuraIcon className="h-4 w-4 text-[#C9362B]" />
             <span className="h-px w-12 bg-gradient-to-l from-transparent to-[#252321]/30 sm:w-20" />
-          </motion.div>
+          </div>
 
           {/* Body */}
-          <motion.p
-            {...rise(0.55, 16)}
-            className="mb-9 max-w-[55ch] text-[clamp(1.05rem,1.3vw,1.25rem)] leading-[1.7] text-[#252321]/90"
+          <p
+            className="body-copy mb-9 max-w-[55ch] text-[clamp(1.05rem,1.3vw,1.25rem)] leading-[1.7] text-[#252321]/90"
             style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
           >
             {GALLERY_CONFIG.content.paragraph}
-          </motion.p>
+          </p>
 
           {/* CTAs */}
-          <motion.div
-            {...rise(0.65, 16)}
-            className="flex w-full max-w-xs flex-col items-center gap-4 sm:max-w-none sm:flex-row sm:gap-5 lg:justify-start"
-          >
-            <Button
-              asChild
-              className="min-h-[46px] w-full cursor-pointer rounded-full px-9 py-3.5 text-xs font-bold uppercase tracking-[0.2em] shadow-[0_6px_22px_rgba(201,54,43,0.32)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(201,54,43,0.42)] sm:w-auto sm:text-sm"
-              style={{
-                backgroundColor: GALLERY_CONFIG.colors.samuraiRed,
-                color: "#FFFFFF",
-                fontFamily: GALLERY_CONFIG.fonts.body,
-              }}
-            >
-              <a
-                href={GALLERY_CONFIG.content.ctaUrl}
-                className="inline-flex items-center justify-center gap-2"
+          <div className="flex w-full max-w-xs flex-col items-center gap-4 sm:max-w-none sm:flex-row sm:gap-5 lg:justify-start">
+            <div className="cta w-full sm:w-auto">
+              <Button
+                asChild
+                className="min-h-[46px] w-full cursor-pointer rounded-full px-9 py-3.5 text-xs font-bold uppercase tracking-[0.2em] shadow-[0_6px_22px_rgba(201,54,43,0.32)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_10px_28px_rgba(201,54,43,0.42)] sm:w-auto sm:text-sm"
+                style={{
+                  backgroundColor: GALLERY_CONFIG.colors.samuraiRed,
+                  color: "#FFFFFF",
+                  fontFamily: GALLERY_CONFIG.fonts.body,
+                }}
               >
-                <span>{GALLERY_CONFIG.content.primaryButtonLabel}</span>
-                <ArrowRight size={15} />
-              </a>
-            </Button>
+                <a
+                  href={GALLERY_CONFIG.content.ctaUrl}
+                  className="inline-flex items-center justify-center gap-2"
+                >
+                  <span>{GALLERY_CONFIG.content.primaryButtonLabel}</span>
+                  <ArrowRight size={15} />
+                </a>
+              </Button>
+            </div>
 
-            <a
-              href={GALLERY_CONFIG.content.secondaryButtonHref}
-              className="inline-flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-full border border-[#252321]/80 px-9 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-[#252321] transition-all duration-300 hover:bg-[#252321] hover:text-[#F8F3E9] sm:w-auto sm:text-sm"
+            <div className="cta w-full sm:w-auto">
+              <a
+                href={GALLERY_CONFIG.content.secondaryButtonHref}
+                className="inline-flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-full border border-[#252321]/80 px-9 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-[#252321] transition-all duration-300 hover:bg-[#252321] hover:text-[#F8F3E9] sm:w-auto sm:text-sm"
+                style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
+              >
+                {GALLERY_CONFIG.content.secondaryButtonLabel}
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Pillars: fills the space under the hero */}
+      <div className="pillars relative z-10 mx-auto mt-16 grid max-w-6xl gap-5 sm:mt-24 md:grid-cols-3">
+        {PILLARS.map((p) => (
+          <div
+            key={p.title}
+            className="pillar group relative overflow-hidden rounded-2xl border border-[#252321]/15 bg-[#FAF6EE]/80 p-7 transition-colors duration-300 hover:border-[#C9362B]/50"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute -right-2 -top-5 select-none text-[8rem] leading-none text-[#C9362B]/10 transition-transform duration-500 group-hover:scale-110 motion-reduce:transition-none"
+              style={{ fontFamily: GALLERY_CONFIG.fonts.kanji }}
+            >
+              {p.kanji}
+            </span>
+            <h3
+              className="relative text-4xl text-[#252321]"
+              style={{ fontFamily: HEADING_FONT }}
+            >
+              {p.title}
+            </h3>
+            <p
+              className="relative mt-3 max-w-[34ch] text-sm leading-relaxed text-[#252321]/75 sm:text-base"
               style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
             >
-              {GALLERY_CONFIG.content.secondaryButtonLabel}
-            </a>
-          </motion.div>
+              {p.body}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ============================================================================
+// MARQUEE BAND
+// ============================================================================
+const MarqueeBand = () => {
+  const ref = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const el = ref.current
+    if (!el) return
+
+    const mm = gsap.matchMedia()
+    mm.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        const track = el.querySelector(".marquee-track")
+        if (!track) return
+        gsap.to(track, {
+          xPercent: -50,
+          duration: 30,
+          ease: "none",
+          repeat: -1,
+        })
+      },
+      el
+    )
+
+    return () => mm.revert()
+  }, [])
+
+  const group = (key: string) => (
+    <div key={key} className="flex shrink-0 items-center" aria-hidden="true">
+      {[...MARQUEE_PHRASES, ...MARQUEE_PHRASES].map((phrase, i) => (
+        <div key={i} className="flex items-center">
+          <span
+            className="px-6 text-[clamp(1.5rem,3vw,2.5rem)] leading-none text-[#F8F3E9] sm:px-10"
+            style={{ fontFamily: HEADING_FONT }}
+          >
+            {phrase}
+          </span>
+          <SakuraIcon className="h-5 w-5 shrink-0 text-[#E9B9A5]" />
         </div>
+      ))}
+    </div>
+  )
+
+  return (
+    <div
+      ref={ref}
+      className="relative z-20 w-full overflow-hidden py-4 sm:py-5"
+      style={{ backgroundColor: GALLERY_CONFIG.colors.samuraiRed }}
+      role="presentation"
+    >
+      <div className="marquee-track flex w-max items-center">
+        {group("a")}
+        {group("b")}
       </div>
     </div>
   )
@@ -457,8 +688,108 @@ const TextRevealZone = () => {
 // ============================================================================
 // MAIN EXPORTED SECTION
 // ============================================================================
-export const DemoVariant1 = () => {
-  const isMobile = useIsMobile()
+
+/**
+ * `active` must be false while HomePage still shows this section inside the fixed,
+ * off-screen "curtain", and true once it is in normal page flow. ScrollTrigger
+ * measures positions when it is created, so creating it too early breaks pins.
+ */
+export const DemoVariant1 = ({ active = true }: { active?: boolean }) => {
+  const flowRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    const flow = flowRef.current
+    if (!flow || !active) return
+
+    const mm = gsap.matchMedia()
+    mm.add(
+      "(prefers-reduced-motion: no-preference)",
+      () => {
+        const pin = flow.querySelector<HTMLElement>(".gallery-pin")
+        const track = flow.querySelector<HTMLElement>(".gallery-track")
+        if (!pin || !track) return
+        const q = gsap.utils.selector(flow)
+        const dist = () => Math.max(0, track.scrollWidth - pin.clientWidth)
+
+        // ---- 1. Pinned horizontal scroll: the photos glide past like an emakimono scroll
+        const scrollTween = gsap.to(track, {
+          x: () => -dist(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: pin,
+            start: "top top",
+            end: () => "+=" + dist(),
+            pin: true,
+            scrub: 1,
+            anticipatePin: 1,
+            invalidateOnRefresh: true,
+          },
+        })
+
+        const sync = () => ({
+          trigger: pin,
+          start: "top top",
+          end: () => "+=" + dist(),
+          scrub: true,
+          invalidateOnRefresh: true,
+        })
+        gsap.fromTo(q(".progress-bar"), { scaleX: 0 }, { scaleX: 1, ease: "none", scrollTrigger: sync() })
+        gsap.to(q(".gallery-ghost"), { xPercent: -40, ease: "none", scrollTrigger: sync() })
+
+        // Photos drift inside their frames while the track moves (depth)
+        gsap.utils.toArray<HTMLElement>(".parallax-img", flow).forEach((img) => {
+          gsap.fromTo(
+            img,
+            { xPercent: -5 },
+            {
+              xPercent: 5,
+              ease: "none",
+              scrollTrigger: {
+                trigger: img.closest(".gallery-card"),
+                containerAnimation: scrollTween,
+                start: "left right",
+                end: "right left",
+                scrub: true,
+              },
+            }
+          )
+        })
+
+        // Entrance: title letters + cards rise in as the section arrives
+        gsap.from(q(".moments-title .char"), {
+          opacity: 0,
+          y: 60,
+          rotate: 6,
+          duration: 0.9,
+          stagger: 0.04,
+          ease: "back.out(1.6)",
+          scrollTrigger: { trigger: pin, start: "top 70%", once: true },
+        })
+        gsap.from(q(".gallery-card"), {
+          opacity: 0,
+          y: 80,
+          duration: 0.9,
+          stagger: 0.06,
+          ease: "power3.out",
+          scrollTrigger: { trigger: pin, start: "top 65%", once: true },
+        })
+        gsap.to(q(".scroll-hint"), {
+          x: 10,
+          duration: 0.9,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+        })
+
+        // Re-measure once the layout has settled after the triggers are created
+        const raf = requestAnimationFrame(() => ScrollTrigger.refresh())
+        return () => cancelAnimationFrame(raf)
+      },
+      flow
+    )
+
+    return () => mm.revert()
+  }, [active])
 
   return (
     <section
@@ -467,60 +798,112 @@ export const DemoVariant1 = () => {
       aria-label="Catalyst 7.0 Leadership Showcase"
     >
       {/* Intro zone */}
-      <TextRevealZone />
+      <TextRevealZone active={active} />
 
-      {/* Photo gallery */}
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 md:px-8 pt-4 sm:pt-6 pb-16 sm:pb-24">
-        {isMobile ? (
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 items-start">
-            <div className="flex flex-col gap-3 sm:gap-4">
-              {MOB_COL_1.map((item, index) => (
-                <PhotoCard key={`mob-1-${index}`} item={item} index={index} />
-              ))}
-            </div>
-            <div className="flex flex-col gap-3 sm:gap-4 pt-4 sm:pt-6">
-              {MOB_COL_2.map((item, index) => (
-                <PhotoCard key={`mob-2-${index}`} item={item} index={index} />
-              ))}
-            </div>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 gap-4 sm:gap-5 lg:gap-6 items-start">
-            <div className="flex flex-col gap-4 sm:gap-5 lg:gap-6">
-              {DESK_COL_1.map((item, index) => (
-                <PhotoCard key={`desk-1-${index}`} item={item} index={index} />
-              ))}
-            </div>
-            <div className="flex flex-col gap-4 sm:gap-5 lg:gap-6 pt-8 lg:pt-12">
-              {DESK_COL_2.map((item, index) => (
-                <PhotoCard key={`desk-2-${index}`} item={item} index={index} />
-              ))}
-            </div>
-            <div className="flex flex-col gap-4 sm:gap-5 lg:gap-6 pt-4 lg:pt-6">
-              {DESK_COL_3.map((item, index) => (
-                <PhotoCard key={`desk-3-${index}`} item={item} index={index} />
-              ))}
-            </div>
-          </div>
-        )}
+      {/* Marquee band */}
+      <MarqueeBand />
 
-        {/* Bottom anchor */}
-        <div className="w-full flex flex-col items-center justify-center pt-14 sm:pt-20 text-center select-none">
-          <div className="flex items-center gap-3 sm:gap-4 mb-3">
-            <div className="w-10 sm:w-16 h-[1px] bg-[#252321]/20" />
-            <SakuraIcon className="w-3.5 sm:w-4 h-3.5 sm:h-4 text-[#C9362B]" />
-            <div className="w-10 sm:w-16 h-[1px] bg-[#252321]/20" />
-          </div>
-          <p className="font-['Noto_Sans_JP',sans-serif] text-[10px] sm:text-xs tracking-[0.25em] uppercase font-bold text-[#252321]/60">
-            CATALYST 7.0 · MOMENTS OF LEADERSHIP
-          </p>
-          <Link
-            to="/gallery"
-            className="inline-flex items-center gap-2 mt-4 px-6 py-2.5 rounded-full border border-[#252321]/40 bg-[#FAF6EE] hover:bg-[#252321] hover:text-[#FAF6EE] text-[#252321] font-['Montserrat',sans-serif] text-[11px] sm:text-xs font-bold tracking-[0.2em] uppercase transition-all shadow-xs cursor-pointer group"
+      <div ref={flowRef}>
+        {/* ── Pinned horizontal scroll gallery ── */}
+        <div
+          className="gallery-pin relative h-[100svh] w-full overflow-hidden motion-reduce:overflow-x-auto"
+          style={{
+            background:
+              "radial-gradient(ellipse at 20% 30%, #FAF8F2 0%, #F8F3E9 55%, #F1E8D8 100%)",
+          }}
+        >
+          {/* ghost kanji 瞬 (moment) drifting slowly behind everything */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute left-[2vw] top-1/2 -translate-y-1/2 select-none"
           >
-            <span>ENTER FULL SCROLL GALLERY</span>
-            <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
-          </Link>
+            <span
+              className="gallery-ghost block text-[70vh] leading-none text-[#252321] opacity-[0.05]"
+              style={{ fontFamily: GALLERY_CONFIG.fonts.kanji }}
+            >
+              瞬
+            </span>
+          </div>
+
+          <div className="gallery-track relative z-10 flex h-full w-max items-center gap-[5vw] px-[6vw]">
+            {/* Title panel */}
+            <div className="gallery-title w-[min(86vw,620px)] shrink-0">
+              <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2">
+                <SakuraIcon className="h-3.5 w-3.5 shrink-0 text-[#C9362B]" />
+                <span
+                  className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-[#252321] sm:text-xs sm:tracking-[0.24em]"
+                  style={{ fontFamily: GALLERY_CONFIG.fonts.label }}
+                >
+                  CATALYST 7.0 · MOMENTS OF LEADERSHIP
+                </span>
+              </div>
+              <h2
+                className="moments-title leading-[1.02] tracking-[0.03em]"
+                style={{ fontFamily: HEADING_FONT }}
+              >
+                <span className="block text-[clamp(1.5rem,3vw,2.25rem)] text-[#252321]">
+                  <SplitChars text="RELIVE THE" />
+                </span>
+                <span className="block text-[clamp(4rem,11vw,9rem)] text-[#C9362B]">
+                  <SplitChars text="MOMENTS" />
+                </span>
+              </h2>
+              <p
+                className="mt-5 max-w-[40ch] text-base leading-relaxed text-[#252321]/80 sm:text-lg"
+                style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
+              >
+                Walk through the faces, the games and the quiet reflections that made the forum.
+              </p>
+              <div
+                className="scroll-hint mt-8 inline-flex items-center gap-3 text-xs font-bold uppercase tracking-[0.25em] text-[#C9362B]"
+                style={{ fontFamily: GALLERY_CONFIG.fonts.label }}
+              >
+                <span>Scroll</span>
+                <ArrowRight size={16} />
+              </div>
+            </div>
+
+            {/* Photo columns */}
+            {COLUMNS.map((col, c) => (
+              <div
+                key={c}
+                className={`flex shrink-0 flex-col gap-[3vh] ${
+                  c % 2 === 0 ? "-translate-y-[2vh]" : "translate-y-[6vh]"
+                }`}
+              >
+                {col.map((item, k) => (
+                  <GalleryCard key={item.src} item={item} n={c * 2 + k} />
+                ))}
+              </div>
+            ))}
+
+            {/* End panel */}
+            <div className="flex w-[min(80vw,360px)] shrink-0 flex-col items-center justify-center gap-4 pr-[4vw] text-center">
+              <span
+                className="text-[clamp(2.5rem,6vw,4.5rem)] leading-none text-[#C9362B]"
+                style={{ fontFamily: GALLERY_CONFIG.fonts.kanji }}
+                aria-hidden="true"
+              >
+                続
+              </span>
+              <Link
+                to="/gallery"
+                className="group inline-flex cursor-pointer items-center gap-2 rounded-full border border-[#252321]/40 bg-[#FAF6EE] px-6 py-2.5 text-[11px] font-bold uppercase tracking-[0.2em] text-[#252321] transition-all hover:bg-[#252321] hover:text-[#FAF6EE] sm:text-xs"
+                style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
+              >
+                <span>ENTER FULL SCROLL GALLERY</span>
+                <ArrowRight size={13} className="transition-transform group-hover:translate-x-1" />
+              </Link>
+            </div>
+          </div>
+
+          {/* progress line */}
+          <div className="absolute bottom-0 left-0 z-20 h-1 w-full bg-[#252321]/10">
+            <div
+              className="progress-bar h-full w-full bg-[#C9362B]"
+              style={{ transformOrigin: "left center" }}
+            />
+          </div>
         </div>
       </div>
     </section>

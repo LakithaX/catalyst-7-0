@@ -38,6 +38,7 @@ export const JapaneseParallaxHero: React.FC = () => {
   const foregroundRef = useRef<HTMLDivElement>(null);
   const sakuraRef = useRef<HTMLDivElement>(null);
   const logoRef = useRef<HTMLDivElement>(null);
+  const rootRef = useRef<HTMLElement>(null);
 
   const targetX = useRef(0);
   const targetY = useRef(0);
@@ -84,12 +85,6 @@ export const JapaneseParallaxHero: React.FC = () => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return;
 
-    let scrollY = window.scrollY;
-    const onScroll = () => {
-      scrollY = window.scrollY;
-    };
-    window.addEventListener('scroll', onScroll, { passive: true });
-
     let frame = 0;
     const set = (el: HTMLDivElement | null, px: number, py: number) => {
       if (el) el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
@@ -103,6 +98,18 @@ export const JapaneseParallaxHero: React.FC = () => {
       const x = currentX.current;
       const y = currentY.current;
       const vh = window.innerHeight;
+
+      // Scroll offset is measured from the hero's OWN position instead of window.scrollY.
+      // While the hero is the sliding curtain over the entrance, window.scrollY is ~2 screens
+      // deep, which displaced every layer and then snapped back when the page unlocked.
+      // Now: curtain phase => 0, normal page => identical to window.scrollY as before.
+      const top = rootRef.current ? rootRef.current.getBoundingClientRect().top : 0;
+      if (top >= vh) {
+        // Hero is still below the viewport (entrance scene is showing): nothing to animate.
+        rafId.current = requestAnimationFrame(render);
+        return;
+      }
+      const scrollY = Math.max(0, -top);
       const sy = Math.min(scrollY, vh * 1.2); // stop parallax once hero is gone
       const m = isMobileRef.current ? 0.55 : 1; // mobile = gentler motion
 
@@ -114,7 +121,8 @@ export const JapaneseParallaxHero: React.FC = () => {
       set(toriiRef.current, x * -22 * m, y * 17 * m + sy * 0.34);
       set(pagodaRef.current, x * 22 * m, y * 17 * m + sy * 0.34);
       set(brushRef.current, x * -12 * m, y * -8 * m + sy * 0.18);
-      set(sakuraRef.current, x * -32 * m, y * -16 * m + sy * 0.46);
+      // Drift kept within the branch's off-screen overhang (-ml-6 / -mt-4) so its end never shows.
+      set(sakuraRef.current, x * -22 * m, y * -16 * m + sy * 0.46);
 
       if (logoRef.current) {
         logoRef.current.style.transform = `translate3d(${(x * 6 * m).toFixed(2)}px, ${(y * 4 * m + sy * 0.12).toFixed(2)}px, 0)`;
@@ -140,7 +148,6 @@ export const JapaneseParallaxHero: React.FC = () => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('deviceorientation', handleDeviceOrientation);
-      window.removeEventListener('scroll', onScroll);
       if (rafId.current) cancelAnimationFrame(rafId.current);
     };
   }, [handleMouseMove, handleDeviceOrientation]);
@@ -153,6 +160,7 @@ export const JapaneseParallaxHero: React.FC = () => {
 
   return (
     <section
+      ref={rootRef}
       id="hero-scene"
       className="relative w-full h-screen min-h-[640px] max-h-[1200px] overflow-hidden bg-[#F8F3E9] text-[#252321] select-none"
     >
@@ -259,7 +267,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       </div>
 
       {/* L8: Sakura branch */}
-      <div className="absolute -top-[1%] -left-[1%] w-[min(48vw,230px)] sm:w-[min(42vw,340px)] md:w-[min(38vw,480px)] lg:w-[min(34vw,500px)] pointer-events-none z-[24]">
+      <div className="absolute -top-[1%] -left-[1%] -mt-4 -ml-6 w-[min(48vw,230px)] sm:w-[min(42vw,340px)] md:w-[min(38vw,480px)] lg:w-[min(34vw,500px)] pointer-events-none z-[24]">
         <div ref={sakuraRef} className="w-full h-auto will-change-transform">
           <img
             src={SAKURA_IMG}

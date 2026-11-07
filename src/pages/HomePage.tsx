@@ -1,11 +1,14 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
-import { ChevronDown } from 'lucide-react';
+import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
 import { SakuraPetals } from '../components/SakuraPetals';
+import { BackgroundMusic } from '../components/BackgroundMusic';
+import { EntryGate } from '../components/EntryGate';
 import { JapaneseParallaxHero } from '../components/JapaneseParallaxHero';
 import AnimatedGalleryDemo from '../components/ui/animated-gallery-demo';
 import FullScreenScrollFXDemo from '../components/ui/full-screen-scroll-fx-demo';
 import CoverFlowCarouselDemo from '../components/ui/3-d-coverflow-carousel-demo';
+import OutroFooter from '../components/ui/outro-footer';
+import PartnershipAnnouncement from '../components/ui/partnership-announcement';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -13,66 +16,223 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);
 }
 
-type Atmosphere = 'original';
-type ArtTheme = 'enhanced' | 'classic';
-
-// Letters of CATALYST for authentic sequential Japanese brush stroke painting
-const CATALYST_LETTERS = ['C', 'A', 'T', 'A', 'L', 'Y', 'S', 'T'];
-
-// Standard motion easing per Effects specification: cubic-bezier(0.22, 1, 0.36, 1)
+// Standard motion easing: cubic-bezier(0.22, 1, 0.36, 1)
 const TWEEN_EASING: [number, number, number, number] = [0.22, 1, 0.36, 1];
+
+/**
+ * Scroll timeline (0 → 1 over the sticky track).
+ *   0.00 → ASSEMBLE      : the vista builds (sun swells, torii zooms, text sequence plays)
+ *   ASSEMBLE → CURTAIN   : short hold on the finished vista
+ *   CURTAIN → CURTAIN_END: Section 2 slides up over the scene
+ *   LOCK                 : swap into normal page flow (atomic, no flash)
+ */
+// Defined in "viewport heights of scroll" so each phase can be tuned without touching the others.
+// The illustrations keep the ORIGINAL pace: they finish after 110vh of scroll (0.5 × 220vh before).
+// Track height in CSS (.entrance-track) must equal SCROLL_VH + 100.
+const SCROLL_VH = 260;
+const ASSEMBLE_VH = 110; // illustrations: sun, torii, water, pontoon…
+const CURTAIN_START_VH = 140; // short hold on the finished vista (110 → 140)
+const CURTAIN_END_VH = 250; // hero slides in slowly over 110vh of scroll (was ~64vh)
+const LOCK_AT_VH = 253;
+
+const ASSEMBLE = ASSEMBLE_VH / SCROLL_VH;
+const CURTAIN_START = CURTAIN_START_VH / SCROLL_VH;
+const CURTAIN_END = CURTAIN_END_VH / SCROLL_VH;
+const LOCK_AT = LOCK_AT_VH / SCROLL_VH;
+
+// After the curtain lands, the hero stays pinned to the screen for this much extra scroll
+// (in viewport heights) before the page continues. Must match --hero-pin in index.css.
+// Set to 0 (and --hero-pin: 0lvh) to disable the pin.
+const HERO_PIN_VH = 0.8;
+
+// The sun disc is authored at its LARGEST size and scaled DOWN, so it stays razor sharp
+// instead of being a small bitmap blown up 3x. Must match `.sun-disc` width in CSS (300%).
+const SUN_MAX = 3;
+
+// Everything the entrance needs. Preloaded so the intro never pops in layer by layer.
+const ENTRANCE_ASSETS = [
+  '/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.png',
+  '/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.png',
+  '/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.png',
+  '/assets/aistudio/Asset_5_clean.png',
+  '/assets/aistudio/Asset_3_clean.png',
+  '/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.png',
+  '/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.png',
+  '/assets/aistudio/Asset_10_clean.png',
+];
+
+// true after the visitor clicked "Enter" once in this page load (resets on refresh, so the gate + music restart)
+let entryGateDismissed = false;
+
+const clamp01 = (v: number) => Math.max(0, Math.min(1, v));
+const smoothstep = (min: number, max: number, v: number) => {
+  const t = clamp01((v - min) / (max - min));
+  return t * t * (3 - 2 * t);
+};
+const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function HomePage() {
   const shouldReduceMotion = useReducedMotion();
-  const [isMobile, setIsMobile] = useState(false);
+  const reduceMotionRef = useRef<boolean>(false);
+  reduceMotionRef.current = !!shouldReduceMotion;
+
   const isMobileRef = useRef<boolean>(false);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      const isMob = window.innerWidth < 768;
-      setIsMobile(isMob);
-      isMobileRef.current = isMob;
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+  // "Enter" screen: its click is the user gesture that lets the music start, and it starts the intro
+  const [gateOpen, setGateOpen] = useState<boolean>(entryGateDismissed);
+  const gateOpenRef = useRef<boolean>(entryGateDismissed);
+  const handleEnter = useCallback(() => {
+    entryGateDismissed = true;
+    gateOpenRef.current = true;
+    setGateOpen(true);
   }, []);
 
-  // Locked into the user's active mode: Enhanced Ukiyo-e, Daylight Red Sun, Sakura Petals enabled
-  const theme = 'enhanced' as ArtTheme;
-  const atmosphere: Atmosphere = 'original';
+  // Keep the page from scrolling while the gate is showing
+  useEffect(() => {
+    if (gateOpen) return;
+    const prev = document.documentElement.style.overflow;
+    document.documentElement.style.overflow = 'hidden';
+    return () => {
+      document.documentElement.style.overflow = prev;
+    };
+  }, [gateOpen]);
+
   const sakuraEnabled = true;
-  const mistEnabled = false;
-  const [scrollProgress, setScrollProgress] = useState<number>(0);
-  const [mouseVelX, setMouseVelX] = useState<number>(0);
+
+  // The ONLY React state the entrance needs. Everything per-frame lives in refs + direct DOM writes,
+  // so scrolling / moving the mouse never re-renders the page (and the heavy sections behind the curtain).
   const [isLockedToHero, setIsLockedToHero] = useState<boolean>(false);
   const isLockedToHeroRef = useRef<boolean>(false);
-  const [isSection2Active, setIsSection2Active] = useState<boolean>(false);
-  const hasTriggeredHeroRef = useRef<boolean>(false);
 
+  // Mouse wind velocity for the petals (read by the canvas loop directly)
+  const mouseVelRef = useRef<number>(0);
+  const lastMouseXRef = useRef<number>(0);
+  const lastMouseTimeRef = useRef<number>(0);
+
+  // Parallax + scroll tracking
+  const targetX = useRef<number>(0);
+  const targetY = useRef<number>(0);
+  const currentX = useRef<number>(0);
+  const currentY = useRef<number>(0);
+  const targetScroll = useRef<number>(0);
+  const currentScroll = useRef<number>(0);
+  const scrollDistanceRef = useRef<number>(1);
+  const autoScrollRaf = useRef<number | null>(null);
+
+  // Animated element refs
+  const trackRef = useRef<HTMLDivElement>(null);
+  const stickyRef = useRef<HTMLDivElement>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const veilRef = useRef<HTMLDivElement>(null);
+  const sunMoonRef = useRef<HTMLDivElement>(null);
+  const sunDiscRef = useRef<HTMLDivElement>(null);
+  const experienceRef = useRef<HTMLDivElement>(null);
+  const orgRef = useRef<HTMLDivElement>(null);
+  const presentsRef = useRef<HTMLDivElement>(null);
+  const mtFujiRef = useRef<HTMLDivElement>(null);
+  const hillRightRef = useRef<HTMLDivElement>(null);
+  const hillLeftRef = useRef<HTMLDivElement>(null);
+  const toriiStageRef = useRef<HTMLDivElement>(null);
+  const toriiBackPillarsRef = useRef<HTMLDivElement>(null);
+  const pontoonRef = useRef<HTMLDivElement>(null);
+  const waterRef = useRef<HTMLDivElement>(null);
+  const rippleRef = useRef<HTMLDivElement>(null);
+  const cueRef = useRef<HTMLDivElement>(null);
+  const curtainShadowRef = useRef<HTMLDivElement>(null);
+  const secondSectionRef = useRef<HTMLDivElement>(null);
+  const heroTrackRef = useRef<HTMLDivElement>(null);
+  const heroStickyRef = useRef<HTMLDivElement>(null);
+
+  // ---------------------------------------------------------------------------------------------
+  // Page setup: always start the entrance from the top (browser scroll-restoration would drop the
+  // user into the middle of the 320vh track and skip the intro).
+  // ---------------------------------------------------------------------------------------------
+  useEffect(() => {
+    const prev = 'scrollRestoration' in history ? history.scrollRestoration : 'auto';
+    if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+    if (!window.location.hash) window.scrollTo(0, 0);
+    return () => {
+      if ('scrollRestoration' in history) history.scrollRestoration = prev;
+    };
+  }, []);
+
+  useEffect(() => {
+    const check = () => {
+      isMobileRef.current = window.innerWidth < 768;
+    };
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
+  // ---------------------------------------------------------------------------------------------
+  // Auto-scroll (click on "scroll to enter" / pontoon / top stripe) with our own easing.
+  // Native `behavior: 'smooth'` has browser-dependent duration and can't be cancelled cleanly,
+  // which is why the old 700ms timeout could lock mid-scroll and jump.
+  // ---------------------------------------------------------------------------------------------
+  const cancelAutoScroll = useCallback(() => {
+    if (autoScrollRaf.current !== null) {
+      cancelAnimationFrame(autoScrollRaf.current);
+      autoScrollRaf.current = null;
+    }
+  }, []);
+
+  const animateScrollTo = useCallback(
+    (target: number, duration: number) => {
+      cancelAutoScroll();
+      const startY = window.scrollY;
+      const t0 = performance.now();
+
+      const stop = () => {
+        cancelAutoScroll();
+        window.removeEventListener('wheel', stop);
+        window.removeEventListener('touchstart', stop);
+        window.removeEventListener('keydown', stop);
+        window.removeEventListener('mousedown', stop);
+      };
+      window.addEventListener('wheel', stop, { passive: true });
+      window.addEventListener('touchstart', stop, { passive: true });
+      window.addEventListener('keydown', stop);
+      window.addEventListener('mousedown', stop);
+
+      const step = (now: number) => {
+        const t = clamp01((now - t0) / duration);
+        window.scrollTo(0, startY + (target - startY) * easeInOutCubic(t));
+        if (t < 1) {
+          autoScrollRaf.current = requestAnimationFrame(step);
+        } else {
+          stop();
+        }
+      };
+      autoScrollRaf.current = requestAnimationFrame(step);
+    },
+    [cancelAutoScroll]
+  );
+
+  // ---------------------------------------------------------------------------------------------
+  // Lock: swap from the fixed curtain into normal page flow.
+  // Only flips state; the actual DOM swap + scrollTo(0) happen in useLayoutEffect below, i.e.
+  // in the SAME frame before paint. (Old code flipped styles first and state 1–2 frames later,
+  // which flashed the vista for a frame.)
+  // ---------------------------------------------------------------------------------------------
   const lockToSection2 = useCallback(() => {
     if (isLockedToHeroRef.current) return;
     isLockedToHeroRef.current = true;
+    cancelAutoScroll();
+    setIsLockedToHero(true);
+  }, [cancelAutoScroll]);
 
-    // Seamlessly transition: remove curtain transform and make relative in same frame
-    if (secondSectionRef.current) {
-      secondSectionRef.current.style.transform = 'none';
-      secondSectionRef.current.style.position = 'relative';
-    }
+  useLayoutEffect(() => {
+    if (!isLockedToHero) return;
+    window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+    if (heroTrackRef.current) heroTrackRef.current.style.transform = '';
+  }, [isLockedToHero]);
 
-    requestAnimationFrame(() => {
-      window.scrollTo({ top: 0, behavior: 'instant' });
-      setIsLockedToHero(true);
-    });
-  }, []);
-
-  // When Section 1 collapses and Section 2 becomes normal relative scroll,
-  // recalculate all GSAP ScrollTrigger pin and scroll coordinates immediately.
+  // Recalculate GSAP ScrollTrigger coordinates once Section 2 becomes normal flow.
   useEffect(() => {
     if (isLockedToHero) {
-      const refreshTriggers = () => {
-        ScrollTrigger.refresh(true);
-      };
+      const refreshTriggers = () => ScrollTrigger.refresh(true);
       const t1 = setTimeout(refreshTriggers, 100);
       const t2 = setTimeout(refreshTriggers, 500);
       const t3 = setTimeout(refreshTriggers, 1200);
@@ -86,6 +246,63 @@ export default function HomePage() {
     }
   }, [isLockedToHero]);
 
+  // ---------------------------------------------------------------------------------------------
+  // Hero pin: once locked, the hero holds the screen for HERO_PIN_VH of scroll, easing in a gentle
+  // push-in while it's held, then releases into the rest of the page. Direct DOM writes, no state.
+  // ---------------------------------------------------------------------------------------------
+  useEffect(() => {
+    if (!isLockedToHero || HERO_PIN_VH <= 0 || reduceMotionRef.current) return;
+    const track = heroTrackRef.current;
+    const sticky = heroStickyRef.current;
+    if (!track || !sticky) return;
+
+    let raf = 0;
+    let running = false;
+    let last = 0;
+    let pinPx = 1;
+    let target = 0;
+    let current = 0;
+
+    const measure = () => {
+      pinPx = Math.max(1, track.offsetHeight - sticky.offsetHeight);
+    };
+    const apply = () => {
+      sticky.style.transform = `scale(${(1 + current * 0.035).toFixed(4)})`;
+    };
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      current += (target - current) * (1 - Math.exp(-dt * 10));
+      if (Math.abs(target - current) < 0.0005) current = target;
+      apply();
+      if (current !== target) raf = requestAnimationFrame(tick);
+      else running = false;
+    };
+    const onScroll = () => {
+      target = clamp01(window.scrollY / pinPx);
+      if (!running) {
+        running = true;
+        last = performance.now();
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
+
+    measure();
+    onScroll();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
+      sticky.style.transform = '';
+    };
+  }, [isLockedToHero]);
+
   // Handle URL hash navigation (e.g. from /#gallery, /#about, /#contact)
   useEffect(() => {
     const handleHash = () => {
@@ -94,429 +311,346 @@ export default function HomePage() {
         lockToSection2();
         setTimeout(() => {
           const target = document.querySelector(hash);
-          if (target) {
-            target.scrollIntoView({ behavior: 'smooth' });
-          }
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
         }, 350);
       }
     };
-
     handleHash();
     window.addEventListener('hashchange', handleHash);
     return () => window.removeEventListener('hashchange', handleHash);
   }, [lockToSection2]);
 
+  const scrollToStory = useCallback(() => {
+    if (isLockedToHeroRef.current) return;
+    if (reduceMotionRef.current) {
+      lockToSection2();
+      return;
+    }
+    const distance = scrollDistanceRef.current;
+    const target = distance * (LOCK_AT + 0.02);
+    const remaining = Math.max(0, target - window.scrollY) / distance; // 0..1
+    animateScrollTo(target, 1200 + remaining * 3400);
+  }, [animateScrollTo, lockToSection2]);
 
-  // Parallax tracking refs for 60fps lerping
-  const targetX = useRef<number>(0);
-  const targetY = useRef<number>(0);
-  const currentX = useRef<number>(0);
-  const currentY = useRef<number>(0);
-  const rafId = useRef<number | null>(null);
+  const scrollToTop = useCallback(() => {
+    animateScrollTo(0, 1100);
+  }, [animateScrollTo]);
 
-  // Scroll tracking refs for silky smooth interpolation
-  const targetScroll = useRef<number>(0);
-  const currentScroll = useRef<number>(0);
-
-  // Velocity calculation
-  const lastMouseXRef = useRef<number>(0);
-  const lastMouseTimeRef = useRef<number>(Date.now());
-
-  // Animated element refs
-  const sunMoonRef = useRef<HTMLDivElement>(null);
-  const experienceRef = useRef<HTMLDivElement>(null);
-  const catalystRef = useRef<HTMLDivElement>(null);
-  const presenterRef = useRef<HTMLSpanElement>(null);
-  const letterRefs = useRef<(HTMLSpanElement | null)[]>([]);
-  const brushTipRef = useRef<HTMLDivElement>(null);
-  const mtFujiRef = useRef<HTMLDivElement>(null);
-  const hillRightRef = useRef<HTMLDivElement>(null);
-  const hillLeftRef = useRef<HTMLDivElement>(null);
-  const toriiStageRef = useRef<HTMLDivElement>(null);
-  const toriiBackPillarsRef = useRef<HTMLDivElement>(null);
-  const pontoonRef = useRef<HTMLDivElement>(null);
-  const waterRef = useRef<HTMLDivElement>(null);
-  const rippleRef = useRef<HTMLDivElement>(null);
-  const heroTrackRef = useRef<HTMLDivElement>(null);
-  const secondSectionRef = useRef<HTMLDivElement>(null);
-
-  // Scroll listener for continuous scroll animation
+  // ---------------------------------------------------------------------------------------------
+  // The one render loop for the entrance (scroll + parallax + intro). Runs ONLY while the
+  // entrance exists, and skips DOM writes on frames where nothing moved.
+  // ---------------------------------------------------------------------------------------------
   useEffect(() => {
     if (isLockedToHero) return;
 
-    const handleScroll = () => {
-      const scrollY = window.scrollY;
-      const heroEl = heroTrackRef.current;
-      const heroDistance = heroEl ? heroEl.offsetHeight - window.innerHeight : window.innerHeight * 2.2;
-      const progress = heroDistance > 0 ? Math.min(1, Math.max(0, scrollY / heroDistance)) : 0;
-      targetScroll.current = progress;
-      setScrollProgress(progress);
+    let raf = 0;
+    let disposed = false;
+    let last = performance.now();
+    let introStart = -1;
+    let assetsReady = false;
+    let introT = 0;
+    const reduced = reduceMotionRef.current;
+
+    // --- scroll metrics -------------------------------------------------------------------
+    const measure = () => {
+      const track = trackRef.current;
+      const sticky = stickyRef.current;
+      if (!track || !sticky) return;
+      scrollDistanceRef.current = Math.max(1, track.offsetHeight - sticky.offsetHeight);
     };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
+    const onScroll = () => {
+      targetScroll.current = clamp01(window.scrollY / scrollDistanceRef.current);
+    };
+    const onResize = () => {
+      measure();
+      onScroll();
+    };
+    measure();
+    onScroll();
     currentScroll.current = targetScroll.current;
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [isLockedToHero]);
 
-  const scrollToStory = () => {
-    const heroEl = heroTrackRef.current;
-    if (heroEl) {
-      if (!hasTriggeredHeroRef.current) {
-        hasTriggeredHeroRef.current = true;
-        setIsSection2Active(true);
-        // Hero entrance triggered
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onResize);
+
+    // --- pointer / gyro parallax (disabled for reduced-motion) ----------------------------
+    const handleMouseMove = (e: MouseEvent) => {
+      const now = performance.now();
+      const dt = Math.max(1, now - lastMouseTimeRef.current);
+      const vx = (e.clientX - lastMouseXRef.current) / dt;
+      mouseVelRef.current = Math.max(-4, Math.min(4, vx * 1.5));
+      lastMouseXRef.current = e.clientX;
+      lastMouseTimeRef.current = now;
+      targetX.current = (e.clientX / window.innerWidth - 0.5) * 2;
+      targetY.current = (e.clientY / window.innerHeight - 0.5) * 2;
+    };
+    const handleDeviceOrientation = (e: DeviceOrientationEvent) => {
+      if (e.gamma !== null && e.beta !== null) {
+        targetX.current = Math.max(-1, Math.min(1, e.gamma / 30));
+        targetY.current = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
       }
-      const targetY = heroEl.offsetHeight - window.innerHeight;
-      window.scrollTo({ top: targetY, behavior: 'smooth' });
-      setTimeout(() => {
-        lockToSection2();
-      }, 700);
+    };
+    // NOTE: touchmove parallax was removed — it made the layers swim while the finger was
+    // scrolling the page. Touch devices get gyro parallax instead.
+    if (!reduced) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      if (window.DeviceOrientationEvent && typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
+        window.addEventListener('deviceorientation', handleDeviceOrientation);
+      }
     }
-  };
 
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    // --- preload, then play the intro -----------------------------------------------------
+    const preload = Promise.all(
+      ENTRANCE_ASSETS.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => resolve();
+            img.onerror = () => resolve();
+            img.src = src;
+          })
+      )
+    );
+    const fontsReady: Promise<unknown> = (document as any).fonts?.ready ?? Promise.resolve();
+    const timeout = new Promise<void>((resolve) => setTimeout(resolve, 2800));
+    Promise.race([Promise.all([preload, fontsReady]), timeout]).then(() => {
+      assetsReady = true;
+    });
 
-  // Mouse & Touch handling
-  const handleMouseMove = useCallback((e: MouseEvent) => {
-    const now = Date.now();
-    const dt = Math.max(1, now - lastMouseTimeRef.current);
-    const vx = (e.clientX - lastMouseXRef.current) / dt;
-    setMouseVelX(Math.max(-4, Math.min(4, vx * 1.5)));
-    lastMouseXRef.current = e.clientX;
-    lastMouseTimeRef.current = now;
+    // --- per-frame write cache (skip frames where nothing changed) -------------------------
+    let pX = Infinity;
+    let pY = Infinity;
+    let pS = Infinity;
+    let pI = Infinity;
 
-    const { innerWidth, innerHeight } = window;
-    const nx = (e.clientX / innerWidth - 0.5) * 2;
-    const ny = (e.clientY / innerHeight - 0.5) * 2;
-    targetX.current = nx;
-    targetY.current = ny;
-  }, []);
+    const render = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const isMob = isMobileRef.current;
 
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    if (e.touches.length > 0) {
-      const touch = e.touches[0];
-      const { innerWidth, innerHeight } = window;
-      const nx = (touch.clientX / innerWidth - 0.5) * 2;
-      const ny = (touch.clientY / innerHeight - 0.5) * 2;
-      targetX.current = nx;
-      targetY.current = ny;
-    }
-  }, []);
+      // The intro begins once assets are ready AND the visitor has pressed "Enter"
+      if (introStart < 0 && assetsReady && gateOpenRef.current) introStart = now;
 
-  // Device orientation for mobile gyroscope parallax
-  const handleDeviceOrientation = useCallback((e: DeviceOrientationEvent) => {
-    if (e.gamma !== null && e.beta !== null) {
-      const nx = Math.max(-1, Math.min(1, e.gamma / 30));
-      const ny = Math.max(-1, Math.min(1, (e.beta - 45) / 30));
-      targetX.current = nx;
-      targetY.current = ny;
-    }
-  }, []);
+      // Intro progress (0..1), then eased
+      if (introStart >= 0 && introT < 1) {
+        introT = reduced ? 1 : clamp01((now - introStart) / 2400);
+      }
+      const introE = 1 - Math.pow(1 - introT, 3);
 
-  // Combined Parallax & Scroll Animation Loop (60fps)
-  useEffect(() => {
-    const render = () => {
-      const factor = 0.08;
-      currentX.current += (targetX.current - currentX.current) * factor;
-      currentY.current += (targetY.current - currentY.current) * factor;
+      // Frame-rate independent damping: identical feel on 60Hz / 120Hz / 144Hz.
+      const kPar = 1 - Math.exp(-dt * 5);
+      const kScr = 1 - Math.exp(-dt * (isMob ? 14 : 9));
+      currentX.current += (targetX.current - currentX.current) * kPar;
+      currentY.current += (targetY.current - currentY.current) * kPar;
+      currentScroll.current += (targetScroll.current - currentScroll.current) * kScr;
+      if (Math.abs(targetScroll.current - currentScroll.current) < 0.00004) {
+        currentScroll.current = targetScroll.current;
+      }
 
-      // Responsive scroll lerp: catches up within 2-3 frames (zero lag) while keeping silky motion
-      const scrollFactor = 0.22;
-      currentScroll.current += (targetScroll.current - currentScroll.current) * scrollFactor;
+      // Petal wind decays back to calm (old code held the last velocity forever).
+      mouseVelRef.current *= Math.exp(-dt * 3.2);
 
       const x = currentX.current;
       const y = currentY.current;
       const sp = currentScroll.current;
 
-      // Hermite smoothstep for natural, gradual ease-in and ease-out curves
-      const smoothstep = (min: number, max: number, v: number) => {
-        const t = Math.max(0, Math.min(1, (v - min) / (max - min)));
-        return t * t * (3 - 2 * t);
-      };
+      const dirty =
+        Math.abs(x - pX) > 0.0002 ||
+        Math.abs(y - pY) > 0.0002 ||
+        Math.abs(sp - pS) > 0.00002 ||
+        introT !== pI;
 
-      const isMob = isMobileRef.current;
+      if (dirty) {
+        pX = x;
+        pY = y;
+        pS = sp;
+        pI = introT;
 
-      // Map scroll progress to vistaSp: all assembly animations complete by 0.50
-      // and remain firmly locked in the completed vista state (the reference screenshot) from 0.50 to 0.78!
-      const vistaSp = Math.min(1.0, sp / 0.50);
+        const vistaSp = Math.min(1, sp / ASSEMBLE);
+        const scrollVh = sp * SCROLL_VH;
 
-      // 1. Sun / Moon: expands rapidly in scale while sinking downward at a gentler rate
-      if (sunMoonRef.current) {
-        const sunX = -x * (isMob ? 10 : 14);
-        const sunY = -y * 8 + vistaSp * (isMob ? 60 : 85);
-        const sunScale = 1 + vistaSp * (isMob ? 1.7 : 2.0);
-        sunMoonRef.current.style.transform = `translate3d(calc(-50% + ${sunX.toFixed(2)}px), ${sunY.toFixed(2)}px, 0px) scale(${sunScale.toFixed(3)})`;
-      }
-
-      // 2. Sequential Moon Typography: "EXPERIENCE" appears, stays longer, lifts up, then disappears before "CATALYST"
-      const txtX = -x * (isMob ? 5 : 8);
-      const baseTxtY = -y * (isMob ? 3 : 5) + vistaSp * (isMob ? 25 : 35);
-
-      // First: "EXPERIENCE" appears smoothly with organic ease-in, stays prominently, lifted up near upper moon
-      if (experienceRef.current) {
-        let expOpacity = 0;
-        let expScale = 0.92;
-        const baseLift = isMob ? 0 : -28;
-        const peakLift = isMob ? -6 : -38;
-        let expLift = baseLift;
-
-        if (vistaSp >= 0.01 && vistaSp <= 0.16) {
-          const eased = smoothstep(0.01, 0.16, vistaSp);
-          expOpacity = eased;
-          expScale = 0.92 + eased * 0.10;
-          expLift = baseLift - eased * (peakLift - baseLift);
-        } else if (vistaSp > 0.16 && vistaSp <= 0.32) {
-          expOpacity = 1;
-          expScale = 1.02;
-          expLift = peakLift;
-        } else if (vistaSp > 0.32 && vistaSp <= 0.42) {
-          const easedOut = smoothstep(0.32, 0.42, vistaSp);
-          expOpacity = Math.max(0, 1 - easedOut);
-          expScale = 1.02 + easedOut * 0.06;
-          expLift = peakLift - easedOut * (isMob ? 8 : 18);
+        // ---- 1. Sun: rises at intro, then swells while sinking ------------------------------
+        if (sunMoonRef.current) {
+          const sunX = -x * (isMob ? 10 : 14);
+          const introRise = (1 - introE) * (isMob ? 70 : 110);
+          const sunY = -y * 8 + vistaSp * (isMob ? 60 : 85) + introRise;
+          sunMoonRef.current.style.transform = `translate3d(calc(-50% + ${sunX.toFixed(2)}px), ${sunY.toFixed(2)}px, 0)`;
         }
-        const expY = baseTxtY + expLift;
-        experienceRef.current.style.transform = `translate3d(calc(-50% + ${txtX.toFixed(2)}px), calc(-50% + ${expY.toFixed(2)}px), 0px) scale(${expScale.toFixed(3)})`;
-        experienceRef.current.style.opacity = expOpacity.toFixed(3);
-      }
-
-      // Next: "CATALYST" appears as if written with a Japanese paint brush
-      if (catalystRef.current) {
-        let catOpacity = 0;
-        let catScale = 1.0;
-        const catLift = isMob ? -50 : -50;
-        const catY = baseTxtY + catLift;
-
-        const writeStart = 0.40;
-        const writeEnd = 0.50;
-
-        // Fade in "AIESEC IN SLIIT PRESENTS" alongside CATALYST
-        if (presenterRef.current) {
-          if (vistaSp < writeStart) {
-            presenterRef.current.style.opacity = '0';
-            presenterRef.current.style.transform = 'translateY(6px)';
-          } else {
-            const presT = smoothstep(writeStart, writeStart + 0.08, vistaSp);
-            presenterRef.current.style.opacity = presT.toFixed(3);
-            presenterRef.current.style.transform = `translateY(${((1 - presT) * 6).toFixed(1)}px)`;
-          }
+        if (sunDiscRef.current) {
+          const sunScale = 1 + vistaSp * (isMob ? 1.7 : 2.0);
+          sunDiscRef.current.style.transform = `translate3d(-50%, -50%, 0) scale(${(sunScale / SUN_MAX).toFixed(4)})`;
         }
 
-        if (vistaSp < writeStart) {
-          catOpacity = 0;
-          letterRefs.current.forEach((el) => {
-            if (el) {
-              el.style.opacity = '0';
-              el.style.webkitMaskImage = 'none';
-              el.style.maskImage = 'none';
-            }
-          });
-          if (brushTipRef.current) {
-            brushTipRef.current.style.opacity = '0';
+        // ---- 2. Typography sequence ----------------------------------------------------------
+        const txtX = -x * (isMob ? 5 : 8);
+        const baseTxtY = -y * (isMob ? 3 : 5) + vistaSp * (isMob ? 25 : 35);
+
+        // EXPERIENCE — fades in with the intro (and stays scroll-driven afterwards)
+        if (experienceRef.current) {
+          const baseLift = isMob ? 0 : -28;
+          const peakLift = isMob ? -6 : -38;
+          const introText = smoothstep(0.5, 1, introT);
+          let op = 0;
+          let sc = 0.92;
+          let lift = baseLift;
+
+          if (vistaSp <= 0.32) {
+            const e = Math.max(smoothstep(0.01, 0.16, vistaSp), introText);
+            op = e;
+            sc = 0.92 + e * 0.1;
+            // FIX: was `baseLift - e*(peakLift-baseLift)`, which moved the wrong way and then
+            // snapped 20px when the plateau started.
+            lift = baseLift + e * (peakLift - baseLift);
+          } else if (vistaSp <= 0.42) {
+            const out = smoothstep(0.32, 0.42, vistaSp);
+            op = 1 - out;
+            sc = 1.02 + out * 0.06;
+            lift = peakLift - out * (isMob ? 8 : 18);
           }
-        } else if (vistaSp >= writeStart && vistaSp <= writeEnd) {
-          catOpacity = 1;
-          const u = (vistaSp - writeStart) / (writeEnd - writeStart); // 0 to 1
-          const numLetters = CATALYST_LETTERS.length; // 8
-          const strokeSpan = 0.24;
-          const step = (1 - strokeSpan) / (numLetters - 1);
-
-          let activeBrushX = 0;
-          let activeBrushY = 0;
-          let activeBrushScale = 1.0;
-          let activeFound = false;
-
-          for (let i = 0; i < numLetters; i++) {
-            const el = letterRefs.current[i];
-            if (!el) continue;
-
-            const lStart = i * step;
-            const lEnd = lStart + strokeSpan;
-
-            if (u < lStart) {
-              el.style.opacity = '0';
-              el.style.webkitMaskImage = 'none';
-              el.style.maskImage = 'none';
-              el.style.transform = 'scale(0.94)';
-            } else if (u >= lEnd) {
-              el.style.opacity = '1';
-              el.style.webkitMaskImage = 'none';
-              el.style.maskImage = 'none';
-              el.style.transform = 'scale(1)';
-            } else {
-              const localT = (u - lStart) / strokeSpan;
-              const strokeProg = smoothstep(0, 1, localT);
-              const pct = Math.round(-15 + strokeProg * 130);
-              el.style.opacity = '1';
-              const maskVal = `linear-gradient(135deg, rgba(0,0,0,1) 0%, rgba(0,0,0,1) ${Math.max(0, pct - 16)}%, rgba(0,0,0,0.6) ${pct}%, transparent ${pct + 18}%)`;
-              el.style.webkitMaskImage = maskVal;
-              el.style.maskImage = maskVal;
-              const letterScale = 0.94 + strokeProg * 0.06;
-              el.style.transform = `scale(${letterScale.toFixed(3)})`;
-
-              if (!activeFound) {
-                activeBrushX = el.offsetLeft + el.offsetWidth * (0.05 + strokeProg * 0.90);
-                activeBrushY = el.offsetTop + el.offsetHeight * (0.15 + strokeProg * 0.70) + Math.sin(strokeProg * Math.PI) * 10;
-                activeBrushScale = 0.85 + Math.sin(strokeProg * Math.PI) * 0.45;
-                activeFound = true;
-              }
-            }
-          }
-
-          if (brushTipRef.current) {
-            if (activeFound) {
-              const tipFade = u < 0.04 ? u / 0.04 : (u > 0.96 ? Math.max(0, (1 - u) / 0.04) : 1);
-              brushTipRef.current.style.opacity = tipFade.toFixed(3);
-              brushTipRef.current.style.transform = `translate3d(${activeBrushX.toFixed(1)}px, ${activeBrushY.toFixed(1)}px, 0px) scale(${activeBrushScale.toFixed(2)})`;
-            } else {
-              brushTipRef.current.style.opacity = '0';
-            }
-          }
-        } else {
-          // vistaSp > writeEnd: Entire word is fully painted and remains visible
-          letterRefs.current.forEach((el) => {
-            if (el) {
-              el.style.opacity = '1';
-              el.style.webkitMaskImage = 'none';
-              el.style.maskImage = 'none';
-              el.style.transform = 'scale(1)';
-            }
-          });
-          if (brushTipRef.current) {
-            brushTipRef.current.style.opacity = '0';
-          }
-
-          catOpacity = 1;
-          catScale = 1.02;
+          experienceRef.current.style.transform = `translate3d(calc(-50% + ${txtX.toFixed(2)}px), calc(-50% + ${(baseTxtY + lift).toFixed(2)}px), 0) scale(${sc.toFixed(3)})`;
+          experienceRef.current.style.opacity = op.toFixed(3);
         }
 
-        catalystRef.current.style.transform = `translate3d(calc(-50% + ${txtX.toFixed(2)}px), calc(-50% + ${catY.toFixed(2)}px), 0px) scale(${catScale.toFixed(3)})`;
-        catalystRef.current.style.opacity = catOpacity.toFixed(3);
-      }
+        // AIESEC in SLIIT — then PRESENTS
+        if (orgRef.current) {
+          // Own, longer timeline in scroll-vh (was ~13vh of scroll, now ~36vh) so it can be read
+          const t = smoothstep(44, 80, scrollVh);
+          const lift = isMob ? -30 : -44;
+          const yy = baseTxtY + lift + (1 - t) * 26;
+          orgRef.current.style.transform = `translate3d(calc(-50% + ${txtX.toFixed(2)}px), calc(-50% + ${yy.toFixed(2)}px), 0) scale(${(0.93 + t * 0.07).toFixed(3)})`;
+          orgRef.current.style.opacity = t.toFixed(3);
+        }
+        if (presentsRef.current) {
+          const t = smoothstep(68, 106, scrollVh);
+          const lift = isMob ? 14 : 32;
+          const yy = baseTxtY + lift + (1 - t) * 16;
+          presentsRef.current.style.transform = `translate3d(calc(-50% + ${txtX.toFixed(2)}px), calc(-50% + ${yy.toFixed(2)}px), 0)`;
+          presentsRef.current.style.opacity = t.toFixed(3);
+        }
 
-      // 3. Mt. Fuji (Asset 2): sinks down gently as you scroll
-      if (mtFujiRef.current) {
-        const fujiX = -x * 0.5;
-        const fujiY = -y * 0.2 + vistaSp * (isMob ? 45 : 80);
-        mtFujiRef.current.style.transform = `translate3d(${fujiX.toFixed(3)}%, ${fujiY.toFixed(2)}px, 0px)`;
-      }
+        // ---- 3. Mt. Fuji ----------------------------------------------------------------------
+        if (mtFujiRef.current) {
+          const fujiX = -x * 0.5;
+          const fujiY = -y * 0.2 + vistaSp * (isMob ? 45 : 80);
+          mtFujiRef.current.style.transform = `translate3d(${fujiX.toFixed(3)}%, ${fujiY.toFixed(2)}px, 0)`;
+        }
 
-      // 4. Shoreline Hills (Asset 4 & 5): slide gently apart and lower by 20px as you scroll
-      if (hillLeftRef.current) {
-        const hlX = -x * 1.5 - vistaSp * (isMob ? 10 : 18);
-        const hlY = -y * 0.4 + vistaSp * (isMob ? 12 : 20);
-        hillLeftRef.current.style.transform = `translate3d(${hlX.toFixed(3)}%, ${hlY.toFixed(2)}px, 0px)`;
-      }
+        // ---- 4. Shoreline hills ---------------------------------------------------------------
+        if (hillLeftRef.current) {
+          const hlX = -x * 1.5 - vistaSp * (isMob ? 10 : 18);
+          const hlY = -y * 0.4 + vistaSp * (isMob ? 12 : 20);
+          hillLeftRef.current.style.transform = `translate3d(${hlX.toFixed(3)}%, ${hlY.toFixed(2)}px, 0)`;
+        }
+        if (hillRightRef.current) {
+          const hrX = -x * 0.8 + vistaSp * (isMob ? 10 : 18);
+          const hrY = -y * 0.3 + vistaSp * (isMob ? 12 : 20);
+          hillRightRef.current.style.transform = `translate3d(${hrX.toFixed(3)}%, ${hrY.toFixed(2)}px, 0)`;
+        }
 
-      if (hillRightRef.current) {
-        const hrX = -x * 0.8 + vistaSp * (isMob ? 10 : 18);
-        const hrY = -y * 0.3 + vistaSp * (isMob ? 12 : 20);
-        hillRightRef.current.style.transform = `translate3d(${hrX.toFixed(3)}%, ${hrY.toFixed(2)}px, 0px)`;
-      }
+        // ---- 5. Torii gate zoom ---------------------------------------------------------------
+        if (toriiStageRef.current) {
+          const tScale = 1 + vistaSp * (isMob ? 2.6 : 3.6);
+          const tY = y * 0.8 + vistaSp * (isMob ? 12 : 18);
+          const tX = x * (isMob ? 1.4 : 2.2);
+          const tOpacity = vistaSp > 0.42 ? Math.max(0, 1 - (vistaSp - 0.42) * 14) : 1;
+          toriiStageRef.current.style.transform = `translate3d(calc(-50% + ${tX.toFixed(2)}px), ${tY.toFixed(2)}%, 0) scale(${tScale.toFixed(3)})`;
+          toriiStageRef.current.style.opacity = tOpacity.toFixed(3);
+        }
+        if (toriiBackPillarsRef.current) {
+          const bpX = -x * (isMob ? 2.0 : 3.2);
+          toriiBackPillarsRef.current.style.transform = `translate3d(${bpX.toFixed(2)}px, 0, 0)`;
+        }
 
-      // 5. Unified Torii Gate: Zooms in 3D perspective as you scroll forward!
-      if (toriiStageRef.current) {
-        const tScale = 1 + vistaSp * (isMob ? 2.6 : 3.6);
-        const tY = y * 0.8 + vistaSp * (isMob ? 12 : 18);
-        const tX = x * (isMob ? 1.4 : 2.2);
-        const tOpacity = vistaSp > 0.42 ? Math.max(0, 1 - (vistaSp - 0.42) * 14) : 1;
-        toriiStageRef.current.style.transform = `translate3d(calc(-50% + ${tX.toFixed(2)}px), ${tY.toFixed(2)}%, 0px) scale(${tScale.toFixed(3)})`;
-        toriiStageRef.current.style.opacity = tOpacity.toFixed(3);
-      }
+        // ---- 6. Water + ripple ----------------------------------------------------------------
+        if (waterRef.current) {
+          const wX = -x * 1.2;
+          const wY = vistaSp * (isMob ? 140 : 200);
+          const wScale = 1 + vistaSp * (isMob ? 0.35 : 0.45);
+          waterRef.current.style.transform = `translate3d(${wX.toFixed(2)}px, ${wY.toFixed(2)}px, 0) scale(${wScale.toFixed(3)})`;
+        }
+        if (rippleRef.current) {
+          const rX = x * 1.5;
+          const rY = vistaSp * (isMob ? 180 : 260);
+          const rScale = 1 + vistaSp * (isMob ? 1.4 : 1.8);
+          const rOpacity = vistaSp > 0.42 ? Math.max(0, 1 - (vistaSp - 0.42) * 14) : 1;
+          rippleRef.current.style.transform = `translate3d(calc(-50% + ${rX.toFixed(2)}px), ${rY.toFixed(2)}px, 0) scale(${rScale.toFixed(3)})`;
+          rippleRef.current.style.opacity = rOpacity.toFixed(3);
+        }
 
-      // Rear pillars move with subtle parallax inside the Torii stage
-      if (toriiBackPillarsRef.current) {
-        const bpX = -x * (isMob ? 2.0 : 3.2);
-        toriiBackPillarsRef.current.style.transform = `translate3d(${bpX.toFixed(2)}px, 0px, 0px)`;
-      }
+        // ---- 7. Pontoon (same as original, incl. the subtle rotateY) ----
+        if (pontoonRef.current) {
+          const pRot = isMob ? 0 : x * 2.5;
+          const pX2 = isMob ? 0 : x * 2.0;
+          const pY2 = vistaSp * (isMob ? 280 : 420);
+          const pScale = 1 + vistaSp * (isMob ? 0.85 : 1.15);
+          pontoonRef.current.style.transform = `translate3d(calc(-50% + ${pX2.toFixed(2)}px), ${pY2.toFixed(2)}px, 0) scale(${pScale.toFixed(3)}) rotateY(${pRot.toFixed(2)}deg)`;
+        }
 
-      // 6. Lake Water Surface (Asset 3): sinks downward and expands forward as you zoom in
-      if (waterRef.current) {
-        const wX = -x * 1.2;
-        const wY = vistaSp * (isMob ? 140 : 200);
-        const wScale = 1 + vistaSp * (isMob ? 0.35 : 0.45);
-        waterRef.current.style.transform = `translate3d(${wX.toFixed(2)}px, ${wY.toFixed(2)}px, 0px) scale(${wScale.toFixed(3)})`;
-      }
+        // ---- 8. Scroll cue fades as soon as the user starts scrolling ---------------------------
+        if (cueRef.current) {
+          const o = clamp01(1 - sp * 7);
+          cueRef.current.style.opacity = o.toFixed(3);
+          cueRef.current.style.transform = `translate3d(0, ${(sp * 40).toFixed(1)}px, 0)`;
+          cueRef.current.style.pointerEvents = sp > 0.1 ? 'none' : 'auto';
+        }
 
-      // Water Ripple Ring: sinks down and expands forward along with the water
-      if (rippleRef.current) {
-        const rX = x * 1.5;
-        const rY = vistaSp * (isMob ? 180 : 260);
-        const rScale = 1 + vistaSp * (isMob ? 1.4 : 1.8);
-        const rOpacity = vistaSp > 0.42 ? Math.max(0, 1 - (vistaSp - 0.42) * 14) : 1;
-        rippleRef.current.style.transform = `translate3d(calc(-50% + ${rX.toFixed(2)}px), ${rY.toFixed(2)}px, 0px) scale(${rScale.toFixed(3)})`;
-        rippleRef.current.style.opacity = rOpacity.toFixed(3);
-      }
+        // ---- 9. Curtain: Section 2 slides up over the vista --------------------------------------
+        const transProg = clamp01((sp - CURTAIN_START) / (CURTAIN_END - CURTAIN_START));
+        const transE = easeInOutSine(transProg);
+        const slideY = (1 - transE) * 100;
 
-      // 7. Floating Pontoon (Asset 10): zooms in strongly with perspective and glides downward off-screen as you scroll
-      if (pontoonRef.current) {
-        const pRot = isMob ? 0 : x * 2.5;
-        const pX = isMob ? 0 : x * 2.0;
-        const pY = vistaSp * (isMob ? 280 : 420);
-        const pScale = 1 + vistaSp * (isMob ? 0.85 : 1.15);
-        pontoonRef.current.style.transform = `translate3d(calc(-50% + ${pX.toFixed(2)}px), ${pY.toFixed(2)}px, 0px) scale(${pScale.toFixed(3)}) rotateY(${pRot.toFixed(2)}deg)`;
-        pontoonRef.current.style.opacity = '1';
-      }
-
-      // 8. Section 2 Smooth Opaque Slide-up (Solid Curtain):
-      // The completed vista (Section 1) is held firmly from 0.50 to 0.76.
-      // From 0.76 to 0.98, Section 2 slides smoothly upwards from 100% to 0% as a solid opaque curtain.
-      // This completely eliminates double-exposure / ghosting between Section 1 and Section 2.
-      if (!isLockedToHeroRef.current) {
-        const transProg = sp < 0.76 ? 0 : Math.min(1, Math.max(0, (sp - 0.76) / 0.22));
-        const slideY = (1 - transProg) * 100;
         if (secondSectionRef.current) {
           secondSectionRef.current.style.transform = `translate3d(0, ${slideY.toFixed(2)}%, 0)`;
           secondSectionRef.current.style.pointerEvents = transProg > 0.85 ? 'auto' : 'none';
         }
 
-        // Trigger bubble entrance animation as soon as Section 2 begins sliding into view!
-        if (!hasTriggeredHeroRef.current && sp >= 0.76) {
-          hasTriggeredHeroRef.current = true;
-          setIsSection2Active(true);
-          // Hero entrance triggered
+        if (heroTrackRef.current) {
+          // The hero eases down from a slight zoom while it slides up: feels like it settles into place.
+          heroTrackRef.current.style.transform = `scale(${(1.08 - 0.08 * transE).toFixed(4)})`;
+        }
+        if (veilRef.current) {
+          // One veil does both jobs: opening fade-in at load + dimming under the curtain.
+          const veil = Math.max(1 - introE, transE * 0.6);
+          veilRef.current.style.opacity = veil.toFixed(3);
+        }
+        if (curtainShadowRef.current) {
+          const vh = window.innerHeight;
+          const edge = (slideY / 100) * vh; // y of the curtain's top edge
+          const fadeIn = clamp01(transProg * 8);
+          const fadeOut = 1 - clamp01((transProg - 0.88) * 8);
+          curtainShadowRef.current.style.transform = `translate3d(0, ${(edge - 140).toFixed(1)}px, 0)`;
+          curtainShadowRef.current.style.opacity = (fadeIn * fadeOut).toFixed(3);
         }
 
-        // Once the curtain slide completes at sp >= 0.98, lock permanently into Section 2!
-        if (sp >= 0.98) {
+        if (sp >= LOCK_AT) {
           lockToSection2();
         }
       }
 
-      rafId.current = requestAnimationFrame(render);
+      if (isLockedToHeroRef.current) return; // loop ends; effect cleanup handles the rest
+      raf = requestAnimationFrame(render);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true });
-
-    if (window.DeviceOrientationEvent && typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
-      window.addEventListener('deviceorientation', handleDeviceOrientation);
-    }
-
-    rafId.current = requestAnimationFrame(render);
+    raf = requestAnimationFrame(render);
 
     return () => {
+      disposed = true;
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onResize);
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('deviceorientation', handleDeviceOrientation);
-      if (rafId.current) cancelAnimationFrame(rafId.current);
     };
-  }, [handleMouseMove, handleTouchMove, handleDeviceOrientation]);
-
-  // Active view: Natural Daylight (Red Sun)
-  const currentFilter = {
-    filter: 'none',
-    skyTint: 'transparent',
-    isMoon: false,
-  };
+  }, [isLockedToHero, lockToSection2]);
 
   return (
-    <div className={`relative bg-[#F8F3E9] ${theme === 'classic' ? 'theme-classic' : ''}`}>
+    <div className="relative bg-[#F8F3E9]">
+      {/* Background music: starts from 0:00 on every load, loops forever, has a mute button */}
+      <BackgroundMusic src="/audio/background-music.mp3" volume={0.45} />
 
-      {/* Top Crimson Accent Stripe (Section 1 only) */}
+      {/* Enter screen: one click starts the music + the intro */}
+      <EntryGate visible={!gateOpen} onEnter={handleEnter} />
+
+      {/* Top Crimson Accent Stripe (entrance only) */}
       {!isLockedToHero && (
         <motion.div
           className="fixed top-0 left-1/2 w-36 sm:w-52 md:w-64 h-2 sm:h-2.5 bg-[#bf3030] z-40 rounded-b cursor-pointer origin-top"
@@ -529,216 +663,154 @@ export default function HomePage() {
         />
       )}
 
-      {/* SECTION 1: 3D PARALLAX SCENE (Sticky Viewport in 320vh scroll track) */}
-      <div
-        ref={heroTrackRef}
-        className="relative h-[320vh] w-full"
-        style={{ display: isLockedToHero ? 'none' : 'block' }}
-      >
-        <div
-          className="sticky top-0 h-screen w-full overflow-hidden pointer-events-none select-none z-10"
-          style={{ filter: currentFilter.filter }}
-        >
-        {/* Floating Sakura Petals Particle Simulation (confined exclusively to Section 1) */}
-        <SakuraPetals enabled={sakuraEnabled} mouseVelX={mouseVelX} className="absolute inset-0 pointer-events-none z-20 w-full h-full" />
-
-        {/* Sky Background */}
-        <div className="sky-bg" />
-
-        {/* Atmosphere Tint */}
-        <div
-          className="absolute inset-0 pointer-events-none transition-all duration-700"
-          style={{ background: currentFilter.skyTint }}
-        />
-
-        {/* GIANT RED SUN / LUMINOUS MOON */}
-        <div
-          ref={sunMoonRef}
-          className={`celestial-body ${currentFilter.isMoon ? 'is-moon' : 'is-sun'}`}
-        />
-
-        {/* SEQUENTIAL TYPOGRAPHY NEAR THE MOON */}
-        <div className="moon-title-stage">
-          <div ref={experienceRef} className="title-word-item">
-            <span className="title-experience">EXPERIENCE</span>
-          </div>
-          <div ref={catalystRef} className="title-word-item catalyst-word-wrapper">
-            <span ref={presenterRef} className="title-presenter">
-              AIESEC IN SLIIT PRESENTS
-            </span>
-            <h1 className="title-catalyst catalyst-brush-track">
-              {CATALYST_LETTERS.map((char, index) => (
-                <span
-                  key={index}
-                  ref={(el) => {
-                    letterRefs.current[index] = el;
-                  }}
-                  className="brush-letter"
-                >
-                  {char}
-                </span>
-              ))}
-              <div ref={brushTipRef} className="brush-tip-cursor" />
-            </h1>
-          </div>
-        </div>
-
-        {/* Mt. Fuji Distant Peaks */}
-        <div ref={mtFujiRef} className="mt-fuji-layer" style={{ transformStyle: 'preserve-3d' }} />
-
-        {/* Drifting Lake Mist / Clouds */}
-        {mistEnabled && <div className="mist-layer-box" />}
-
-        {/* Shoreline Hills Framing Sides */}
-        <div ref={hillRightRef} className="hill-right-layer" style={{ transformStyle: 'preserve-3d' }} />
-        <div ref={hillLeftRef} className="hill-left-layer" style={{ transformStyle: 'preserve-3d' }} />
-
-        {/* Lake Water Surface (Asset 3 - Pristine reflection path) */}
-        <div ref={waterRef} className="water-lake-layer" style={{ transformStyle: 'preserve-3d' }} />
-
-        {/* Water Ripple Ring Animation */}
-        <div ref={rippleRef} className="water-ripple-center">
-          <div className="water-ring" />
-          <div className="water-ring _2" />
-        </div>
-
-        {/* UNIFIED RYŌBU-TORII ASSEMBLY (No duplicate gates, perfectly aligned!) */}
-        <div ref={toriiStageRef} className="torii-stage">
-          {/* Rear support columns in 3D perspective */}
-          <div ref={toriiBackPillarsRef} className="torii-back-pillars" />
-
-          {/* Main front Torii gate */}
-          <div className="torii-front-gate" />
-        </div>
-
-        {/* Wooden Floating Pontoon Dock */}
-        <div
-          ref={pontoonRef}
-          className="pontoon-dock"
-          onClick={scrollToStory}
-          title="Scroll down or click to enter Catalyst"
-        />
-      </div>
-
-        {/* "SCROLL DOWN TO ENTER" HERO ENTRANCE GROUP */}
-        <motion.div
-          className="fixed bottom-6 sm:bottom-10 left-1/2 z-30 flex flex-col items-center justify-center gap-1 sm:gap-1.5 cursor-pointer text-center select-none"
-          style={{
-            left: '50%',
-            x: '-50%',
-            pointerEvents: scrollProgress > 0.15 ? 'none' : 'auto',
-          }}
-          initial={{
-            opacity: 0,
-            y: shouldReduceMotion ? 0 : isMobile ? 8 : 12,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-          }}
-          transition={{
-            duration: 0.8,
-            ease: TWEEN_EASING,
-          }}
-          whileHover={shouldReduceMotion ? undefined : { scale: 1.01 }}
-          whileTap={shouldReduceMotion ? undefined : { scale: 0.99 }}
-          onClick={scrollToStory}
-        >
+      {/* SECTION 1: 3D PARALLAX SCENE — unmounted completely once locked (frees images + canvas) */}
+      {!isLockedToHero && (
+        <div ref={trackRef} className="entrance-track relative w-full">
           <div
-            className="flex flex-col items-center justify-center gap-1 sm:gap-1.5"
-            style={{
-              opacity: Math.max(0, 1 - scrollProgress * 4),
-              transform: `translateY(${scrollProgress * 30}px)`,
-            }}
+            ref={stickyRef}
+            className="entrance-sticky sticky top-0 w-full overflow-hidden pointer-events-none select-none z-10"
           >
-            <span className="text-white/90 font-sans text-[9px] sm:text-[11px] tracking-[0.25em] pl-[0.25em] uppercase font-bold text-shadow text-center">
-              Scroll Down to Enter
-            </span>
-            <div className="w-4 h-7 sm:w-5 sm:h-8 rounded-full border-2 border-white/60 flex items-start justify-center p-1 shadow-lg bg-black/20 backdrop-blur-xs">
-              <div className="w-1 h-1.5 sm:w-1.5 sm:h-2 bg-white rounded-full mt-0.5" />
-            </div>
-            <ChevronDown className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white/70 -mt-1" />
-          </div>
-        </motion.div>
-      </div>
+            <div ref={sceneRef} className="entrance-scene">
+              {/* Falling petals (wind comes straight from a ref: no re-render per mouse move) */}
+              <SakuraPetals
+                enabled={sakuraEnabled}
+                velRef={mouseVelRef}
+                className="absolute inset-0 pointer-events-none z-20 w-full h-full"
+              />
 
-      {/* SECTIONS 2–6 CONTAINER (Solid Opaque Curtain on entrance, normal scroll flow when locked) */}
+              {/* Sky */}
+              <div className="sky-bg" />
+
+              {/* Red sun: wrapper handles position/parallax, disc handles the (sharp) scale */}
+              <div ref={sunMoonRef} className="celestial-body">
+                <div ref={sunDiscRef} className="sun-disc" />
+              </div>
+
+              {/* Typography near the sun */}
+              <div className="moon-title-stage">
+                <div ref={experienceRef} className="title-word-item experience-word">
+                  <span className="title-experience">EXPERIENCE</span>
+                  <span className="title-kanji" aria-hidden="true">
+                    <i />
+                    <b>体験</b>
+                    <i />
+                  </span>
+                </div>
+
+                <div ref={orgRef} className="title-word-item org-word">
+                  <span className="title-org">
+                    AIESEC <em className="title-org-in">in</em> SLIIT
+                  </span>
+                </div>
+
+                <div ref={presentsRef} className="title-word-item presents-word">
+                  <span className="presents-line">
+                    <i />
+                    <b>PRESENTS</b>
+                    <i />
+                  </span>
+                </div>
+              </div>
+
+              {/* Mt. Fuji */}
+              <div ref={mtFujiRef} className="mt-fuji-layer" />
+
+              {/* Shoreline hills */}
+              <div ref={hillRightRef} className="hill-right-layer" />
+              <div ref={hillLeftRef} className="hill-left-layer" />
+
+              {/* Lake */}
+              <div ref={waterRef} className="water-lake-layer" />
+              <div ref={rippleRef} className="water-ripple-center">
+                <div className="water-ring" />
+                <div className="water-ring _2" />
+              </div>
+
+              {/* Ryōbu-torii */}
+              <div ref={toriiStageRef} className="torii-stage">
+                <div ref={toriiBackPillarsRef} className="torii-back-pillars" />
+                <div className="torii-front-gate" />
+              </div>
+
+              {/* Pontoon dock (click to enter) */}
+              <div
+                ref={pontoonRef}
+                className="pontoon-dock"
+                onClick={scrollToStory}
+                title="Scroll down or click to enter Catalyst"
+              />
+
+              {/* Atmosphere: static vignette for depth + opening/closing veil */}
+              <div className="scene-vignette" />
+              <div ref={veilRef} className="scene-veil" style={{ opacity: 1 }} />
+            </div>
+          </div>
+
+          {/* Scroll cue (appears after "Enter") */}
+          {gateOpen && (
+          <div className="scroll-cue" onClick={scrollToStory}>
+            <div ref={cueRef} className="scroll-cue-inner">
+              <span className="scroll-cue-label">Scroll to enter</span>
+              <span className="scroll-cue-line">
+                <span className="scroll-cue-dot" />
+              </span>
+              <span className="scroll-cue-kanji" aria-hidden="true">
+                入る
+              </span>
+            </div>
+          </div>
+          )}
+        </div>
+      )}
+
+      {/* Soft shadow riding on the curtain's top edge */}
+      {!isLockedToHero && <div ref={curtainShadowRef} className="curtain-edge-shadow" style={{ opacity: 0 }} />}
+
+      {/* SECTIONS 2–6 (fixed curtain on entrance → normal flow once locked) */}
       <div
         ref={secondSectionRef}
         className={`w-full z-30 bg-[#F8F3E9] ${
           isLockedToHero
             ? 'relative pointer-events-auto'
-            : 'fixed inset-0 h-screen overflow-hidden pointer-events-none'
+            : 'fixed inset-0 h-screen overflow-hidden pointer-events-none will-change-transform'
         }`}
         style={{
           transform: isLockedToHero ? 'none' : 'translate3d(0, 100%, 0)',
         }}
       >
-                {/* SECTION 2: JAPANESE SAMURAI PARALLAX HERO */}
-        <div id="hero" className="w-full catalyst-section-isolate">
-          <JapaneseParallaxHero />
+        {/* SECTION 2: JAPANESE SAMURAI PARALLAX HERO */}
+        <div
+          id="hero"
+          ref={heroTrackRef}
+          className={`w-full catalyst-section-isolate ${isLockedToHero ? 'hero-pin-track' : ''}`}
+        >
+          <div ref={heroStickyRef} className={isLockedToHero ? 'hero-pin-sticky' : ''}>
+            <JapaneseParallaxHero />
+          </div>
         </div>
 
         {/* SECTION 3: ANIMATED GALLERY */}
         <div id="gallery" className="w-full catalyst-section-isolate">
-          <AnimatedGalleryDemo />
+          <AnimatedGalleryDemo active={isLockedToHero} />
         </div>
 
         {/* SECTION 4: FULL SCREEN SCROLL FX (GSAP ScrollTrigger Slideshow) */}
         <div className="catalyst-section-isolate">
-          <FullScreenScrollFXDemo />
+          <FullScreenScrollFXDemo active={isLockedToHero} />
         </div>
 
         {/* SECTION 6: 3D COVERFLOW CAROUSEL */}
         <div className="catalyst-section-isolate">
-          <CoverFlowCarouselDemo />
+          <CoverFlowCarouselDemo active={isLockedToHero} />
+        </div>
+
+        {/* SECTION 7: PARTNERSHIP ANNOUNCEMENT */}
+        <div className="catalyst-section-isolate">
+          <PartnershipAnnouncement active={isLockedToHero} />
         </div>
 
         {/* Outro / Footer */}
-        <section id="contact" className="relative flex flex-col min-h-[38svh] w-full items-center justify-center bg-[#F3ECE0] px-6 py-14 text-center select-none border-t border-[#252321]/10 overflow-hidden">
-          {/* Subtle Traditional Pagoda Watermark (Left) */}
-          <div className="pointer-events-none absolute left-4 lg:left-12 bottom-0 z-0 opacity-[0.06] select-none hidden sm:block max-w-[220px]">
-            <img
-              src="/assets/illustrations/gdj-building-8171699.svg"
-              alt=""
-              className="w-full h-auto object-contain filter grayscale"
-            />
-          </div>
-
-          {/* Subtle Bonsai Tree Watermark (Right) */}
-          <div className="pointer-events-none absolute right-4 lg:right-12 bottom-0 z-0 opacity-[0.06] select-none hidden sm:block max-w-[180px]">
-            <img
-              src="/assets/illustrations/gdj-bonsai-tree-8143900.svg"
-              alt=""
-              className="w-full h-auto object-contain filter grayscale"
-            />
-          </div>
-
-          {/* Authentic Ink Samurai Illustration */}
-          <div className="relative mb-4 max-w-[120px] sm:max-w-[150px] md:max-w-[180px] h-auto pointer-events-none select-none z-10">
-            <div
-              className="absolute -inset-4 rounded-full blur-2xl opacity-40 pointer-events-none"
-              style={{
-                background: "radial-gradient(circle, rgba(201, 54, 43, 0.25) 0%, transparent 70%)",
-              }}
-            />
-            <img
-              src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
-              alt="Catalyst 7.0 Bushido Samurai"
-              className="w-full h-auto object-contain filter drop-shadow-[0_12px_24px_rgba(37,35,33,0.18)]"
-            />
-          </div>
-
-          <div className="flex items-center gap-3 mb-3 text-[10px] font-['Noto_Sans_JP',sans-serif] tracking-[0.3em] text-[#C9362B] uppercase font-bold z-10">
-            <span className="w-8 h-[1px] bg-[#C9362B]/40" />
-            <span>武士道 · DARE BEYOND DEFINITION</span>
-            <span className="w-8 h-[1px] bg-[#C9362B]/40" />
-          </div>
-
-          <p className="max-w-md font-mono text-xs uppercase leading-relaxed tracking-[0.3em] text-[#736B63] font-bold z-10">
-            Scroll back up to explore previous realms.
-          </p>
-        </section>
+        <OutroFooter active={isLockedToHero} />
       </div>
     </div>
   );
