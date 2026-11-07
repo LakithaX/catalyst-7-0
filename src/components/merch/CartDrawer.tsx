@@ -37,7 +37,7 @@ export const CartDrawer: React.FC = () => {
                     CATALYST 7.0
                   </span>
                 </div>
-                <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321]">
+                <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321]">
                   CLAIM CART ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
                 </h3>
               </div>
@@ -61,7 +61,7 @@ export const CartDrawer: React.FC = () => {
                       className="w-full h-auto object-contain filter drop-shadow-[0_4px_10px_rgba(201,54,43,0.18)]"
                     />
                   </div>
-                  <h4 className="font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
+                  <h4 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
                     YOUR CART IS EMPTY
                   </h4>
                   <p className="font-['Droid_Serif',Georgia,serif] italic text-xs text-[#736B63] max-w-xs mb-6">

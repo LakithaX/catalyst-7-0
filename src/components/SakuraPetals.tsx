@@ -27,10 +27,11 @@ interface Petal {
 interface SakuraPetalsProps {
   enabled: boolean;
   mouseVelX?: number;
+  windRef?: React.RefObject<number>;
   className?: string;
 }
 
-export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX = 0, className }) => {
+export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX = 0, windRef, className }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const animIdRef = useRef<number | null>(null);
   const smoothedWindRef = useRef<number>(0);
@@ -42,20 +43,20 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
   }, [mouseVelX]);
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    let dpr = window.devicePixelRatio || 1;
+    let dpr = Math.min(window.devicePixelRatio || 1, 2);
     let width = window.innerWidth;
     let height = window.innerHeight;
 
     const updateSize = () => {
       if (!canvas) return;
-      dpr = window.devicePixelRatio || 1;
+      dpr = Math.min(window.devicePixelRatio || 1, width < 768 ? 1.5 : 2);
       width = window.innerWidth;
       height = window.innerHeight;
       canvas.width = Math.round(width * dpr);
@@ -68,7 +69,7 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
     window.addEventListener('resize', updateSize);
 
     // 34 organic cherry blossom petals across realistic depth planes
-    const count = 34;
+    const count = width < 768 ? 20 : 34;
     const petals: Petal[] = [];
     for (let i = 0; i < count; i++) {
       const z = Math.random();
@@ -144,19 +145,28 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
       c.restore();
     };
 
+    // Paint the detailed gradient and curves once; frames only transform a bitmap.
+    const sprite = document.createElement('canvas');
+    sprite.width = sprite.height = 128;
+    const spriteContext = sprite.getContext('2d');
+    if (!spriteContext) return;
+    drawPetal(spriteContext, 64, 64, 96, 0, 1, 1, 1);
+
+    petals.sort((a, b) => a.z - b.z);
+    let inView = false;
+    let disposed = false;
     const loop = () => {
+      animIdRef.current = null;
+      if (disposed || !inView || document.hidden) return;
       // Clear with DPR scale
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 
       // Smoothly react to mouse velocity for responsive wind gusts
-      const targetWind = Math.max(-2.0, Math.min(2.0, mouseVelRef.current * 0.4));
+      const targetWind = Math.max(-2.0, Math.min(2.0, (windRef?.current ?? mouseVelRef.current) * 0.4));
       smoothedWindRef.current += (targetWind - smoothedWindRef.current) * 0.05;
       const wind = smoothedWindRef.current;
-
-      // Sort by depth (far to near)
-      petals.sort((a, b) => a.z - b.z);
 
       for (const p of petals) {
         p.phase += p.swaySpeed;
@@ -175,7 +185,14 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
         const scaleX = Math.abs(Math.cos(p.rotationY)) * 0.65 + 0.35;
         const scaleY = Math.abs(Math.sin(p.rotationX)) * 0.65 + 0.35;
 
-        drawPetal(ctx, p.x, p.y, p.size, p.rotationZ, scaleX, scaleY, p.opacity);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rotationZ);
+        ctx.scale(scaleX, scaleY);
+        ctx.globalAlpha = p.opacity;
+        const spriteSize = p.size * 128 / 96;
+        ctx.drawImage(sprite, -spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize);
+        ctx.restore();
 
         // Respawn gracefully when drifting out of view
         if (p.y > height + 40) {
@@ -192,13 +209,27 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({ enabled, mouseVelX =
       animIdRef.current = requestAnimationFrame(loop);
     };
 
-    loop();
+    const resume = () => {
+      if (!disposed && inView && !document.hidden && animIdRef.current === null) {
+        animIdRef.current = requestAnimationFrame(loop);
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      resume();
+    });
+    observer.observe(canvas);
+    document.addEventListener('visibilitychange', resume);
 
     return () => {
+      disposed = true;
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('resize', updateSize);
       if (animIdRef.current) cancelAnimationFrame(animIdRef.current);
+      animIdRef.current = null;
     };
-  }, [enabled]);
+  }, [enabled, windRef]);
 
   if (!enabled) return null;
 

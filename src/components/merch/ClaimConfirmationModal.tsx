@@ -67,7 +67,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321] mb-3">
+                <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321] mb-3">
                   CONFIRM MERCHANDISE RESERVATION
                 </h3>
 
@@ -153,7 +153,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                   </span>
                 </div>
 
-                <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl uppercase tracking-wider text-[#252321] mb-2">
+                <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-4xl uppercase tracking-wider text-[#252321] mb-2">
                   MERCHANDISE CLAIMED
                 </h3>
 
