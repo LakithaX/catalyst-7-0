@@ -193,7 +193,7 @@ html, body {
 .sky-bg {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.png");
+  background-image: url("/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.webp");
   background-position: 50% 35px;
   background-size: cover;
   pointer-events: none;
@@ -312,7 +312,7 @@ html, body {
   left: 0;
   right: 0;
   height: 48vh;
-  background-image: url("/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.png");
+  background-image: url("/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.webp");
   background-position: 50% 100%;
   background-repeat: no-repeat;
   background-size: auto min(36vh, 360px);
@@ -334,7 +334,7 @@ html, body {
   left: -20%;
   right: -20%;
   height: 22vh;
-  background-image: url("/assets/aistudio/Asset_12___Drifting_Mist_Layer_e20761d0.png");
+  background-image: url("/assets/aistudio/Asset_12___Drifting_Mist_Layer_e20761d0.webp");
   background-position: 50% 100%;
   background-repeat: repeat-x;
   background-size: 1300px auto;
@@ -357,7 +357,7 @@ html, body {
   left: -8vw;
   width: 68vw;
   height: 46vh;
-  background-image: url("/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.png");
+  background-image: url("/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.webp");
   background-position: left bottom;
   background-repeat: no-repeat;
   background-size: auto 100%;
@@ -378,7 +378,7 @@ html, body {
   right: -8vw;
   width: 68vw;
   height: 46vh;
-  background-image: url("/assets/aistudio/Asset_5_clean.png");
+  background-image: url("/assets/aistudio/Asset_5_clean.webp");
   background-position: right bottom;
   background-repeat: no-repeat;
   background-size: auto 100%;
@@ -400,7 +400,7 @@ html, body {
   left: 0;
   right: 0;
   height: 42vh;
-  background-image: url("/assets/aistudio/Asset_3_clean.png");
+  background-image: url("/assets/aistudio/Asset_3_clean.webp");
   background-position: 50% 0%;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -434,7 +434,7 @@ html, body {
 .torii-back-pillars {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.png");
+  background-image: url("/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.webp");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -451,7 +451,7 @@ html, body {
 .torii-front-gate {
   position: absolute;
   inset: 0;
-  background-image: url("/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.png");
+  background-image: url("/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.webp");
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
@@ -470,7 +470,7 @@ html, body {
   transform: translateX(-50%);
   width: min(65vw, 660px);
   aspect-ratio: 1774 / 831;
-  background-image: url("/assets/aistudio/Asset_10_clean.png");
+  background-image: url("/assets/aistudio/Asset_10_clean.webp");
   background-size: 100% 100%;
   background-position: center bottom;
   background-repeat: no-repeat;
@@ -1108,4 +1108,9 @@ html, body {
 }
 @media (prefers-reduced-motion: reduce) {
   .hero-pin-track { --hero-pin: 0lvh; }
+}
+/* Osaka Bright's painted strokes extend well above its font line box. */
+.brush-heading {
+  padding-top: 0.35em;
+  line-height: 1.2;
 }

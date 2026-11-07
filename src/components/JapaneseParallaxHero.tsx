@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ChevronDown } from 'lucide-react';
 import { Navbar } from './Navbar';
@@ -12,7 +12,7 @@ const MIST_IMG = '/assets/hero-section-assets/atmospheric-mist.webp';
 const PAGODA_IMG = '/assets/hero-section-assets/pagoda.webp';
 const TORII_IMG = '/assets/hero-section-assets/torii-gate.webp';
 const BRUSH_IMG = '/assets/hero-section-assets/brush-strokes.webp';
-const FOREGROUND_IMG = '/assets/hero-section-assets/foreground-landscape.png';
+const FOREGROUND_IMG = '/assets/hero-section-assets/foreground-landscape.webp';
 const SAKURA_IMG = '/assets/hero-section-assets/sakura-branch.webp';
 const LOGO_IMG = '/assets/catalyst_7_logo.png';
 
@@ -51,7 +51,6 @@ export const JapaneseParallaxHero: React.FC = () => {
   const lastMouseX = useRef(0);
   const lastMouseTime = useRef(Date.now());
   const isMobileRef = useRef(false);
-  const [mouseVelX, setMouseVelX] = useState(0);
 
   useEffect(() => {
     const onResize = () => {
@@ -85,12 +84,15 @@ export const JapaneseParallaxHero: React.FC = () => {
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduceMotion) return;
 
-    let frame = 0;
+    let inView = false;
+    let disposed = false;
     const set = (el: HTMLDivElement | null, px: number, py: number) => {
       if (el) el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
     };
 
     const render = () => {
+      rafId.current = null;
+      if (disposed || !inView || document.hidden) return;
       const lerp = 0.07;
       currentX.current += (targetX.current - currentX.current) * lerp;
       currentY.current += (targetY.current - currentY.current) * lerp;
@@ -129,12 +131,8 @@ export const JapaneseParallaxHero: React.FC = () => {
         logoRef.current.style.opacity = String(Math.max(0, 1 - sy / (vh * 0.8)));
       }
 
-      // Decay velocity and push to React state only every few frames (and only if changed)
+      // Canvas reads wind directly without re-rendering the hero's image layers.
       velRef.current *= 0.92;
-      if (++frame % 4 === 0) {
-        const v = Math.round(velRef.current * 10) / 10;
-        setMouseVelX((prev) => (prev === v ? prev : v));
-      }
 
       rafId.current = requestAnimationFrame(render);
     };
@@ -143,12 +141,26 @@ export const JapaneseParallaxHero: React.FC = () => {
     if (window.DeviceOrientationEvent && typeof (DeviceOrientationEvent as any).requestPermission !== 'function') {
       window.addEventListener('deviceorientation', handleDeviceOrientation);
     }
-    rafId.current = requestAnimationFrame(render);
+    const resume = () => {
+      if (!disposed && inView && !document.hidden && rafId.current === null) {
+        rafId.current = requestAnimationFrame(render);
+      }
+    };
+    const observer = new IntersectionObserver(([entry]) => {
+      inView = entry.isIntersecting;
+      resume();
+    });
+    if (rootRef.current) observer.observe(rootRef.current);
+    document.addEventListener('visibilitychange', resume);
 
     return () => {
+      disposed = true;
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', resume);
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('deviceorientation', handleDeviceOrientation);
       if (rafId.current) cancelAnimationFrame(rafId.current);
+      rafId.current = null;
     };
   }, [handleMouseMove, handleDeviceOrientation]);
 
@@ -165,7 +177,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       className="relative w-full h-screen min-h-[640px] max-h-[1200px] overflow-hidden bg-[#F8F3E9] text-[#252321] select-none"
     >
       {/* Petals */}
-      <SakuraPetals enabled mouseVelX={mouseVelX} className="absolute inset-0 pointer-events-none z-[25] w-full h-full" />
+      <SakuraPetals enabled velRef={velRef} className="absolute inset-0 pointer-events-none z-[25] w-full h-full" />
 
       {/* L1: Enso sun */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-[58%] sm:-translate-y-[55%] md:-translate-y-[53%] w-[min(65vw,320px)] sm:w-[min(54vw,400px)] md:w-[min(48vw,480px)] aspect-square pointer-events-none z-10">

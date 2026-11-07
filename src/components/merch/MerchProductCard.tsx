@@ -74,7 +74,7 @@ export const MerchProductCard: React.FC<MerchProductCardProps> = ({ product }) =
         </div>
 
         {/* Status indicator bar */}
-        <div className="relative z-10 flex items-center justify-between border-t border-[#252321]/10 pt-2.5">
+        <div className="relative z-10 flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 border-t border-[#252321]/10 pt-2.5">
           <span className="text-[9.5px] font-['Montserrat',sans-serif] tracking-[0.2em] text-[#736B63] uppercase font-bold flex items-center gap-1.5">
             <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B]" />
             {product.claimStatus}
@@ -102,7 +102,7 @@ export const MerchProductCard: React.FC<MerchProductCardProps> = ({ product }) =
           </p>
         </div>
 
-        <div className="pt-3 border-t border-[#252321]/10 flex items-center justify-between text-[11px] font-['Montserrat',sans-serif]">
+        <div className="pt-3 border-t border-[#252321]/10 flex flex-wrap items-center justify-between gap-2 text-[11px] font-['Montserrat',sans-serif]">
           <span className="text-[#736B63] tracking-wider uppercase font-semibold">
             {product.options?.sizes ? `SIZES: ${product.options.sizes.join(' · ')}` : 'STANDARD FIT'}
           </span>

@@ -48,7 +48,7 @@ export const CartPage: React.FC = () => {
             </span>
           </div>
 
-          <h1 className="font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-6xl uppercase tracking-wider text-[#252321]">
+          <h1 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-6xl uppercase tracking-wider text-[#252321]">
             MERCHANDISE CLAIM BAG
           </h1>
         </div>
@@ -63,7 +63,7 @@ export const CartPage: React.FC = () => {
               />
             </div>
 
-            <h2 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#252321] mb-3">
+            <h2 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#252321] mb-3">
               YOUR CLAIM BAG IS CURRENTLY EMPTY
             </h2>
 
@@ -113,7 +113,7 @@ export const CartPage: React.FC = () => {
                       </span>
                       <Link
                         to={`/merch/${item.productId}`}
-                        className="font-['Osaka_Bright','Bison',sans-serif] text-xl sm:text-2xl uppercase tracking-wider text-[#252321] hover:text-[#C9362B] transition-colors truncate block"
+                        className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-xl sm:text-2xl uppercase tracking-wider text-[#252321] hover:text-[#C9362B] transition-colors truncate block"
                       >
                         {item.name}
                       </Link>
@@ -177,7 +177,7 @@ export const CartPage: React.FC = () => {
                   <span className="text-[10px] font-['Montserrat',sans-serif] tracking-[0.25em] text-[#C9362B] uppercase font-bold block mb-1">
                     CONFIRMATION PROTOCOL
                   </span>
-                  <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#252321]">
+                  <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#252321]">
                     CLAIM SUMMARY
                   </h3>
                 </div>
@@ -237,7 +237,7 @@ export const CartPage: React.FC = () => {
                 <span className="font-['Montserrat',sans-serif] text-[10px] tracking-[0.25em] text-[#C9362B] uppercase font-bold block mb-1">
                   YOUR SAVED PIECES
                 </span>
-                <h3 className="font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321]">
+                <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321]">
                   WISHLIST ({wishlist.length})
                 </h3>
               </div>

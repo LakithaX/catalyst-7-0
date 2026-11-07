@@ -92,8 +92,7 @@ export const SakuraPetals: React.FC<SakuraPetalsProps> = ({
   }, [mouseVelX]);
 
   useEffect(() => {
-    if (!enabled) return;
-
+       if (!enabled || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext('2d');

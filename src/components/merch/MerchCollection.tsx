@@ -40,7 +40,7 @@ export const MerchCollection: React.FC = () => {
 
         {/* Category Filter Tabs (Horizontal Smooth Scroll on Mobile, Centered Wrap on Desktop) */}
         <div className="w-full flex justify-center mb-8 sm:mb-14">
-          <div className="flex items-center justify-start sm:justify-center overflow-x-auto no-scrollbar max-w-full px-2 sm:px-0 py-1.5 gap-2 sm:gap-3 flex-nowrap sm:flex-wrap">
+          <div className="flex min-w-0 w-full items-center justify-start sm:justify-center overflow-x-auto no-scrollbar px-2 sm:px-0 py-1.5 gap-2 sm:gap-3 flex-nowrap sm:flex-wrap">
             {CATEGORIES.map((cat) => {
               const count = cat === 'ALL'
                 ? MERCH_PRODUCTS.length
