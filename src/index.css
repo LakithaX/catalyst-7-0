@@ -80,11 +80,11 @@
   --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
 
   /* Entrance typography: change a font by editing ONE line here */
-  --entrance-font-title: 'Cinzel', 'Trajan Pro', 'Optima', Georgia, serif;
-  --entrance-font-accent: 'Jansina', 'Brusher', 'Akashii', 'Montserrat', cursive;
-  --entrance-font-org: 'Cinzel', 'Trajan Pro', 'Optima', Georgia, serif;
-  --entrance-font-small: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
-  --entrance-font-kanji: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', 'MS PMincho', serif;
+  --entrance-font-title: 'Jansina', 'Shinkansen', sans-serif;                  /* EXPERIENCE */
+  --entrance-font-accent: 'Jansina', 'Shinkansen', sans-serif;                 /* the gold "in" */
+  --entrance-font-org: 'Jansina', 'Shinkansen', sans-serif;                    /* AIESEC in SLIIT */
+  --entrance-font-small: 'Jansina', 'Shinkansen', 'Montserrat', sans-serif;    /* PRESENTS + scroll cue */
+  --entrance-font-kanji: 'Yuji Boku', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', 'MS PMincho', serif; /* 体験 */
   --entrance-ivory: #fff3dc;
   --entrance-gold: #f6c768;
   --entrance-outline: #1a0508; /* dark ink edge that keeps letters crisp on red + teal */
@@ -857,7 +857,7 @@ html, body {
   will-change: opacity;
 }
 
-/* ---- Typography ---- */
+/* ---- Typography (brush-style Japanese fonts; single-weight, so no synthetic bold) ---- */
 .title-word-item {
   flex-direction: column;
   gap: 0.7rem;
@@ -865,20 +865,20 @@ html, body {
 
 .title-experience {
   font-family: var(--entrance-font-title);
-  font-size: clamp(2rem, 8.4vw, 5.5rem);
-  font-weight: 800;
+  font-size: clamp(2.4rem, 10.5vw, 7rem);
+  font-weight: 400;
   font-synthesis: none;
-  letter-spacing: 0.13em;
-  padding-left: 0.13em; /* optically re-centres tracked caps */
+  letter-spacing: 0.05em;
+  padding-left: 0.05em; /* optically re-centres tracked caps */
   line-height: 1;
   text-transform: uppercase;
   color: #fff6e2;
   text-shadow:
-    -2px 0 0 var(--entrance-outline), 2px 0 0 var(--entrance-outline),
-    0 -2px 0 var(--entrance-outline), 0 2px 0 var(--entrance-outline),
-    -1.5px -1.5px 0 var(--entrance-outline), 1.5px -1.5px 0 var(--entrance-outline),
-    -1.5px 1.5px 0 var(--entrance-outline), 1.5px 1.5px 0 var(--entrance-outline),
-    0 6px 0 rgba(120, 20, 24, 0.55),
+    -1.5px 0 0 var(--entrance-outline), 1.5px 0 0 var(--entrance-outline),
+    0 -1.5px 0 var(--entrance-outline), 0 1.5px 0 var(--entrance-outline),
+    -1px -1px 0 var(--entrance-outline), 1px -1px 0 var(--entrance-outline),
+    -1px 1px 0 var(--entrance-outline), 1px 1px 0 var(--entrance-outline),
+    0 5px 0 rgba(120, 20, 24, 0.55),
     0 14px 30px rgba(10, 2, 6, 0.7),
     0 0 46px rgba(246, 199, 104, 0.4);
 }
@@ -902,30 +902,31 @@ html, body {
 }
 .title-kanji b {
   font-family: var(--entrance-font-kanji);
-  font-weight: 600;
-  font-size: clamp(0.8rem, 2vw, 1.15rem);
-  letter-spacing: 0.5em;
-  padding-left: 0.5em;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: clamp(1.05rem, 2.6vw, 1.6rem);
+  letter-spacing: 0.4em;
+  padding-left: 0.4em;
   color: var(--entrance-gold);
   text-shadow: 0 2px 12px rgba(10, 2, 6, 0.85);
 }
 
 .title-org {
   font-family: var(--entrance-font-org);
-  font-size: clamp(1.5rem, 5.6vw, 3.9rem);
-  font-weight: 800;
+  font-size: clamp(1.9rem, 7.2vw, 5rem);
+  font-weight: 400;
   font-synthesis: none;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.04em;
   line-height: 1;
   white-space: nowrap;
   text-transform: uppercase;
   color: #ffffff;
   text-shadow:
-    -2px 0 0 var(--entrance-outline), 2px 0 0 var(--entrance-outline),
-    0 -2px 0 var(--entrance-outline), 0 2px 0 var(--entrance-outline),
-    -1.5px -1.5px 0 var(--entrance-outline), 1.5px -1.5px 0 var(--entrance-outline),
-    -1.5px 1.5px 0 var(--entrance-outline), 1.5px 1.5px 0 var(--entrance-outline),
-    0 6px 0 rgba(120, 20, 24, 0.5),
+    -1.5px 0 0 var(--entrance-outline), 1.5px 0 0 var(--entrance-outline),
+    0 -1.5px 0 var(--entrance-outline), 0 1.5px 0 var(--entrance-outline),
+    -1px -1px 0 var(--entrance-outline), 1px -1px 0 var(--entrance-outline),
+    -1px 1px 0 var(--entrance-outline), 1px 1px 0 var(--entrance-outline),
+    0 5px 0 rgba(120, 20, 24, 0.5),
     0 14px 30px rgba(10, 2, 6, 0.7),
     0 0 54px rgba(239, 68, 68, 0.45);
 }
@@ -934,10 +935,10 @@ html, body {
   font-style: normal;
   font-weight: 400;
   text-transform: none;
-  font-size: 1.55em;
+  font-size: 1.3em;
   line-height: 0;
   letter-spacing: 0.02em;
-  margin: 0 0.14em;
+  margin: 0 0.15em;
   position: relative;
   top: 0.05em;
   color: var(--entrance-gold);
@@ -950,10 +951,11 @@ html, body {
 
 .presents-line b {
   font-family: var(--entrance-font-small);
-  font-weight: 700;
-  font-size: clamp(0.6rem, 1.6vw, 0.9rem);
-  letter-spacing: 0.5em;
-  padding-left: 0.5em;
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: clamp(0.8rem, 2vw, 1.2rem);
+  letter-spacing: 0.45em;
+  padding-left: 0.45em;
   color: var(--entrance-gold);
   text-shadow: 0 2px 14px rgba(10, 2, 6, 0.9);
 }
@@ -982,8 +984,9 @@ html, body {
 }
 .scroll-cue-label {
   font-family: var(--entrance-font-small);
-  font-size: 0.62rem;
-  font-weight: 700;
+  font-size: 0.8rem;
+  font-weight: 400;
+  font-synthesis: none;
   letter-spacing: 0.34em;
   padding-left: 0.34em;
   text-transform: uppercase;
@@ -1010,7 +1013,7 @@ html, body {
 }
 .scroll-cue-kanji {
   font-family: var(--entrance-font-kanji);
-  font-size: 0.7rem;
+  font-size: 0.8rem;
   letter-spacing: 0.3em;
   color: var(--entrance-gold);
   text-shadow: 0 2px 8px rgba(10, 2, 6, 0.9);
@@ -1039,13 +1042,13 @@ html, body {
 /* ---- Entrance typography on small screens ---- */
 @media screen and (max-width: 768px) {
   .title-word-item { gap: 0.5rem; }
-  .title-experience { letter-spacing: 0.09em; padding-left: 0.09em; }
-  .title-org { letter-spacing: 0.05em; }
-  .presents-line b { letter-spacing: 0.4em; padding-left: 0.4em; }
+  .title-experience { letter-spacing: 0.03em; padding-left: 0.03em; }
+  .title-org { letter-spacing: 0.02em; }
+  .presents-line b { letter-spacing: 0.35em; padding-left: 0.35em; }
 }
 @media screen and (max-width: 360px) {
-  .title-experience { font-size: 1.7rem; letter-spacing: 0.06em; padding-left: 0.06em; }
-  .title-org { font-size: 1.3rem; letter-spacing: 0.03em; }
+  .title-experience { font-size: 2.1rem; letter-spacing: 0.02em; padding-left: 0.02em; }
+  .title-org { font-size: 1.7rem; letter-spacing: 0.01em; }
 }
 @media screen and (max-height: 520px) and (orientation: landscape) {
   .scroll-cue-line { height: 24px; }

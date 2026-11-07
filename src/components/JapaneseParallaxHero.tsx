@@ -28,6 +28,21 @@ const maskStyle = (gradient: string): React.CSSProperties => ({
 const FADE_TOP = maskStyle('linear-gradient(to bottom, transparent 0%, #000 38%, #000 100%)');
 const FADE_BOTH = maskStyle('linear-gradient(to bottom, transparent 0%, #000 30%, #000 70%, transparent 100%)');
 
+/**
+ * Keeps bottom-anchored UI inside the part of the hero you can actually see.
+ *
+ * The hero is `h-screen` (= 100vh = the LARGE viewport on phones). While the browser's
+ * address/tool bar is showing, the visible area is shorter (100dvh), so anything pinned a few
+ * pixels from the hero's bottom sits underneath the bar until you scroll. 100lvh - 100dvh is
+ * exactly the hidden strip, so adding it to `bottom` lifts the element into view, and it
+ * slides back down on its own as the bar collapses. On desktop the difference is 0.
+ * (If a browser doesn't support these units, the declaration is dropped and the Tailwind
+ * `bottom-*` class on the element is used instead.)
+ */
+const aboveBrowserBar = (offset: string): React.CSSProperties => ({
+  bottom: `calc(100lvh - 100dvh + ${offset} + env(safe-area-inset-bottom, 0px))`,
+});
+
 export const JapaneseParallaxHero: React.FC = () => {
   const sunRef = useRef<HTMLDivElement>(null);
   const mountainsRef = useRef<HTMLDivElement>(null);
@@ -340,20 +355,27 @@ export const JapaneseParallaxHero: React.FC = () => {
         </div>
       </div>
 
-      {/* Bottom-center motto (desktop) */}
-      <div className="hidden lg:block absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center">
+      {/* Bottom-center motto (desktop). Lifted above the browser bar on large tablets in landscape. */}
+      <div
+        className="hidden lg:block absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center"
+        style={aboveBrowserBar('2rem')}
+      >
         <span className="font-['Bison',sans-serif] text-[2.6rem] font-black tracking-[0.22em] text-[#FAF6EE] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] leading-none">
           DARE BEYOND DEFINITION
         </span>
       </div>
 
-      {/* Bottom (mobile / tablet) */}
-      <div className="lg:hidden absolute bottom-2 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center text-center max-w-[210px] w-full px-1">
+      {/* Bottom (mobile / tablet). Anchored to the VISIBLE bottom, so it shows on load
+          instead of hiding under the browser's address bar until you scroll. */}
+      <div
+        className="lg:hidden absolute bottom-3 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center text-center w-full max-w-[min(92vw,320px)] px-1"
+        style={aboveBrowserBar('0.85rem')}
+      >
         <div className="flex items-center justify-center gap-1.5">
-          <span className="font-['Bison',sans-serif] text-xl font-black text-[#FAF6EE] leading-none drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)]">7.0</span>
-          <span className="text-[9px] font-bold text-[#FAF6EE] uppercase tracking-wider leading-none">Leadership Seminar</span>
+          <span className="font-['Bison',sans-serif] text-xl font-black text-[#FAF6EE] leading-none drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)]">7.0</span>
+          <span className="text-[9px] font-bold text-[#FAF6EE] uppercase tracking-wider leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.75)]">Leadership Seminar</span>
         </div>
-        <span className="font-['Bison',sans-serif] text-xs font-black tracking-[0.16em] text-[#FAF6EE] uppercase mt-0.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.6)] whitespace-nowrap">
+        <span className="font-['Bison',sans-serif] text-[clamp(0.7rem,3.6vw,1rem)] font-black tracking-[0.16em] text-[#FAF6EE] uppercase mt-0.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] whitespace-nowrap">
           DARE BEYOND DEFINITION
         </span>
       </div>
@@ -362,6 +384,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       <button
         onClick={scrollToNext}
         className="group absolute bottom-5 right-5 sm:right-8 z-30 hidden sm:flex items-center gap-2 text-[#FAF6EE]/85 hover:text-white transition-colors font-mono text-[10px] uppercase tracking-[0.2em] font-bold cursor-pointer"
+        style={aboveBrowserBar('1.25rem')}
         title="Scroll to Gallery"
       >
         <span>EXPLORE</span>

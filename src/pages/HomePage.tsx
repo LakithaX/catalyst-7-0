@@ -7,6 +7,7 @@ import { JapaneseParallaxHero } from '../components/JapaneseParallaxHero';
 import AnimatedGalleryDemo from '../components/ui/animated-gallery-demo';
 import FullScreenScrollFXDemo from '../components/ui/full-screen-scroll-fx-demo';
 import CoverFlowCarouselDemo from '../components/ui/3-d-coverflow-carousel-demo';
+import JapaneseCursor from '../components/ui/japanese-cursor';
 import OutroFooter from '../components/ui/outro-footer';
 import PartnershipAnnouncement from '../components/ui/partnership-announcement';
 import { gsap } from 'gsap';
@@ -644,6 +645,7 @@ export default function HomePage() {
 
   return (
     <div className="relative bg-[#F8F3E9]">
+      <JapaneseCursor />
       {/* Background music: starts from 0:00 on every load, loops forever, has a mute button */}
       <BackgroundMusic src="/audio/background-music.mp3" volume={0.45} />
 

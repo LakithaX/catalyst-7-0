@@ -25,6 +25,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
   const isGallery = location.pathname.startsWith('/gallery');
   const isMerch = location.pathname.startsWith('/merch');
   const isGame = location.pathname.startsWith('/game');
+  const isContact = location.pathname.startsWith('/contact');
 
   // Prevent background scroll when mobile menu is active
   useEffect(() => {
@@ -131,15 +132,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
     }
   };
 
-  const handleContactClick = (e: React.MouseEvent) => {
+  const handleContactClick = () => {
     setMobileMenuOpen(false);
-    if (location.pathname === '/' || location.pathname === '') {
-      const contactEl = document.getElementById('contact');
-      if (contactEl) {
-        e.preventDefault();
-        contactEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
   };
 
   // Logo pill rendered on cream pill with soft shadow and backdrop blur
@@ -293,9 +287,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               PLAY
             </Link>
             <Link
-              to="/#contact"
+              to="/contact"
               onClick={handleContactClick}
-              className="hover:opacity-60 transition-opacity cursor-pointer whitespace-nowrap text-[#0e1118] py-1"
+              className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                isContact ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+              }`}
             >
               CONTACT
             </Link>
@@ -441,9 +437,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 PLAY
               </Link>
               <Link
-                to="/#contact"
+                to="/contact"
                 onClick={handleContactClick}
-                className="hover:opacity-60 transition-opacity cursor-pointer whitespace-nowrap text-[#0e1118] py-1"
+                className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                  isContact ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+                }`}
               >
                 CONTACT
               </Link>
@@ -530,9 +528,11 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 PLAY
               </Link>
               <Link
-                to="/#contact"
+                to="/contact"
                 onClick={handleContactClick}
-                className="py-3 px-4 rounded-xl transition-all hover:bg-[#252321]/5 text-[#0e1118]"
+                className={`py-3 px-4 rounded-xl transition-all ${
+                  isContact ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5 text-[#0e1118]'
+                }`}
               >
                 CONTACT
               </Link>

@@ -11,6 +11,7 @@ const MerchPage = lazy(() => import('./pages/MerchPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
 const GameComingSoonPage = lazy(() => import('./pages/GameComingSoonPage'));
+const ContactPage = lazy(() => import('./pages/ContactPage'));
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -89,6 +90,7 @@ export default function App() {
         <Route path="/merch/:productId" element={<ProductDetailPage />} />
         <Route path="/merch/cart" element={<CartPage />} />
         <Route path="/game" element={<GameComingSoonPage />} />
+        <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
       </Suspense>

@@ -12,12 +12,12 @@ if (typeof window !== "undefined") {
 // ============================================================================
 const NAV = [
   { label: "Home", to: "/" },
-  { label: "About", href: "#about" },
+  { label: "About", to: "/about" },
   { label: "Register", to: "/register" },
   { label: "Gallery", to: "/gallery" },
   { label: "Merch", to: "/merch" },
-  { label: "Play", to: "/play" },
-  { label: "Contact", href: "#contact" },
+  { label: "Play", to: "/game" },
+  { label: "Contact", to: "/contact" },
 ] as const;
 
 // Replace "#" with your real profile URLs.
@@ -262,11 +262,7 @@ export default function OutroFooter({ active = false }: { active?: boolean }) {
             <ul className="mx-auto mt-3 grid max-w-xs grid-cols-2 gap-x-6 md:mx-0">
               {NAV.map((n) => (
                 <li key={n.label} data-g="navlink">
-                  {"to" in n ? (
-                    <Link to={n.to} className="inline-flex min-h-[44px] items-center transition-colors hover:text-[#C9362B]" style={navLink}>{n.label}</Link>
-                  ) : (
-                    <a href={n.href} className="inline-flex min-h-[44px] items-center transition-colors hover:text-[#C9362B]" style={navLink}>{n.label}</a>
-                  )}
+                  <Link to={n.to} className="inline-flex min-h-[44px] items-center transition-colors hover:text-[#C9362B]" style={navLink}>{n.label}</Link>
                 </li>
               ))}
             </ul>
