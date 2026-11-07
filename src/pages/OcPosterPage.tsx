@@ -141,7 +141,7 @@ const SECTIONS: SectionData[] = [
     id: 'del-events',
     navLabel: 'Del & Events',
     title: 'OCVP',
-    tag: 'DEL & EVENTS',
+    tag: 'DELEGATES & EVENTS',
     watermark: 'OCVP',
     members: [
       {
@@ -174,17 +174,8 @@ const SECTIONS: SectionData[] = [
         image: '/assets/cat-oc-pics/isuri-muthumalee-ocvp-delegates-and-events.webp',
         aspect: 0.904,
         pw: 32,
-        bottom: 'calc(-6 * var(--k))',
+        bottom: 'calc(-0.5 * var(--k))',
       },
-    ],
-  },
-  {
-    id: 'del-log',
-    navLabel: 'Del & Log',
-    title: 'OCVP',
-    tag: 'DEL & LOG',
-    watermark: 'OCVP',
-    members: [
       {
         name: 'Adithya Munasinghe',
         role: 'OCVP Del & Log',
@@ -432,7 +423,8 @@ export default function OcPosterPage() {
     }
   };
 
-  let globalMemberCounter = 0;
+  const globalMemberCounterRef = React.useRef(0);
+  globalMemberCounterRef.current = 0;
 
   return (
     <div className="oc-poster-page anim">
@@ -537,7 +529,7 @@ export default function OcPosterPage() {
 
               <div className="rows">
                 {section.members.map((member, index) => {
-                  const overallIndex = globalMemberCounter++;
+                  const overallIndex = globalMemberCounterRef.current++;
                   const first = member.name.split(' ')[0].toUpperCase();
                   const fs = Math.min(31, 189 / first.length);
                   const isOdd = index % 2 !== 0;

@@ -3,7 +3,7 @@
   --ph: url('/assets/cat-oc-pics/nethuli-gunathilaka-ocvp-pd.webp');
   --ar: 0.717;
   --pw: 36;
-  --bg: #f3e9eb;
+  --bg: #fdf4f6;
   --red: #a50f2d;
   min-height: 100vh;
   width: 100%;
@@ -17,7 +17,7 @@
 /* every size is in cqw, so the poster keeps the same proportions at any width */
 .oc-poster-page .page {
   container-type: inline-size;
-  background: #fff;
+  background: #fdf4f6;
   width: 100%;
   margin: 0;
   padding: 0;
@@ -95,7 +95,7 @@
   position: relative;
   height: calc(45 * var(--k));
   margin-bottom: calc(-8 * var(--k));
-  background: linear-gradient(#e8abb6 0, #cb4a60 calc(37 * var(--k)));
+  background: linear-gradient(to bottom, #f2c4ce 0, #d94060 calc(20 * var(--k)), #b21335 calc(37 * var(--k)));
   text-align: center;
   overflow: hidden;
 }
@@ -115,7 +115,7 @@
 .oc-poster-page .wm {
   top: calc(3 * var(--k));
   font-size: calc(30 * var(--k));
-  color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.28);
   transform: scaleY(1.15);
 }
 
@@ -124,6 +124,7 @@
   font-size: calc(14 * var(--k));
   color: var(--red);
   letter-spacing: 0.01em;
+  text-shadow: 0 2px 8px rgba(255,255,255,0.3);
 }
 
 .oc-poster-page .ttl span {
@@ -139,10 +140,11 @@
   right: 0;
   top: calc(25 * var(--k));
   margin: 0;
-  font-weight: 500;
+  font-weight: 600;
   font-size: calc(4.3 * var(--k));
-  letter-spacing: 0.05em;
-  color: var(--red);
+  letter-spacing: 0.12em;
+  color: rgba(90,20,30,0.75);
+  text-transform: uppercase;
 }
 
 .oc-poster-page .row {

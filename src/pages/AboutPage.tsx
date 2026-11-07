@@ -46,6 +46,8 @@ export default function AboutPage() {
           "/assets/eb-pics/chamindi-kaveesha.webp",
           "/assets/eb-pics/dinadi-jayathilake.webp",
           "/assets/eb-pics/nadun-weerakkody.webp",
+          "/assets/eb-pics/pethara-ranasinghe.webp",
+          "/assets/eb-pics/fahad-faheem.webp",
         ],
       },
     },

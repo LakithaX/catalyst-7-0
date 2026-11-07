@@ -500,9 +500,11 @@ function Disc({ src, hue, delay }: { src: string; hue: string; delay: number }) 
 }
 
 function FloatingPicture({ src, index = 0 }: { src: string; index?: number }) {
+  // .webp files here are portrait photos (not transparent cutouts). Only .png
+  // and .svg assets are truly transparent cut-outs that need object-contain +
+  // drop-shadow treatment. .webp files get the rounded-photo card treatment.
   const isCutout =
     src.toLowerCase().endsWith(".png") ||
-    src.toLowerCase().endsWith(".webp") ||
     src.toLowerCase().endsWith(".svg");
 
   return (
@@ -517,8 +519,8 @@ function FloatingPicture({ src, index = 0 }: { src: string; index?: number }) {
         className={cn(
           "w-full h-auto select-none pointer-events-none",
           isCutout
-            ? "max-h-[300px] object-contain filter drop-shadow-[0_16px_28px_rgba(37,35,33,0.35)]"
-            : "rounded-xl object-cover shadow-[0_16px_32px_-6px_rgba(37,35,33,0.35)]"
+            ? "max-h-[260px] object-contain filter drop-shadow-[0_14px_24px_rgba(37,35,33,0.40)]"
+            : "rounded-2xl object-cover shadow-[0_18px_38px_-6px_rgba(37,35,33,0.40)] ring-2 ring-white/60"
         )}
       />
     </div>
