@@ -27,7 +27,7 @@ const PARTNER_CTA = { label: "Become a partner", href: "#contact" };
 // Illustrations from /public/assets/illustrations
 const ART = {
   mask: "/assets/illustrations/alessandro_hrdz-mask-6976331.png",
-  fan: "/assets/illustrations/jakeloris-fan-7039967.webp",
+  fan: "/assets/illustrations/jakeloris-fan-7039967.png",
   tree: "/assets/illustrations/susannp4-tree-1586365_1920.webp",
   koi: "/assets/illustrations/kacsoeszti-koi-1184783_1920.png",
 };

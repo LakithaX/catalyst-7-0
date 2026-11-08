@@ -953,7 +953,7 @@ const CM: { name: string; file: string; role: string; ph?: number; keep?: number
 // file names as they appear in public/assets/illustrations (a missing one just hides itself)
 const ILLS = {
   mask: ILL + 'alessandro_hrdz-mask-6976331.png',
-  fan: ILL + 'jakeloris-fan-7039967.webp',
+  fan: ILL + 'jakeloris-fan-7039967.png',
   koi: ILL + 'kacsoeszti-koi-1184783_1920.png',
   bonsai: ILL + 'gdj-bonsai-tree-8143900.svg',
   building: ILL + 'gdj-building-8171699.svg',

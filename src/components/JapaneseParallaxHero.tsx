@@ -338,7 +338,7 @@ export const JapaneseParallaxHero: React.FC = () => {
               loading="eager"
               fetchPriority="high"
               decoding="async"
-              className="w-[84vw] max-w-[260px] sm:max-w-[360px] md:max-w-[460px] lg:max-w-[560px] h-auto object-contain drop-shadow-[0_12px_36px_rgba(0,0,0,0.22)] drop-shadow-[0_2px_8px_rgba(181,30,35,0.25)]"
+              className="w-[84vw] max-w-[260px] sm:max-w-[360px] md:max-w-[460px] lg:max-w-[560px] h-auto object-contain md:drop-shadow-[0_12px_36px_rgba(0,0,0,0.22)]"
             />
           </div>
 

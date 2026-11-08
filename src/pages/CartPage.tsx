@@ -160,7 +160,7 @@ export const CartPage: React.FC = () => {
                 <div className="animate-spin-very-slow absolute -inset-2 rounded-full border border-dashed border-[#C9362B]/50" />
                 <Ill
                   data-float="10"
-                  src="/assets/illustrations/jakeloris-fan-7039967.webp"
+                  src="/assets/illustrations/jakeloris-fan-7039967.png"
                   className="relative w-20 drop-shadow-[0_8px_16px_rgba(0,0,0,0.3)]"
                 />
               </div>

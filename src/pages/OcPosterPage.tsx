@@ -79,7 +79,7 @@ const F = {
   koiSun: 'benkageyama-koi-5135969_1920.png',
   samurai: 'benkageyama-samurai-5135974_1920.png',
   mask: 'alessandro-hrdz-mask-6976331.png',
-  fan: 'jakeloris-fan-7039967.webp',
+  fan: 'jakeloris-fan-7039967.png',
   koi: 'kacsoeszti-koi-1184783_1920.png',
   tree: 'susannp4-tree-1586365_1920.webp',
   pagoda: 'gdj-building-8171699.svg',

@@ -141,7 +141,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
       title="Cart"
       className={`relative min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2 ${
         forHero
-          ? 'bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm'
+          ? 'bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)]'
           : 'hover:bg-[#252321]/5 border border-[#252321]/10 bg-[#FAF6EE]/50'
       } ${
         isCartActive ? 'text-[#B51E23]' : 'text-[#0e1118] hover:text-[#B51E23]'
@@ -176,7 +176,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
       to="/"
       state={{ directToHero: true }}
       onClick={handleHomeClick}
-      className="flex items-center gap-2 sm:gap-2.5 shrink-0 pointer-events-auto cursor-pointer group bg-[#FAF6EE]/90 rounded-full px-3 py-1.5 backdrop-blur-sm shadow-[0_2px_8px_rgba(37,35,33,0.08)] border border-[#252321]/10 hover:border-[#252321]/20 transition-all duration-300"
+      className="flex items-center gap-2 sm:gap-2.5 shrink-0 pointer-events-auto cursor-pointer group bg-[#FAF6EE]/90 rounded-full px-3 py-1.5 shadow-[0_2px_8px_rgba(37,35,33,0.08)] border border-[#252321]/10 hover:border-[#252321]/20 transition-all duration-300"
       title="Catalyst 7.0 - Home"
       aria-label="Catalyst 7.0 home"
     >
@@ -351,7 +351,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -361,7 +361,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
         <header
           className={`${
             isGallery ? 'fixed top-0 left-0 right-0' : 'sticky top-0'
-          } z-50 w-full bg-[#F8F3E9]/95 backdrop-blur-md select-none transition-transform transition-opacity duration-300 ease-in-out ${
+          } z-50 w-full bg-[#F8F3E9]/95 select-none transition-transform transition-opacity duration-300 ease-in-out ${
             isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0 pointer-events-none'
           } ${className}`}
         >
@@ -509,7 +509,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-                className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>

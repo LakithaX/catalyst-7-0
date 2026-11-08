@@ -74,7 +74,7 @@ const VIRTUES = ['義理', '勇気', '仁愛', '礼節', '誠実', '名誉', '�
 // colourful illustrations that float beside the name (one per slide, cycling)
 const ILLS = [
   ILL + 'alessandro_hrdz-mask-6976331.png',
-  ILL + 'jakeloris-fan-7039967.webp',
+  ILL + 'jakeloris-fan-7039967.png',
   ILL + 'kacsoeszti-koi-1184783_1920.png',
 ]
 // one-colour silhouettes, drawn huge and very faint behind the text (cycling)

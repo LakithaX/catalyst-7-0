@@ -56,7 +56,7 @@ export const CartDrawer: React.FC = () => {
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
                   <div className="w-20 h-20 rounded-full bg-[#252321]/5 flex items-center justify-center p-3 mb-4">
                     <img
-                      src="/assets/illustrations/jakeloris-fan-7039967.webp"
+                      src="/assets/illustrations/jakeloris-fan-7039967.png"
                       alt="Japanese Fan"
                       className="w-full h-auto object-contain filter drop-shadow-[0_4px_10px_rgba(201,54,43,0.18)]"
                     />
