@@ -233,7 +233,7 @@ const SplitChars = ({ text }: { text: string }) => (
       <span
         key={i}
         aria-hidden="true"
-        className="char inline-block will-change-transform"
+        className="char inline-block"
       >
         {ch === " " ? "\u00A0" : ch}
       </span>
@@ -250,7 +250,7 @@ const GalleryCard = ({ item, n }: { item: GalleryImageItem; n: number }) => (
     <div className={`group ${TILTS[n % TILTS.length]}`}>
       <div className="relative overflow-hidden rounded-[3px] bg-[#FBF8F1] p-2 shadow-[0_18px_40px_rgba(37,35,33,0.18)] ring-1 ring-[#252321]/10 transition-all duration-500 group-hover:-translate-y-2 group-hover:shadow-[0_26px_50px_rgba(201,54,43,0.28)] sm:p-3">
         <div className="relative aspect-[4/3] overflow-hidden">
-          <div className="parallax-img absolute inset-y-0 -inset-x-[8%] will-change-transform">
+          <div className="parallax-img absolute inset-y-0 -inset-x-[8%] md:will-change-transform">
             <img
               src={item.src}
               alt={item.alt}
@@ -298,6 +298,7 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
       "(prefers-reduced-motion: no-preference)",
       () => {
         const q = gsap.utils.selector(root)
+        const loops: gsap.core.Animation[] = []
 
         // ---- Main entrance timeline (plays when the section scrolls into view)
         const tl = gsap.timeline({
@@ -354,21 +355,27 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
           )
 
         // ---- Idle motion
-        gsap.to(q(".koi-float"), {
-          y: -14,
-          duration: 3.2,
-          ease: "sine.inOut",
-          yoyo: true,
-          repeat: -1,
-        })
+        loops.push(
+          gsap.to(q(".koi-float"), {
+            y: -14,
+            duration: 3.2,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            paused: true,
+          })
+        )
 
-        gsap.to(q(".enso"), {
-          rotate: 360,
-          duration: 90,
-          ease: "none",
-          repeat: -1,
-          transformOrigin: "50% 50%",
-        })
+        loops.push(
+          gsap.to(q(".enso"), {
+            rotate: 360,
+            duration: 90,
+            ease: "none",
+            repeat: -1,
+            transformOrigin: "50% 50%",
+            paused: true,
+          })
+        )
 
         q(".petal").forEach((petal, i) => {
           gsap.fromTo(
@@ -376,16 +383,19 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
             { opacity: 0 },
             { opacity: 1, duration: 1.2, delay: 0.8 + i * 0.2 }
           )
-          gsap.to(petal, {
-            y: gsap.utils.random(24, 40),
-            x: gsap.utils.random(-14, 16),
-            rotation: gsap.utils.random(-30, 30),
-            duration: 4 + i * 0.8,
-            ease: "sine.inOut",
-            yoyo: true,
-            repeat: -1,
-            delay: i * 0.4,
-          })
+          loops.push(
+            gsap.to(petal, {
+              y: gsap.utils.random(24, 40),
+              x: gsap.utils.random(-14, 16),
+              rotation: gsap.utils.random(-30, 30),
+              duration: 4 + i * 0.8,
+              ease: "sine.inOut",
+              yoyo: true,
+              repeat: -1,
+              delay: i * 0.4,
+              paused: true,
+            })
+          )
         })
 
         // ---- Scroll parallax on the kanji watermark
@@ -409,6 +419,14 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
           ease: "power3.out",
           scrollTrigger: { trigger: q(".pillars")[0], start: "top 88%", once: true },
         })
+
+        // ---- Idle loops only run while this section is on screen
+        const io = new IntersectionObserver(
+          ([entry]) => loops.forEach((t) => (entry.isIntersecting ? t.resume() : t.pause())),
+          { rootMargin: "100px" }
+        )
+        io.observe(root)
+        return () => io.disconnect()
       },
       root
     )
@@ -461,8 +479,11 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
           <div className="koi-float relative">
             {/* soft red glow behind the art */}
             <div
-              className="absolute inset-[8%] rounded-full opacity-50 blur-3xl"
-              style={{ background: "rgba(201,54,43,0.30)" }}
+              className="absolute -inset-[4%] rounded-full opacity-60"
+              style={{
+                background:
+                  "radial-gradient(circle, rgba(201,54,43,0.34) 0%, rgba(201,54,43,0.16) 45%, rgba(201,54,43,0) 70%)",
+              }}
             />
 
             {/* hand-drawn ink enso ring that draws itself around the koi */}
@@ -641,12 +662,19 @@ const MarqueeBand = () => {
       () => {
         const track = el.querySelector(".marquee-track")
         if (!track) return
-        gsap.to(track, {
+        const tw = gsap.to(track, {
           xPercent: -50,
           duration: 30,
           ease: "none",
           repeat: -1,
+          paused: true,
         })
+        const io = new IntersectionObserver(
+          ([entry]) => (entry.isIntersecting ? tw.resume() : tw.pause()),
+          { rootMargin: "100px" }
+        )
+        io.observe(el)
+        return () => io.disconnect()
       },
       el
     )
@@ -737,7 +765,7 @@ export const DemoVariant1 = ({ active = true }: { active?: boolean }) => {
         gsap.to(q(".gallery-ghost"), { xPercent: -40, ease: "none", scrollTrigger: sync() })
 
         // Photos drift inside their frames while the track moves (depth)
-        gsap.utils.toArray<HTMLElement>(".parallax-img", flow).forEach((img) => {
+        if (window.matchMedia("(min-width: 768px)").matches) gsap.utils.toArray<HTMLElement>(".parallax-img", flow).forEach((img) => {
           gsap.fromTo(
             img,
             { xPercent: -5 },
@@ -773,17 +801,26 @@ export const DemoVariant1 = ({ active = true }: { active?: boolean }) => {
           ease: "power3.out",
           scrollTrigger: { trigger: pin, start: "top 65%", once: true },
         })
-        gsap.to(q(".scroll-hint"), {
+        const hint = gsap.to(q(".scroll-hint"), {
           x: 10,
           duration: 0.9,
           ease: "sine.inOut",
           yoyo: true,
           repeat: -1,
+          paused: true,
         })
+        const io = new IntersectionObserver(
+          ([entry]) => (entry.isIntersecting ? hint.resume() : hint.pause()),
+          { rootMargin: "100px" }
+        )
+        io.observe(flow)
 
         // Re-measure once the layout has settled after the triggers are created
         const raf = requestAnimationFrame(() => ScrollTrigger.refresh())
-        return () => cancelAnimationFrame(raf)
+        return () => {
+          cancelAnimationFrame(raf)
+          io.disconnect()
+        }
       },
       flow
     )

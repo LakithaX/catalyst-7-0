@@ -102,6 +102,9 @@ export const JapaneseParallaxHero: React.FC = () => {
 
     let inView = false;
     let disposed = false;
+    let lastX = Infinity;
+    let lastY = Infinity;
+    let lastSy = Infinity;
     const set = (el: HTMLDivElement | null, px: number, py: number) => {
       if (el) el.style.transform = `translate3d(${px.toFixed(2)}px, ${py.toFixed(2)}px, 0)`;
     };
@@ -130,6 +133,16 @@ export const JapaneseParallaxHero: React.FC = () => {
       const scrollY = Math.max(0, -top);
       const sy = Math.min(scrollY, vh * 1.2); // stop parallax once hero is gone
       const m = isMobileRef.current ? 0.55 : 1; // mobile = gentler motion
+
+      // Nothing moved since the last frame: skip all the style writes.
+      if (Math.abs(x - lastX) < 0.0004 && Math.abs(y - lastY) < 0.0004 && Math.abs(sy - lastSy) < 0.3) {
+        velRef.current *= 0.92;
+        rafId.current = requestAnimationFrame(render);
+        return;
+      }
+      lastX = x;
+      lastY = y;
+      lastSy = sy;
 
       // Back -> front. Scroll factor grows with depth: far layers move slow, near layers move fast.
       set(sunRef.current, x * 7 * m, y * 5 * m + sy * 0.08);
@@ -204,7 +217,7 @@ export const JapaneseParallaxHero: React.FC = () => {
             aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="w-full h-full object-contain drop-shadow-[0_12px_36px_rgba(181,30,35,0.2)] opacity-95"
+            className="w-full h-full object-contain md:drop-shadow-[0_12px_36px_rgba(181,30,35,0.2)] opacity-95"
           />
         </div>
       </div>
@@ -262,7 +275,7 @@ export const JapaneseParallaxHero: React.FC = () => {
             aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="h-full w-auto object-contain drop-shadow-[0_14px_28px_rgba(37,35,33,0.22)]"
+            className="h-full w-auto object-contain md:drop-shadow-[0_14px_28px_rgba(37,35,33,0.22)]"
           />
         </div>
       </div>
@@ -276,7 +289,7 @@ export const JapaneseParallaxHero: React.FC = () => {
             aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="h-full w-auto object-contain drop-shadow-[0_16px_32px_rgba(37,35,33,0.2)]"
+            className="h-full w-auto object-contain md:drop-shadow-[0_16px_32px_rgba(37,35,33,0.2)]"
           />
         </div>
       </div>
@@ -303,7 +316,7 @@ export const JapaneseParallaxHero: React.FC = () => {
             aria-hidden="true"
             loading="eager"
             decoding="async"
-            className="w-full h-auto object-contain drop-shadow-[0_8px_24px_rgba(37,35,33,0.15)] [transform:scaleY(-1)]"
+            className="w-full h-auto object-contain md:drop-shadow-[0_8px_24px_rgba(37,35,33,0.15)] [transform:scaleY(-1)]"
           />
         </div>
       </div>

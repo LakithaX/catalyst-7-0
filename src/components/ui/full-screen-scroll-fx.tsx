@@ -739,8 +739,6 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         </div>
 
         <style>{`
-          @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@700;800&family=Noto+Sans+JP:wght@500;700&family=Noto+Serif+JP:wght@700;900&display=swap');
-
           .fx {
             position: relative;
             width: 100%;
@@ -963,7 +961,6 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
             height: auto;
             opacity: 0;
             animation-name: fx-petal-fall;
-            filter: drop-shadow(0 1px 3px rgba(0,0,0,0.25));
             animation-timing-function: linear;
             animation-iteration-count: infinite;
             will-change: transform, opacity;
