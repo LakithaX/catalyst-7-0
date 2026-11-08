@@ -13,7 +13,7 @@ grant usage on schema public,auth,storage to anon,authenticated;
 grant select,insert on storage.objects to authenticated;
 create function storage.foldername(text) returns text[] language sql immutable as $$select string_to_array($1,'/')$$;`);
 const root=fileURLToPath(new URL('../supabase',import.meta.url));
-for(const name of (await readdir(root+'/migrations')).sort()){await db.exec(await readFile(root+'/migrations/'+name,'utf8'));console.log('Applied',name);}
+for(const name of (await readdir(root+'/migrations')).sort().filter(name=>!process.argv.includes('--skip-006')||!name.includes('006_defer_payments'))){await db.exec(await readFile(root+'/migrations/'+name,'utf8'));console.log('Applied',name);}
 await db.exec(await readFile(root+'/seed.sql','utf8'));
 console.log('Seed OK');
 const admin='10000000-0000-4000-8000-000000000001';
@@ -32,7 +32,10 @@ await denied(()=>db.query('select public.place_order($1,$2,$3)',[key,'[]',100]),
 await identity(other);
 await denied(()=>db.query('select public.admin_bank_details($1,$2,$3,$4)',['Bank','Event','123','Branch']),/Not authorized/);
 await identity(admin);
+await denied(()=>db.query('select public.admin_shop_settings(false)'),/Add the bank/);
 await db.query('select public.admin_bank_details($1,$2,$3,$4)',['Test bank','Test event','123456','Test branch']);
+assert.equal((await db.query('select coming_soon from public.shop_settings')).rows[0].coming_soon,true);checks++;
+await db.query('select public.admin_shop_settings(false)');
 await identity(delegate);
 const answers={name:'Test Delegate',gender:'Other',nic:'200012345678',aiesecEmail:'delegate@example.test',email:'delegate@example.test',phone:'0771234567',year:'2nd Year',sem:'Semester 1',faculty:'Other','faculty-sp':'Test faculty',path:'oGV',rank:'Team Member',circle:'Other relevant function','circle-sp':'Test function',type:'The Scout',seek:'Leadership',drive:'Test motivation',diet:'Vegetarian',allergy:'Yes','allergy-sp':'Test allergy',safety:'Yes','safety-sp':'Test safety need',ecName:'Test contact',ecPhone:'0777654321'};
 await db.query("insert into storage.objects(bucket_id,name,metadata) values('delegate-cvs',$1,$2)",[delegate+'/cv-key/cv',JSON.stringify({size:100,mimetype:'application/pdf'})]);
@@ -79,14 +82,8 @@ assert.equal((await db.query('select count(*)::int n from public.payments')).row
 assert.equal((await db.query('select method from public.payments')).rows[0].method,'bank_transfer');checks++;
 await db.query('select public.admin_order($1,$2)',[placed.id,'collected']);
 const stock=(await db.query('select stock_on_hand,stock_reserved from public.product_variants where id=$1',[variant.id])).rows[0];assert.equal(stock.stock_on_hand,0);assert.equal(stock.stock_reserved,0);checks+=2;
-const summary=(await db.query('select public.admin_summary() data')).rows[0].data;assert.equal(summary.schema_version,5);checks++;assert.equal(summary.pending_registrations,1);assert.equal(summary.awaiting_collection,0);checks+=2;
-await db.exec('reset role');await db.exec("update public.shop_settings set bank_name='',account_name='',account_number='' where id=true");
-await identity(delegate);
-const unpaidKey='20000000-0000-4000-8000-000000000003';
-const unpaid=(await db.query('select public.submit_preorder($1,$2,$3) result',[unpaidKey,items,variant.price_minor*2])).rows[0].result;
-assert.equal((await db.query('select payment_status from public.orders where id=$1',[unpaid.id])).rows[0].payment_status,'unpaid');checks++;
-assert.equal((await db.query('select count(*)::int n from public.order_receipts where order_id=$1',[unpaid.id])).rows[0].n,0);checks++;
-const unpaidRetry=(await db.query('select public.submit_preorder($1,$2,$3) result',[unpaidKey,items,variant.price_minor*2])).rows[0].result;assert.equal(unpaidRetry.id,unpaid.id);checks++;
-await identity(null,'anon');await denied(()=>db.query('select public.submit_preorder($1,$2,$3)',[unpaidKey,items,variant.price_minor*2]),/permission denied/);
+const summary=(await db.query('select public.admin_summary() data')).rows[0].data;assert.equal(summary.schema_version,7);checks++;assert.equal(summary.pending_registrations,1);assert.equal(summary.awaiting_collection,0);checks+=2;
+const unpaidAccess=(await db.query("select case when to_regprocedure('public.submit_preorder(uuid,jsonb,bigint)') is null then false else has_function_privilege('authenticated',to_regprocedure('public.submit_preorder(uuid,jsonb,bigint)'),'EXECUTE') end allowed")).rows[0].allowed;
+assert.equal(unpaidAccess,false);checks++;
 console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, pre-order atomicity, pause, payment and collection).`);
 await db.close();

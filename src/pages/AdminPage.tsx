@@ -41,7 +41,7 @@ export default function AdminPage() {
       if (!membership.data?.is_active || !['admin'].includes(membership.data.role)) throw new Error('This account is not the Catalyst administrator.');
       const [s, r, o, v] = await Promise.all([supabase.rpc('admin_summary'), supabase.from('registrations').select('id,full_name,personal_email,university,reference,status,created_at,checked_in_at').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('orders').select('*,registrations(full_name,personal_email)').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('product_variants').select('*').order('sku')]);
       for (const result of [s, r, o, v]) if (result.error) throw result.error;
-      if(s.data.schema_version!==5)throw new Error('The admin setup needs a database update. Apply the Supabase UI integration upgrade before continuing.');
+      if(s.data.schema_version!==7)throw new Error('The admin setup needs a database update. Apply the Supabase UI integration upgrade before continuing.');
       if(currentUser.current!==userId)return;
       setSummary(s.data); setRegistrations(r.data || []); setOrders(o.data || []); setVariants(v.data || []); setAuthorized(true);
     } catch (e) { if(currentUser.current===userId){setAuthorized(false);setError(errorMessage(e));} }
