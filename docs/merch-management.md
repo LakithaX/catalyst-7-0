@@ -5,7 +5,7 @@ The admin Merchandise section controls the database catalogue, publishing, varia
 ## Database setup
 
 - Empty project: run `supabase/setup.sql` once, then `supabase/seed.sql`.
-- Existing project: apply only unapplied migrations in filename order; the merchandise management migrations are `202611080003_merch_management.sql` and `202611080004_preorders.sql`. Run `supabase/seed.sql` to import the existing code catalogue without overwriting existing product IDs or SKUs.
+- Existing project: apply only unapplied migrations in filename order; the merchandise management migrations are `202611080003_merch_management.sql` and `202611080004_preorders.sql`; the UI/receipt upgrade is `202611080005_ui_integration.sql`. Run `supabase/seed.sql` to import the existing code catalogue without overwriting existing product IDs or SKUs.
 - Seed prices/descriptions come from `src/data/merchProducts.ts`. Confirm commercial details before opening sales. Orders are pre-orders and do not require available stock.
 
 ## Behavior
@@ -20,3 +20,5 @@ The admin Merchandise section controls the database catalogue, publishing, varia
 ## Deployment verification
 
 Build and TypeScript checks can run locally. Live integration checks require the schema and an authorized admin session. Verify create/edit/publish/hide, per-size prices, paused-checkout rejection, and reopening the collection. Unauthorized RPC calls should be rejected. Do not use delegate personal data for these checks.
+
+Receipt uploads and bank instructions are now integrated. See `docs/supabase-upgrade-005.md` for existing-project upgrade and rollout instructions.

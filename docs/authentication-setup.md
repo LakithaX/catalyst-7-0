@@ -17,3 +17,5 @@ Supabase configuration still required:
 Documentation: https://supabase.com/docs/guides/auth/auth-email-passwordless and https://supabase.com/docs/reference/javascript/auth-signinwithotp
 
 The public catalogue is readable while the shop is open. Browsing does not require sign-in; registration and checkout do.
+
+Existing projects also need the UI/receipt upgrade described in `docs/supabase-upgrade-005.md`. Admin builds without Supabase configuration are blocked rather than entering preview mode.

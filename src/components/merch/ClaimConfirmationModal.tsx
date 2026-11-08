@@ -14,24 +14,14 @@ import {
   ArrowLeft,
   ArrowRight,
 } from 'lucide-react';
+import EmailSignIn, { useSession } from '../EmailSignIn';
+import { Link } from 'react-router-dom';
+import { useCatalog } from '../../context/CatalogContext';
+import { requireSupabase, errorMessage } from '../../lib/supabase';
+import { quoteOrder, placePreorder, type OrderQuote } from '../../lib/booking';
 import { useMerch } from '../../context/MerchContext';
 
-// ============================================================================
-// EDIT HERE
-// ============================================================================
-// 1) Paste your Google Apps Script web-app URL (ends in /exec). See merch-orders.gs.
-//    Leave it empty to run in DEMO mode: the form works, but nothing is sent anywhere.
-const ORDER_ENDPOINT = '';
-
-// 2) Your bank details, shown to the customer on the payment step.
-const BANK = {
-  bank: 'YOUR BANK NAME',
-  accountName: 'YOUR ACCOUNT NAME',
-  accountNumber: '0000000000',
-  branch: 'YOUR BRANCH',
-};
-
-const MAX_RECEIPT_BYTES = 5 * 1024 * 1024; // what we send (images are shrunk first, so phone photos are fine)
+const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
 const MAX_PICK_BYTES = 12 * 1024 * 1024; // biggest file we will even try to read
 // ============================================================================
 
@@ -39,7 +29,7 @@ type Step = 1 | 2;
 type Receipt = { blob: Blob; name: string; type: string; size: number; previewUrl: string | null };
 type Errors = Partial<Record<'name' | 'email' | 'phone', string>>;
 
-const makeRef = () => 'CAT7-ORD-' + Math.floor(100000 + Math.random() * 900000);
+
 const formatKb = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`);
 
 // shrink big phone photos / screenshots so they upload fast
@@ -65,14 +55,6 @@ const compressImage = (file: File): Promise<Blob> =>
       reject(new Error('decode'));
     };
     img.src = url;
-  });
-
-const blobToBase64 = (blob: Blob): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const r = new FileReader();
-    r.onload = () => resolve(String(r.result).split(',')[1] ?? '');
-    r.onerror = () => reject(new Error('read'));
-    r.readAsDataURL(blob);
   });
 
 const inputBase =
@@ -112,7 +94,14 @@ export const ClaimConfirmationModal: React.FC = () => {
   const { isClaimModalOpen, closeClaimModal, cartItems, clearCart } = useMerch();
 
   const [step, setStep] = useState<Step>(1);
-  const [reference, setReference] = useState(makeRef);
+  const orderKey = useRef(crypto.randomUUID());
+  const inFlight = useRef(false);
+  const {session} = useSession();
+  const {comingSoon} = useCatalog();
+  const [quote,setQuote] = useState<OrderQuote|null>(null);
+  const [delegateReady,setDelegateReady] = useState(false);
+  const [BANK,setBank] = useState({bank:'',accountName:'',accountNumber:'',branch:''});
+  const [reference, setReference] = useState('');
 
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -131,8 +120,29 @@ export const ClaimConfirmationModal: React.FC = () => {
   const [copied, setCopied] = useState('');
 
   const dialogRef = useRef<HTMLDivElement>(null);
-  const totalLkr = cartItems.reduce((sum, item) => sum + (item.priceLkr || 0) * item.quantity, 0);
+  const totalLkr = quote ? quote.totalMinor / 100 : 0;
   const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
+  useEffect(() => {
+    if (!isClaimModalOpen) return;
+    let active=true;
+    setQuote(null);setDelegateReady(false);setSubmitError('');setName('');setEmail('');setPhone('');setDelegateId('');setStep(1);
+    async function prepare(){
+      try {
+        const db=requireSupabase();
+        const bank=await db.from('shop_settings').select('bank_name,account_name,account_number,bank_branch').eq('id',true).single();
+        if(bank.error)throw bank.error;
+        if(active)setBank({bank:bank.data.bank_name,accountName:bank.data.account_name,accountNumber:bank.data.account_number,branch:bank.data.bank_branch});
+        if(!session)return;
+        const registration=await db.from('registrations').select('full_name,personal_email,phone,reference,status').eq('user_id',session.user.id).maybeSingle();
+        if(registration.error)throw registration.error;
+        if(!registration.data || !['pending','approved'].includes(registration.data.status))throw new Error('Complete an active Catalyst registration before pre-ordering.');
+        const current=await quoteOrder(cartItems);
+        if(active){setName(registration.data.full_name);setEmail(registration.data.personal_email);setPhone(registration.data.phone);setDelegateId(registration.data.reference);setDelegateReady(true);setQuote(current);}
+      }catch(e){if(active)setSubmitError(errorMessage(e));}
+    }
+    void prepare();return()=>{active=false;};
+  },[isClaimModalOpen,session?.user.id,cartItems]);
 
   // free the preview image when it is replaced / removed / the modal unmounts
   useEffect(() => {
@@ -152,7 +162,7 @@ export const ClaimConfirmationModal: React.FC = () => {
   }, [isClaimModalOpen]);
 
   const handleClose = () => {
-    if (submitting) return;
+    if (inFlight.current) return;
     const wasSuccess = isSuccess;
     closeClaimModal();
     window.setTimeout(() => {
@@ -164,7 +174,7 @@ export const ClaimConfirmationModal: React.FC = () => {
         setPhone('');
         setDelegateId('');
         setReceipt(null);
-        setReference(makeRef());
+        orderKey.current=crypto.randomUUID();setReference('');
       }
       setErrors({});
       setSubmitError('');
@@ -203,7 +213,8 @@ export const ClaimConfirmationModal: React.FC = () => {
 
   const goToPayment = (e: React.FormEvent) => {
     e.preventDefault();
-    if (cartItems.length === 0) return;
+    if (cartItems.length === 0 || !quote || !delegateReady || !session || comingSoon) return;
+    if (!BANK.bank || !BANK.accountName || !BANK.accountNumber) {setSubmitError('Bank details have not been configured. Pre-orders will open once payment instructions are ready.');return;}
     if (validateDetails()) setStep(2);
   };
 
@@ -212,9 +223,9 @@ export const ClaimConfirmationModal: React.FC = () => {
     if (!file) return;
     setReceiptError('');
     const isPdf = file.type === 'application/pdf';
-    const isImage = file.type.startsWith('image/');
+    const isImage = ['image/jpeg','image/png','image/webp'].includes(file.type);
     if (!isPdf && !isImage) {
-      setReceiptError('Please upload a photo, screenshot or PDF of your receipt.');
+      setReceiptError('Please upload a JPEG, PNG, WebP or PDF receipt.');
       return;
     }
     if (file.size > MAX_PICK_BYTES) {
@@ -281,46 +292,14 @@ export const ClaimConfirmationModal: React.FC = () => {
       setReceiptError('Please upload your payment receipt to place the order.');
       return;
     }
-    setSubmitting(true);
-    setSubmitError('');
+    if(inFlight.current || !session || !quote || !delegateReady || comingSoon)return;
+    inFlight.current=true;setSubmitting(true);setSubmitError('');
     try {
-      const data = await blobToBase64(receipt.blob);
-      const payload = {
-        ref: reference,
-        submittedAt: new Date().toISOString(),
-        name: name.trim(),
-        email: email.trim(),
-        phone: phone.trim(),
-        delegateId: delegateId.trim(),
-        totalLkr,
-        items: cartItems.map((i) => ({
-          productId: i.productId,
-          name: i.name,
-          variant: i.variant,
-          size: i.size ?? '',
-          quantity: i.quantity,
-          priceLkr: i.priceLkr ?? 0,
-        })),
-        receipt: { name: receipt.name, type: receipt.type, data },
-      };
-
-      if (!ORDER_ENDPOINT) {
-        // DEMO MODE: nothing is sent. Set ORDER_ENDPOINT at the top of this file to go live.
-        console.warn('[Merch checkout] ORDER_ENDPOINT is empty, so this order was NOT sent anywhere.', { ...payload, receipt: { ...payload.receipt, data: '(omitted)' } });
-        await new Promise((r) => setTimeout(r, 900));
-      } else {
-        const res = await fetch(ORDER_ENDPOINT, { method: 'POST', body: JSON.stringify(payload) });
-        const json = await res.json().catch(() => null);
-        if (!res.ok || !json?.ok) throw new Error(json?.error || 'Server error');
-      }
-
-      setIsSuccess(true);
-      clearCart();
-    } catch {
-      setSubmitError('We could not send your order. Please check your connection and try again. Your details and receipt are still here.');
-    } finally {
-      setSubmitting(false);
-    }
+      const file=new File([receipt.blob],receipt.name,{type:receipt.type});
+      const result=await placePreorder(orderKey.current,quote,file);
+      setReference(result.reference);setIsSuccess(true);clearCart();
+    } catch(error){setSubmitError(errorMessage(error));}
+    finally{inFlight.current=false;setSubmitting(false);}
   };
 
   const steps: { n: Step; label: string }[] = [
@@ -330,7 +309,7 @@ export const ClaimConfirmationModal: React.FC = () => {
 
   return (
     <AnimatePresence>
-      {isClaimModalOpen && (
+      {isClaimModalOpen && (!comingSoon || isSuccess) && (
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4">
           {/* Backdrop */}
           <motion.div
@@ -412,8 +391,11 @@ export const ClaimConfirmationModal: React.FC = () => {
                       Back to collection
                     </button>
                   </div>
-                ) : step === 1 ? (
-                  /* ======================= STEP 1 ======================= */
+                ) : step === 1 ? (<>
+                  {/* ======================= STEP 1 ======================= */}
+                  <EmailSignIn />
+                  {!delegateReady && session && <p className="mb-4 text-sm text-[#9e2722]">An active registration is required. <Link to="/register" onClick={handleClose} className="underline">Register for Catalyst</Link></p>}
+                  {submitError && <p role="alert" className="mb-4 text-sm text-[#9e2722]">{submitError}</p>}
                   <form onSubmit={goToPayment} noValidate className="space-y-4">
                     <Field id="co-name" label="Full name" error={errors.name}>
                       <input
@@ -422,7 +404,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                         autoComplete="name"
                         autoFocus
                         placeholder="e.g. Kasun Perera"
-                        value={name}
+                        readOnly value={name}
                         onChange={(e) => setName(e.target.value)}
                         aria-invalid={!!errors.name}
                         aria-describedby={errors.name ? 'co-name-error' : undefined}
@@ -430,14 +412,14 @@ export const ClaimConfirmationModal: React.FC = () => {
                       />
                     </Field>
 
-                    <Field id="co-email" label="Email" error={errors.email} hint="We will send your order confirmation here.">
+                    <Field id="co-email" label="Email" error={errors.email} hint="Email from your verified registration.">
                       <input
                         id="co-email"
                         type="email"
                         inputMode="email"
                         autoComplete="email"
                         placeholder="you@example.com"
-                        value={email}
+                        readOnly value={email}
                         onChange={(e) => setEmail(e.target.value)}
                         aria-invalid={!!errors.email}
                         aria-describedby={errors.email ? 'co-email-error' : 'co-email-hint'}
@@ -452,7 +434,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                         inputMode="tel"
                         autoComplete="tel"
                         placeholder="077 123 4567"
-                        value={phone}
+                        readOnly value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         aria-invalid={!!errors.phone}
                         aria-describedby={errors.phone ? 'co-phone-error' : 'co-phone-hint'}
@@ -460,13 +442,13 @@ export const ClaimConfirmationModal: React.FC = () => {
                       />
                     </Field>
 
-                    <Field id="co-delegate" label="Delegate / badge ID (optional)" hint="Leave blank if you do not have one yet.">
+                    <Field id="co-delegate" label="Delegate reference" hint="Linked automatically to your verified registration.">
                       <input
                         id="co-delegate"
                         type="text"
                         autoComplete="off"
                         placeholder="e.g. SLIIT-DEL-2026"
-                        value={delegateId}
+                        readOnly value={delegateId}
                         onChange={(e) => setDelegateId(e.target.value)}
                         aria-describedby="co-delegate-hint"
                         className={`${inputBase} border-[#E5DDD0] focus:border-[#C9362B]`}
@@ -508,6 +490,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                       </button>
                       <button
                         type="submit"
+                        disabled={!quote || !delegateReady || !session || submitting}
                         className="flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#C9362B] px-4 py-3 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-widest text-white shadow-[0_4px_16px_rgba(201,54,43,0.3)] transition-all hover:bg-[#9E171C]"
                       >
                         <span>Continue</span>
@@ -515,7 +498,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                       </button>
                     </div>
                   </form>
-                ) : (
+                </>) : (
                   /* ======================= STEP 2 ======================= */
                   <div className="space-y-5">
                     {/* amount */}
@@ -555,11 +538,11 @@ export const ClaimConfirmationModal: React.FC = () => {
                       <div className="mt-3 flex items-center justify-between gap-3 rounded-lg bg-[#F8F3E9] px-3 py-2.5">
                         <div className="min-w-0">
                           <p className="text-[10px] uppercase tracking-widest text-[#736B63]">Use this as the payment reference</p>
-                          <p className="font-mono text-sm font-bold tracking-wider text-[#C9362B]">{reference}</p>
+                          <p className="font-mono text-sm font-bold tracking-wider text-[#C9362B]">{reference || `CAT7-PAY-${orderKey.current.toUpperCase()}`}</p>
                         </div>
                         <button
                           type="button"
-                          onClick={() => copyText('ref', reference)}
+                          onClick={() => copyText('ref', reference || `CAT7-PAY-${orderKey.current.toUpperCase()}`)}
                           className="flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center rounded-md border border-[#E5DDD0] bg-white text-[#736B63] transition-colors hover:border-[#C9362B] hover:text-[#C9362B]"
                           aria-label="Copy order reference"
                         >
@@ -651,7 +634,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                     </div>
 
                     <p className="text-[11px] leading-relaxed text-[#736B63]">
-                      We will check your receipt and confirm your order by email. Pick-up is at the Catalyst registration booth on event day.
+                      Your receipt will be reviewed by the event team. Payment is confirmed only after verification. Pick-up is at the Catalyst registration booth on event day.
                     </p>
 
                     {submitError && (
@@ -673,7 +656,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                       <button
                         type="button"
                         onClick={submitOrder}
-                        disabled={submitting || processing}
+                        disabled={submitting || processing || !quote || !delegateReady || !session || comingSoon}
                         className="flex flex-[1.4] cursor-pointer items-center justify-center gap-2 rounded-full bg-[#C9362B] px-4 py-3 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-widest text-white shadow-[0_4px_16px_rgba(201,54,43,0.3)] transition-all hover:bg-[#9E171C] disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {submitting ? (
