@@ -4,9 +4,9 @@ import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import '../styles/samurai-registration.css';
 
-// Configurable endpoint: set to your Google Apps Script Web App URL or custom backend.
-// Leave empty for local demo mode.
-export const REGISTRATION_ENDPOINT = '';
+import EmailSignIn, { useSession } from '../components/EmailSignIn';
+import { submitRegistration } from '../lib/booking';
+import { errorMessage } from '../lib/supabase';
 
 // ============================================================================
 // FORM CONTENT  (edit questions here. Everything else adapts automatically)
@@ -59,20 +59,6 @@ const CHAPTERS: ChapterDef[] = [
       alt: 'Traditional Japanese pagoda clan architecture - The Clan',
     },
     questions: [
-      {
-        id: 'clan',
-        q: 'Which clan do you call home?',
-        h: 'Your university or campus',
-        w: 1,
-        o: [
-          'SLIIT — Malabe Campus',
-          'SLIIT City Uni',
-          'Metropolitan Campus',
-          'CINEC Campus',
-          'William Angliss Institute @ SLIIT',
-          'Other*',
-        ],
-      },
       {
         id: 'year',
         q: 'Which chapter of your journey are you in?',
@@ -257,7 +243,9 @@ export default function RegisterPage() {
   const [cur, setCur] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [cvBase64, setCvBase64] = useState<string>('');
+  const { session } = useSession();
+  const submissionKey = useRef(crypto.randomUUID());
+  const [registrationReference, setRegistrationReference] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -542,20 +530,18 @@ export default function RegisterPage() {
     if (file.size > 5242880) {
       setErrors((prev) => ({ ...prev, cv: 'That file is over 5 MB. Choose a smaller one.' }));
       setCvFile(null);
-      setCvBase64('');
+
       return;
     }
     if (!/\.(pdf|docx?)$/i.test(file.name)) {
       setErrors((prev) => ({ ...prev, cv: 'Use a PDF or Word file.' }));
       setCvFile(null);
-      setCvBase64('');
+
       return;
     }
     setCvFile(file);
     clearError('cv');
-    const reader = new FileReader();
-    reader.onload = () => setCvBase64(reader.result as string);
-    reader.readAsDataURL(file);
+    submissionKey.current = crypto.randomUUID();
     burstAt(stepRef.current?.querySelector('.rg-drop') ?? null, 14);
   };
 
@@ -597,31 +583,16 @@ export default function RegisterPage() {
     setSubmitError('');
 
     try {
-      const payload = {
-        ...formData,
-        cvFileName: cvFile?.name || '',
-        cvMimeType: cvFile?.type || '',
-        cvBase64: cvBase64,
-      };
-
-      if (REGISTRATION_ENDPOINT) {
-        const res = await fetch(REGISTRATION_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Network error');
-      } else {
-        // Simulated submission in demo mode
-        await new Promise((r) => setTimeout(r, 800));
-      }
-
+      if (!session) throw new Error('Verify your registration email before submitting.');
+      if (!cvFile) throw new Error('Upload your CV before submitting.');
+      const result = await submitRegistration(submissionKey.current, formData, cvFile);
+      setRegistrationReference(result.reference);
       try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       entryDelay.current = 0.1;
       setIsDone(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      setSubmitError('We couldn’t send your registration. Check your connection and try again.');
+    } catch (error) {
+      setSubmitError(errorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -770,6 +741,7 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
+                {cur === CHAPTERS.length - 1 && <EmailSignIn initialEmail={formData.email || ''} />}
                 {ch.questions.map((q, qi) => {
                   const err = errors[q.id];
                   const hasSpecial = q.o?.some((opt) => opt.endsWith('*'));
@@ -957,17 +929,18 @@ export default function RegisterPage() {
           <p className="rg-tag rg-done-in"><i /> 登録完了 · REGISTERED</p>
           <h2 className="rg-done-h rg-done-in" tabIndex={-1}>Your journey begins, {firstName}.</h2>
           <p className="rg-sub rg-done-in">
-            Your Catalyst 7.0 registration is in. Keep an eye on your AIESEC email for updates.
+            Your registration has been saved and is awaiting review. Keep your reference for follow-up.
           </p>
 
           <div className="rg-ticket" onPointerMove={onTicketMove} onPointerLeave={onTicketLeave}>
             <div className="rg-ticket-top">
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}><TagMark />CATALYST 7.0</span>
-              <span>WARRIOR PASS</span>
+              <span>REGISTRATION RECEIVED</span>
             </div>
+            <p className="rg-sub">Reference: {registrationReference}</p>
             <h3>{formData.name || 'Warrior'}</h3>
             <dl>
-              <div><dt>Clan</dt><dd>{formData.clan === 'Other' || formData['clan-isSpecial'] ? formData['clan-sp'] || formData.clan : formData.clan || '·'}</dd></div>
+              <div><dt>Community</dt><dd>AIESEC in SLIIT</dd></div>
               <div><dt>Path</dt><dd>{formData.path || '·'}</dd></div>
               <div><dt>Warrior</dt><dd>{warriorType || '·'}</dd></div>
             </dl>

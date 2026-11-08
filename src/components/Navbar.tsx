@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { motion, useReducedMotion } from 'motion/react';
-import { MERCH_PRODUCTS } from '../data/merchProducts';
+import { useCatalog } from '../context/CatalogContext';
 import { useMerch } from '../context/MerchContext';
 import { CatalystMark } from './brand/CatalystMark';
 
@@ -15,6 +15,7 @@ export interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }) => {
+  const {products: MERCH_PRODUCTS} = useCatalog();
   const [merchOpen, setMerchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);

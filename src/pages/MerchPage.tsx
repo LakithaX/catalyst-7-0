@@ -1,4 +1,6 @@
 import React, { useEffect, useRef } from 'react';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { MerchHero } from '../components/merch/MerchHero';
 import { MerchCollection } from '../components/merch/MerchCollection';
@@ -13,6 +15,7 @@ import { scrollTopOrRestore } from '../utils/navState';
 import { CatalystMark } from '../components/brand/CatalystMark';
 
 export const MerchPage: React.FC = () => {
+  const {comingSoon, loading, error, products} = useCatalog();
   const pageRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -21,7 +24,7 @@ export const MerchPage: React.FC = () => {
   }, []);
 
   // scroll progress bar + any data-* effects used inside this page
-  useMerchMotion(pageRef);
+  useMerchMotion(pageRef, [loading, comingSoon, error, products.length]);
 
   return (
     <div
@@ -30,6 +33,7 @@ export const MerchPage: React.FC = () => {
     >
       <Navbar />
 
+      {comingSoon || loading || error || !products.length ? <ShopUnavailable /> : <>
       {/* Main Page Flow */}
       <main className="relative">
         {/* Section A: Hero */}
@@ -99,11 +103,12 @@ export const MerchPage: React.FC = () => {
         </div>
       </footer>
 
+      </>}
       {/* Shared Overlays */}
-      <CartDrawer />
-      <ClaimConfirmationModal />
+      {!comingSoon && !loading && !error && <CartDrawer />}
+      {!comingSoon && !loading && !error && <ClaimConfirmationModal />}
       <MerchToast />
-      <MerchCartButton />
+      {!comingSoon && !loading && !error && <MerchCartButton />}
     </div>
   );
 };

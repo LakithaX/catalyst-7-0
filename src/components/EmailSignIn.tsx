@@ -8,12 +8,15 @@ export function useSession() {
   useEffect(() => {
     if (!supabase) return;
     let active = true;
+    let revision = 0;
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => {
+      revision++;
       if (active) { setSession(next); setLoading(false); }
     });
-    supabase.auth.getSession().then(({ data }) => {
-      if (active) { setSession(data.session); setLoading(false); }
-    });
+    const initialRevision = revision;
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (active && revision === initialRevision) { setSession(error ? null : data.session); setLoading(false); }
+    }).catch(() => { if (active && revision === initialRevision) { setSession(null); setLoading(false); } });
     return () => { active = false; subscription.unsubscribe(); };
   }, []);
   return { session, loading };

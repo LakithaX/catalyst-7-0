@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { MerchProduct, getProductById } from '../data/merchProducts';
+import { MerchProduct } from '../data/merchProducts';
+
+import { useCatalog } from './CatalogContext';
 
 export interface CartItem {
   cartId: string;
@@ -48,6 +50,7 @@ const STORAGE_KEY_CART = 'catalyst7_merch_cart';
 const STORAGE_KEY_WISHLIST = 'catalyst7_merch_wishlist';
 
 export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const {products} = useCatalog();
   // Load initial cart from localStorage
   const [cartItems, setCartItems] = useState<CartItem[]>(() => {
     try {
@@ -132,7 +135,7 @@ export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       showToast(`Added ${product.name} (${product.variant}) to your claim list`);
     },
-    [showToast]
+    [showToast, products]
   );
 
   const removeFromCart = useCallback(
@@ -140,7 +143,7 @@ export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setCartItems((prev) => prev.filter((item) => item.cartId !== cartId));
       showToast('Item removed from claim list');
     },
-    [showToast]
+    [showToast, products]
   );
 
   const updateQuantity = useCallback((cartId: string, quantity: number) => {
@@ -159,7 +162,7 @@ export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const toggleWishlist = useCallback(
     (productId: string) => {
-      const product = getProductById(productId);
+      const product = products.find(p => p.id === productId);
       const name = product ? product.name : 'Item';
 
       setWishlist((prev) => {
@@ -173,7 +176,7 @@ export const MerchProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }
       });
     },
-    [showToast]
+    [showToast, products]
   );
 
   const isWishlisted = useCallback(

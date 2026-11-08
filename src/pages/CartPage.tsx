@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { gsap } from 'gsap';
 import { ArrowLeft, Trash2, ArrowRight, ShieldCheck, Heart, Plus } from 'lucide-react';
 import { useMerch } from '../context/MerchContext';
-import { getProductById } from '../data/merchProducts';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
@@ -48,6 +49,8 @@ const CountUp: React.FC<{ value: number; prefix?: string; className?: string }> 
 };
 
 export const CartPage: React.FC = () => {
+  const {products, comingSoon, loading, error} = useCatalog();
+  const getProductById = (id: string) => products.find(p => p.id === id);
   const {
     cartItems,
     removeFromCart,
@@ -67,11 +70,12 @@ export const CartPage: React.FC = () => {
   }, []);
 
   // empty <-> filled swaps different markup, so re-arm the effects when that changes
-  useMerchMotion(pageRef, [cartItems.length === 0, wishlist.length === 0]);
+  useMerchMotion(pageRef, [cartItems.length === 0, wishlist.length === 0, loading, comingSoon, error]);
 
   const totalPieces = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalLkr = cartItems.reduce((acc, i) => acc + (i.priceLkr || 0) * i.quantity, 0);
 
+  if (comingSoon || loading || error) return <><Navbar/><ShopUnavailable/></>;
   return (
     <div
       ref={pageRef}

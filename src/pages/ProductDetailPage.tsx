@@ -16,8 +16,10 @@ import {
   Check,
   ShoppingBag,
 } from 'lucide-react';
-import { getProductById, getRelatedProducts, MerchProduct } from '../data/merchProducts';
+import { MerchProduct } from '../data/merchProducts';
 import { useMerch } from '../context/MerchContext';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { CartDrawer } from '../components/merch/CartDrawer';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
@@ -35,8 +37,9 @@ export const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
   const { addToCart, isWishlisted, toggleWishlist, openCart } = useMerch();
 
-  const product: MerchProduct | undefined = productId ? getProductById(productId) : undefined;
-  const relatedProducts = productId ? getRelatedProducts(productId, 3) : [];
+  const {products, comingSoon, loading, error} = useCatalog();
+  const product: MerchProduct | undefined = products.find(p => p.id === productId);
+  const relatedProducts = products.filter(p => p.id !== productId).slice(0,3);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
@@ -64,7 +67,7 @@ export const ProductDetailPage: React.FC = () => {
     if (product) {
       document.title = `${product.name} — ${product.variant} | Catalyst 7.0 Merch`;
     }
-  }, [productId, product]);
+  }, [productId, product?.id]);
 
   const images = product?.images || [];
   const hasMultipleImages = images.length > 1;
@@ -100,11 +103,12 @@ export const ProductDetailPage: React.FC = () => {
     );
     io.observe(el);
     return () => io.disconnect();
-  }, [productId]);
+  }, [productId, product?.id, loading, comingSoon, error]);
 
   // scroll effects, tilt, magnetic buttons, letter drop-in (re-armed when the product changes)
-  useMerchMotion(pageRef, [productId]);
+  useMerchMotion(pageRef, [productId, product?.id, loading, comingSoon, error]);
 
+  if (comingSoon || loading || error) return <><Navbar/><ShopUnavailable/></>;
   if (!product) {
     return (
       <div className="flex min-h-screen flex-col bg-[#F8F3E9] text-[#252321]">
