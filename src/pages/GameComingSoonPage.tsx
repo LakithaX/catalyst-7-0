@@ -97,10 +97,7 @@ export const GameComingSoonPage: React.FC = () => {
 
       </main>
 
-      {/* Minimal Discreet Footer Note */}
-      <footer className="py-6 text-center text-[10px] font-mono tracking-widest text-[#736B63]/60 uppercase">
-        AIESEC in SLIIT &middot; Catalyst 7.0
-      </footer>
+
     </div>
   );
 };
