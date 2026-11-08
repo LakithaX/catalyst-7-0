@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/samurai-registration.css';
+import EmailSignIn from '../components/EmailSignIn';
+import { submitRegistration } from '../lib/booking';
+import { errorMessage } from '../lib/supabase';
 
-// Configurable endpoint: set to your Google Apps Script Web App URL or custom backend.
-// Leave empty for local demo mode.
-export const REGISTRATION_ENDPOINT = '';
 
 interface QuestionDef {
   id: string;
@@ -57,20 +57,6 @@ const CHAPTERS: ChapterDef[] = [
       alt: 'Traditional Japanese pagoda clan architecture - The Clan',
     },
     questions: [
-      {
-        id: 'clan',
-        q: 'Which clan do you call home?',
-        h: 'Your university or campus',
-        w: 1,
-        o: [
-          'SLIIT — Malabe Campus',
-          'SLIIT City Uni',
-          'Metropolitan Campus',
-          'CINEC Campus',
-          'William Angliss Institute @ SLIIT',
-          'Other*',
-        ],
-      },
       {
         id: 'year',
         q: 'Which chapter of your journey are you in?',
@@ -222,7 +208,8 @@ export default function RegisterPage() {
   const [cur, setCur] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [cvBase64, setCvBase64] = useState<string>('');
+  const submissionKey = useRef(crypto.randomUUID());
+  const [registrationReference, setRegistrationReference] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -303,16 +290,15 @@ export default function RegisterPage() {
     if (file.size > 5242880) {
       setErrors((prev) => ({ ...prev, cv: 'That file is over 5 MB. Choose a smaller one.' }));
       setCvFile(null);
-      setCvBase64('');
       return;
     }
     if (!/\.(pdf|docx?)$/i.test(file.name)) {
       setErrors((prev) => ({ ...prev, cv: 'Use a PDF or Word file.' }));
       setCvFile(null);
-      setCvBase64('');
       return;
     }
 
+    submissionKey.current = crypto.randomUUID();
     setCvFile(file);
     setErrors((prev) => {
       const next = { ...prev };
@@ -320,11 +306,7 @@ export default function RegisterPage() {
       return next;
     });
 
-    const reader = new FileReader();
-    reader.onload = () => {
-      setCvBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
+
   };
 
   const goToChapter = (n: number) => {
@@ -362,29 +344,13 @@ export default function RegisterPage() {
     setSubmitError('');
 
     try {
-      const payload = {
-        ...formData,
-        cvFileName: cvFile?.name || '',
-        cvMimeType: cvFile?.type || '',
-        cvBase64: cvBase64,
-      };
-
-      if (REGISTRATION_ENDPOINT) {
-        const res = await fetch(REGISTRATION_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Network error');
-      } else {
-        // Simulated submission in demo mode
-        await new Promise((r) => setTimeout(r, 800));
-      }
+      const result = await submitRegistration(submissionKey.current, formData, cvFile!);
+      setRegistrationReference(result.reference);
 
       setIsDone(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      setSubmitError('We couldn’t send your registration. Check your connection and try again.');
+    } catch (error) {
+      setSubmitError(errorMessage(error));
     } finally {
       setSubmitting(false);
     }
@@ -628,6 +594,8 @@ export default function RegisterPage() {
                   })}
                 </section>
 
+                {cur === CHAPTERS.length - 1 && <EmailSignIn initialEmail={formData.email || ''} />}
+
                 {submitError && (
                   <p className="err" id="sub-err" role="alert" style={{ marginBottom: 12 }}>
                     {submitError}
@@ -658,6 +626,7 @@ export default function RegisterPage() {
               </div>
               <h2 tabIndex={-1}>Your journey begins, {firstName}.</h2>
               <p>Your Catalyst 7.0 registration is in. Keep an eye on your AIESEC email for updates.</p>
+              <p className="break-all">Reference: {registrationReference}</p>
               <div style={{ marginTop: 28 }}>
                 <Link to="/" className="btn go" style={{ display: 'inline-block', lineHeight: '52px', padding: '0 36px' }}>
                   Return to Home
