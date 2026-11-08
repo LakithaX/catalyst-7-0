@@ -2,8 +2,6 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import GlobalLoader from './components/GlobalLoader';
-import SiteFooter from './components/SiteFooter';
-import { StickyFooter } from './components/ui/sticky-footer';
 import { BackgroundMusic } from './components/BackgroundMusic';
 import Layout from './components/Layout';
 import { initBoot } from './utils/navState';
@@ -123,8 +121,6 @@ export default function App() {
         {/* GROUP A (catch-all): Last route in the list */}
         <Route path="*" element={<HomePage />} />
       </Routes>
-      {/^\/(about(?:\/oc)?|oc|register|registration|gallery|merch(?:\/[^/]+)?|game)\/?$/.test(location.pathname) && <SiteFooter />}
-      {location.pathname.replace(/\/$/, '') === '/admin' && <StickyFooter />}
       </Suspense>
     </>
   );

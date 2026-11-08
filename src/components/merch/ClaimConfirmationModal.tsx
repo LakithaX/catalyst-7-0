@@ -15,10 +15,6 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { useMerch } from '../../context/MerchContext';
-import EmailSignIn, { useSession } from '../EmailSignIn';
-import { quoteOrder, placeOrder, type OrderQuote } from '../../lib/booking';
-import { useCatalog } from '../../context/CatalogContext';
-import { errorMessage } from '../../lib/supabase';
 
 // ============================================================================
 // EDIT HERE
