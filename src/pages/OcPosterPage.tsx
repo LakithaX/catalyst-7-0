@@ -624,9 +624,6 @@ export default function OcPosterPage() {
         </section>
       </main>
 
-      <footer className="relative z-20 w-full border-t border-[#29211D]/10 bg-[#EFE1CB]/70 px-4 py-10 text-center">
-        <p className="text-[11px] text-[#736B63]">Catalyst 7.0 · AIESEC in SLIIT · All Rights Reserved</p>
-      </footer>
     </div>
   )
 }
