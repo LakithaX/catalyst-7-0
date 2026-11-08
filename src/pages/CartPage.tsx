@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { ArrowLeft, Trash2, ArrowRight, ShieldCheck, Heart, ShoppingBag, Plus } from 'lucide-react';
 import { useMerch } from '../context/MerchContext';
 import { getProductById } from '../data/merchProducts';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
@@ -24,6 +26,8 @@ export const CartPage: React.FC = () => {
     document.title = 'My Claim Bag — Catalyst 7.0 Merch';
   }, []);
 
+  const {comingSoon, loading, error} = useCatalog();
+  if (comingSoon || loading || error) return <><Navbar/><ShopUnavailable/></>;
   const totalPieces = cartItems.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
