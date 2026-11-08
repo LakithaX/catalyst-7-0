@@ -295,7 +295,7 @@ export const GalleryPage: React.FC = () => {
       <div id="chapters" ref={chaptersHostRef} className="relative z-20 w-full" />
 
       {/* ── Editorial Outro / Footer Section ── */}
-      <footer className="relative bg-[#B51E23] text-white text-center py-24 sm:py-36 px-6 overflow-hidden">
+      <section aria-label="Continue the Catalyst experience" className="relative bg-[#B51E23] text-white text-center py-24 sm:py-36 px-6 overflow-hidden">
         {/* Full-bleed Celebration Photograph Backdrop */}
         <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
           <img
@@ -367,7 +367,7 @@ export const GalleryPage: React.FC = () => {
             </Link>
           </div>
         </div>
-      </footer>
+      </section>
 
       {/* Scoped High-Performance CSS matching Garden Wedding Scroll Gallery Engine */}
       <style>{`

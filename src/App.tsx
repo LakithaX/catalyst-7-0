@@ -2,6 +2,9 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import GlobalLoader from './components/GlobalLoader';
+import SiteFooter from './components/SiteFooter';
+import { StickyFooter } from './components/ui/sticky-footer';
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -79,6 +82,7 @@ export default function App() {
       </AnimatePresence>
       <Suspense fallback={<GlobalLoader />}>
       <Routes>
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/register" element={<RegisterPage />} />
@@ -93,6 +97,8 @@ export default function App() {
         <Route path="/contact" element={<ContactPage />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
+      {/^\/(about(?:\/oc)?|oc|register|registration|gallery|merch(?:\/[^/]+)?|game)\/?$/.test(location.pathname) && <SiteFooter />}
+      {location.pathname.replace(/\/$/, '') === '/admin' && <StickyFooter />}
       </Suspense>
     </>
   );

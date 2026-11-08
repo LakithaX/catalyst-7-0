@@ -495,17 +495,6 @@ export default function AboutPage() {
         </section>
       </main>
 
-      <footer className="relative z-20 w-full select-none border-t border-[#252321]/10 bg-[#F3ECE0]/70 px-4 py-10 text-center sm:px-6 lg:px-8">
-        <div
-          className="mb-2 flex items-center justify-center gap-3 text-[10px] font-bold uppercase tracking-[0.25em] text-[#C9362B]"
-          style={{ fontFamily: LABEL_FONT }}
-        >
-          <span className="h-px w-6 bg-[#C9362B]/30" />
-          <span>武士道 · Dare beyond definition</span>
-          <span className="h-px w-6 bg-[#C9362B]/30" />
-        </div>
-        <p className="text-[11px] text-[#736B63]">Catalyst 7.0 · AIESEC in SLIIT · All Rights Reserved</p>
-      </footer>
 
     </div>
   )
