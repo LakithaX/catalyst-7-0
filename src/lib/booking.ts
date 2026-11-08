@@ -40,24 +40,10 @@ export async function quoteOrder(cart: CartItem[]): Promise<OrderQuote> {
   });
   return { items, totalMinor };
 }
-export async function placePreorder(key: string, quote: OrderQuote, file: File) {
-  const db = requireSupabase();
-  const { data: { user }, error: authError } = await db.auth.getUser();
-  if (authError || !user) throw new Error('Verify your registration email first.');
-  if (!['application/pdf','image/jpeg','image/png','image/webp'].includes(file.type) || file.size < 1 || file.size > 5242880) throw new Error('Use a PDF, JPEG, PNG or WebP receipt up to 5 MB.');
-  const previous = await db.from('orders').select('id,reference').eq('submission_key', key).maybeSingle();
-  if (previous.error) throw previous.error;
-  if (previous.data) return previous.data;
-  const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
-  const fileKey=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
-  const storageKey = `${user.id}/${key}/${fileKey}`;
-  const existing = await db.storage.from('payment-receipts').list(`${user.id}/${key}`);
-  if (existing.error) throw existing.error;
-  if (!existing.data.some(f => f.name === fileKey)) {
-    const upload = await db.storage.from('payment-receipts').upload(storageKey, file, {contentType:file.type, upsert:false});
-    if (upload.error) throw upload.error;
-  }
-  const {data,error} = await db.rpc('place_preorder', {p_key:key,p_items:quote.items,p_total:quote.totalMinor,p_receipt:{storage_key:storageKey,original_name:file.name}});
+export async function placePreorder(key: string, quote: OrderQuote) {
+  const { data, error } = await requireSupabase().rpc('submit_preorder', {
+    p_key: key, p_items: quote.items, p_total: quote.totalMinor,
+  });
   if (error) throw error;
   return data as {id:string;reference:string};
 }

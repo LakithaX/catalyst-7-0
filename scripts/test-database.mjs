@@ -80,5 +80,13 @@ assert.equal((await db.query('select method from public.payments')).rows[0].meth
 await db.query('select public.admin_order($1,$2)',[placed.id,'collected']);
 const stock=(await db.query('select stock_on_hand,stock_reserved from public.product_variants where id=$1',[variant.id])).rows[0];assert.equal(stock.stock_on_hand,0);assert.equal(stock.stock_reserved,0);checks+=2;
 const summary=(await db.query('select public.admin_summary() data')).rows[0].data;assert.equal(summary.schema_version,5);checks++;assert.equal(summary.pending_registrations,1);assert.equal(summary.awaiting_collection,0);checks+=2;
+await db.exec('reset role');await db.exec("update public.shop_settings set bank_name='',account_name='',account_number='' where id=true");
+await identity(delegate);
+const unpaidKey='20000000-0000-4000-8000-000000000003';
+const unpaid=(await db.query('select public.submit_preorder($1,$2,$3) result',[unpaidKey,items,variant.price_minor*2])).rows[0].result;
+assert.equal((await db.query('select payment_status from public.orders where id=$1',[unpaid.id])).rows[0].payment_status,'unpaid');checks++;
+assert.equal((await db.query('select count(*)::int n from public.order_receipts where order_id=$1',[unpaid.id])).rows[0].n,0);checks++;
+const unpaidRetry=(await db.query('select public.submit_preorder($1,$2,$3) result',[unpaidKey,items,variant.price_minor*2])).rows[0].result;assert.equal(unpaidRetry.id,unpaid.id);checks++;
+await identity(null,'anon');await denied(()=>db.query('select public.submit_preorder($1,$2,$3)',[unpaidKey,items,variant.price_minor*2]),/permission denied/);
 console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, pre-order atomicity, pause, payment and collection).`);
 await db.close();
