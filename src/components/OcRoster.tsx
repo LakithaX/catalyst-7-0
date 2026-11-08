@@ -92,6 +92,16 @@ export const playFor = (tl: gsap.core.Timeline, self: ScrollTrigger) => {
   tl.timeScale(v > 4000 ? 3.5 : v > 1800 ? 2.2 : 1).play()
 }
 
+// ONE debounced refresh after fonts load (every poster used to call ScrollTrigger.refresh() on its own = 9 full recalcs at once)
+let refreshTimer = 0
+export const refreshSoon = () => {
+  if (typeof document === 'undefined') return
+  document.fonts?.ready.then(() => {
+    window.clearTimeout(refreshTimer)
+    refreshTimer = window.setTimeout(() => ScrollTrigger.refresh(), 200)
+  })
+}
+
 // play an entrance exactly once. ScrollTrigger is configured with limitCallbacks, so when the visitor
 // scrolls PAST a section in one jump (fast scroll, scrollbar drag, anchor, reload mid-page) only onLeave
 // fires and onEnter never does. Without handling that, the section would stay invisible forever.
@@ -300,10 +310,6 @@ const Row = ({
 // ============================================================================
 // ONE DEPARTMENT POSTER
 // ============================================================================
-const PETALS = Array.from({ length: 6 }, (_, i) => ({
-  left: 4 + ((i * 97) % 92),
-  scale: 0.7 + ((i * 37) % 60) / 100,
-}))
 
 export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
   const ref = useRef<HTMLDivElement>(null)
@@ -350,40 +356,11 @@ export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
             duration: 0.9, stagger: 0.08, ease: 'back.out(1.9)',
           })
           .fromTo(q('.ocx-star'), { scale: 0, rotation: -200 }, { scale: 1, rotation: 0, duration: 0.8, ease: 'back.out(2.4)' }, '-=0.5')
-          .fromTo(q('.ocx-tag'), { opacity: 0, letterSpacing: '0.55em' }, { opacity: 1, letterSpacing: '0.06em', duration: 1.1, ease: 'power3.out' }, '-=0.6')
+          .fromTo(q('.ocx-tag'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, '-=0.6')
           .fromTo(q('.ocx-orn'), { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, '-=0.7')
           .fromTo(q('.ocx-vk'), { opacity: 0, y: -30 }, { opacity: 0.72, y: 0, duration: 0.9, ease: 'power3.out' }, '-=0.8')
 
         revealOnce(intro, head, 'top 100%')
-
-        // endless tweens (asterisk spin + petals): only run while the poster is on screen
-        const loops: gsap.core.Tween[] = []
-        loops.push(gsap.to(q('.ocx-star'), { rotation: 360, duration: 14, ease: 'none', repeat: -1, delay: 2, paused: true }))
-
-        // ----- giant watermark drifts with scroll
-        gsap.fromTo(q('.ocx-wm'), { yPercent: -10 }, {
-          yPercent: 14, ease: 'none',
-          scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: true },
-        })
-
-        // ----- sakura petals fall through the header
-        const hh = (head as HTMLElement).offsetHeight || 300
-        q('.ocx-petal').forEach((p, i) => {
-          gsap.set(p, { y: -30, rotation: gsap.utils.random(0, 360) })
-          loops.push(
-            gsap.to(p, {
-              y: hh * 1.05, duration: gsap.utils.random(7, 12), ease: 'none', repeat: -1, delay: -gsap.utils.random(0, 10), paused: true,
-            }),
-            gsap.to(p, {
-              x: gsap.utils.random(30, 70) * (i % 2 ? 1 : -1), rotation: '+=240',
-              duration: gsap.utils.random(3, 5), ease: 'sine.inOut', yoyo: true, repeat: -1, paused: true,
-            }),
-          )
-        })
-        ScrollTrigger.create({
-          trigger: root, start: 'top bottom', end: 'bottom top',
-          onToggle: (self) => loops.forEach((t) => (self.isActive ? t.resume() : t.pause())),
-        })
 
         // ----- rows
         q('.ocx-row').forEach((row) => {
@@ -409,14 +386,9 @@ export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
               { opacity: 1, scale: 1, rotation: sgn * 6, duration: 0.45, ease: 'back.out(2.4)' },
               '-=0.2',
             )
-            // a little "thud" of the stamp landing
-            tl.fromTo(row, { y: 0 }, { y: 3, duration: 0.06, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '<0.3')
           }
 
           revealOnce(tl, row, 'top 112%')
-
-          // gentle scroll parallax on the big first name only (cheap: plain text layer)
-          if (big) gsap.fromTo(big, { x: sgn * 40 }, { x: -sgn * 40, ease: 'none', scrollTrigger: { trigger: row, start: 'top bottom', end: 'bottom top', scrub: true } })
         })
 
         // ----- wave divider fades in
@@ -426,7 +398,7 @@ export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
     }, root)
 
     // fonts (Jansina / Anton) change nothing in layout heights, but refresh to be safe
-    document.fonts?.ready.then(() => ScrollTrigger.refresh())
+    refreshSoon()
 
     return () => ctx.revert()
   }, [dept.key])
@@ -450,9 +422,6 @@ export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
         <p className="ocx-tag" style={{ fontSize: tagFont }}>{dept.tag}</p>
         <div className="ocx-orn" aria-hidden="true" />
         <div className="ocx-vk" aria-hidden="true">{dept.kanji}</div>
-        {PETALS.map((p, i) => (
-          <span key={i} className="ocx-petal" aria-hidden="true" style={{ left: `${p.left}%`, scale: String(p.scale) }} />
-        ))}
       </header>
 
       <div>
@@ -732,10 +701,12 @@ const GroupCard = ({ s, label }: { s: GSlot; label: string }) => {
   const [failed, setFailed] = useState(false)
   // trims transparent padding and keeps the upper body so every head ends up the same size
   const face = FACE[s.name]
-  const url = useCutout(photo(s.file), face?.keep ?? 0.52)
+  const [figRef, near] = useNear()
+  const url = useCutout(photo(s.file), face?.keep ?? 0.52, near)
   const [first, ...rest] = s.name.split(' ')
   return (
     <figure
+      ref={figRef}
       className={`og-c s${s.side}${s.lead ? ' lead og-lead' : ` og-t${s.tier}`}`}
       style={{ '--x': s.x.toFixed(2), '--y': s.y.toFixed(2) } as React.CSSProperties}
     >
@@ -873,7 +844,7 @@ export function OcGroup({
       })
     }, root)
 
-    document.fonts?.ready.then(() => ScrollTrigger.refresh())
+    refreshSoon()
     return () => ctx.revert()
   }, [])
 
@@ -967,87 +938,146 @@ const ILLS = {
 
 const WAVES_WINE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%2340081a' stroke='%23d6b25e' stroke-width='1.3'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`
 
-// trims the transparent padding off a cut-out and keeps only the top part of the person
-export const useCutout = (src: string, keep: number) => {
-  const [out, setOut] = useState<string | null>(null)
-  useEffect(() => {
-    let dead = false
-    let obj = ''
+// trims the transparent padding off a cut-out and keeps only the top part of the person.
+// PERF: this used to scan every pixel of 28 full-size photos on the main thread the moment the OC tab
+// mounted (right when you are looking at Conference Managers + OCP). Now:
+//   - the bounding box is found on a small downscaled copy (~50x fewer pixels)
+//   - the output is capped to 800px wide (it is shown at ~300px)
+//   - jobs run ONE at a time, each in an idle slot, so scrolling / animations never stall
+//   - results are cached for the whole session (switching tabs back and forth costs nothing)
+const CUT_MAX = 800
+const SCAN_MAX = 384
+const cutCache = new Map<string, Promise<string>>()
+let cutChain: Promise<unknown> = Promise.resolve()
+
+const idle = () =>
+  new Promise<void>((res) => {
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback
+    if (ric) ric(() => res(), { timeout: 250 })
+    else setTimeout(res, 20)
+  })
+
+const buildCutout = async (src: string, keep: number): Promise<string> => {
+  try {
     const img = new Image()
     img.decoding = 'async'
-    img.onload = () => {
-      try {
-        const c = document.createElement('canvas')
-        c.width = img.naturalWidth
-        c.height = img.naturalHeight
-        const g = c.getContext('2d', { willReadFrequently: true })
-        if (!g) throw new Error('no ctx')
-        g.drawImage(img, 0, 0)
-        const { data, width, height } = g.getImageData(0, 0, c.width, c.height)
-        let t = height, b = -1, l = width, r = -1
-        for (let y = 0; y < height; y++) {
-          for (let x = 0; x < width; x++) {
-            if (data[(y * width + x) * 4 + 3] > 24) {
-              if (y < t) t = y
-              if (y > b) b = y
-              if (x < l) l = x
-              if (x > r) r = x
-            }
-          }
+    img.src = src
+    await img.decode()
+    const sw = img.naturalWidth
+    const sh = img.naturalHeight
+
+    // 1) find the visible bounds on a small copy
+    const sc = Math.min(1, SCAN_MAX / Math.max(sw, sh))
+    const w = Math.max(1, Math.round(sw * sc))
+    const h = Math.max(1, Math.round(sh * sc))
+    const c = document.createElement('canvas')
+    c.width = w
+    c.height = h
+    const g = c.getContext('2d', { willReadFrequently: true })
+    if (!g) return src
+    g.drawImage(img, 0, 0, w, h)
+    const { data } = g.getImageData(0, 0, w, h)
+    let t = h, b = -1, l = w, r = -1
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        if (data[(y * w + x) * 4 + 3] > 12) {
+          if (y < t) t = y
+          if (y > b) b = y
+          if (x < l) l = x
+          if (x > r) r = x
         }
-        if (b < 0) throw new Error('empty')
-        const cw = r - l + 1
-        const ch = Math.max(1, Math.round((b - t + 1) * keep))
-        const o = document.createElement('canvas')
-        o.width = cw
-        o.height = ch
-        o.getContext('2d')!.drawImage(img, l, t, cw, ch, 0, 0, cw, ch)
-        o.toBlob((blob) => {
-          if (!blob || dead) return
-          obj = URL.createObjectURL(blob)
-          setOut(obj)
-        })
-      } catch {
-        if (!dead) setOut(src) // could not read pixels: show the original
       }
     }
-    img.onerror = () => { if (!dead) setOut(src) }
-    img.src = src
-    return () => {
-      dead = true
-      if (obj) URL.revokeObjectURL(obj)
-    }
-  }, [src, keep])
+    if (b < 0) return src
+
+    // 2) crop on the ORIGINAL (1 scan-pixel of safety margin so thin hair tips are never clipped)
+    const m = 1
+    const sx = Math.max(0, Math.floor((l - m) / sc))
+    const sy = Math.max(0, Math.floor((t - m) / sc))
+    const ex = Math.min(sw, Math.ceil((r + 1 + m) / sc))
+    const ey = Math.min(sh, Math.ceil((b + 1 + m) / sc))
+    const cw = ex - sx
+    const chFull = ey - sy
+    const chKeep = Math.max(1, Math.round(chFull * keep))
+
+    // 3) draw once, capped in size
+    const k = Math.min(1, CUT_MAX / cw)
+    const o = document.createElement('canvas')
+    o.width = Math.max(1, Math.round(cw * k))
+    o.height = Math.max(1, Math.round(chKeep * k))
+    const og = o.getContext('2d')
+    if (!og) return src
+    og.imageSmoothingQuality = 'high'
+    og.drawImage(img, sx, sy, cw, chKeep, 0, 0, o.width, o.height)
+    const blob = await new Promise<Blob | null>((res) => o.toBlob(res))
+    return blob ? URL.createObjectURL(blob) : src
+  } catch {
+    return src // could not read pixels: show the original
+  }
+}
+
+const cutout = (src: string, keep: number) => {
+  const key = `${src}|${keep}`
+  let p = cutCache.get(key)
+  if (!p) {
+    p = new Promise<string>((resolve) => {
+      cutChain = cutChain.then(idle).then(() => buildCutout(src, keep)).then(resolve)
+    })
+    cutCache.set(key, p)
+  }
+  return p
+}
+
+// `enabled` lets a card wait until it is near the screen before doing any work
+export const useCutout = (src: string, keep: number, enabled = true) => {
+  const [out, setOut] = useState<string | null>(null)
+  useEffect(() => {
+    if (!enabled) return
+    let dead = false
+    cutout(src, keep).then((u) => { if (!dead) setOut(u) })
+    return () => { dead = true }
+  }, [src, keep, enabled])
   return out
 }
 
-const Ill = ({ src, className, style }: { src: string; className: string; style?: React.CSSProperties }) => {
+// true once the element has come within `margin` of the viewport (and stays true)
+const useNear = (margin = '900px') => {
+  const ref = useRef<HTMLElement>(null)
+  const [near, setNear] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || near) return
+    if (!('IntersectionObserver' in window)) { setNear(true); return }
+    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setNear(true); io.disconnect() } }, { rootMargin: margin })
+    io.observe(el)
+    return () => io.disconnect()
+  }, [near, margin])
+  return [ref, near] as const
+}
+
+const Ill = ({ src, className, style, eager }: { src: string; className: string; style?: React.CSSProperties; eager?: boolean }) => {
   const [bad, setBad] = useState(false)
   if (bad) return null
-  return <img className={className} style={style} src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" draggable={false} onError={() => setBad(true)} />
+  return <img className={className} style={style} src={src} alt="" aria-hidden="true" loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false} onError={() => setBad(true)} />
 }
 
 const CMCSS = `
 .cm{--u:1cqw;--ink:#2a0310;--cream:#fff1e4;--gold:#d6b25e;--vermilion:#d93a2b;position:relative;overflow:hidden;margin-bottom:calc(5*var(--u));padding-top:calc(5*var(--u));
-  background:radial-gradient(ellipse at 50% 42%,#a8142f 0,#7a0a22 48%,#3a0613 100%);font-family:'Oswald',system-ui,sans-serif;clip-path:${TOP_CLIP}}
+  background:radial-gradient(ellipse at 50% 42%,#a8142f 0,#7a0a22 48%,#3a0613 100%);font-family:'Oswald',system-ui,sans-serif}
 @container (min-width:700px){.cm{--u:.8cqw}}
 @container (min-width:1100px){.cm{--u:.62cqw}}
 @container (min-width:1600px){.cm{--u:.5cqw}}
 
-/* faint sun rays */
-.cm::before{content:'';position:absolute;left:50%;top:34%;width:calc(240*var(--u));height:calc(240*var(--u));margin:calc(-120*var(--u)) 0 0 calc(-120*var(--u));border-radius:50%;
-  background:repeating-conic-gradient(rgba(255,241,228,.06) 0 5deg,transparent 5deg 10deg);
-  -webkit-mask-image:radial-gradient(circle,#000 18%,transparent 66%);mask-image:radial-gradient(circle,#000 18%,transparent 66%);pointer-events:none}
 
 .cm-stage{position:relative;width:calc(100*var(--u));max-width:100%;height:calc(100*var(--u));margin:0 auto}
 
 /* ---------- backdrop ---------- */
 .cm-sun{position:absolute;left:50%;top:calc(2*var(--u));width:calc(66*var(--u));aspect-ratio:1;margin-left:calc(-33*var(--u));border-radius:50%;z-index:0;
-  background:radial-gradient(circle at 40% 34%,#ffb89f,#ff6a52 55%,#d93a2b);box-shadow:0 0 calc(10*var(--u)) calc(2*var(--u)) rgba(255,120,90,.28)}
+  background:radial-gradient(circle at 40% 34%,#ffb89f,#ff6a52 55%,#d93a2b)}
 .cm-sil{position:absolute;pointer-events:none;filter:brightness(0) invert(1);opacity:.09;z-index:0}
 .cm-sil.bld{left:calc(-5*var(--u));bottom:calc(14*var(--u));width:calc(42*var(--u))}
 .cm-sil.drg{right:calc(-9*var(--u));top:calc(4*var(--u));width:calc(54*var(--u))}
-.cm-ill{position:absolute;pointer-events:none;filter:drop-shadow(0 calc(.6*var(--u)) calc(1.2*var(--u)) rgba(0,0,0,.45))}
+.cm-ill{position:absolute;pointer-events:none}
 .cm-ill.mask{left:calc(1*var(--u));top:calc(1.5*var(--u));width:calc(11*var(--u));rotate:-8deg;z-index:5}
 .cm-ill.fan{right:calc(2.5*var(--u));top:calc(3*var(--u));width:calc(19*var(--u));rotate:9deg;z-index:5}
 .cm-ill.koi{left:calc(1.5*var(--u));bottom:calc(1.5*var(--u));width:calc(13*var(--u));z-index:11}
@@ -1059,13 +1089,13 @@ const CMCSS = `
 .cm-c1{--l:calc(36.5*var(--u))}
 .cm-c2{--l:calc(66*var(--u))}
 
-.cm-col{position:absolute;left:var(--l);width:var(--w);bottom:calc(18*var(--u));overflow:hidden;color:var(--ink);box-shadow:inset 0 0 0 max(1.5px,calc(.3*var(--u))) rgba(42,3,16,.28),0 calc(1.4*var(--u)) calc(3*var(--u)) rgba(0,0,0,.4)}
+.cm-col{position:absolute;left:var(--l);width:var(--w);bottom:calc(18*var(--u));overflow:hidden;color:var(--ink);box-shadow:inset 0 0 0 max(1.5px,calc(.3*var(--u))) rgba(42,3,16,.28)}
 .cm-col.cm-c0{height:calc(68*var(--u));z-index:2;background:linear-gradient(#f6d77c,#e0a73a 70%,#c98a22)}
 .cm-col.cm-c1{height:calc(68*var(--u));z-index:2;background:linear-gradient(#fde3e8,#f0b1bf 65%,#df8aa0)}
 .cm-col.cm-c2{height:calc(68*var(--u));z-index:2;background:linear-gradient(#fbf4e6,#eadcc0 65%,#d4be98)}
 .cm-col::before,.cm-col::after{content:'';position:absolute;left:0;right:0;height:calc(1.6*var(--u));z-index:4;background:linear-gradient(#5e3d20,#2c1b0c);box-shadow:inset 0 max(1px,calc(.2*var(--u))) 0 rgba(255,220,160,.35)}
 .cm-col::before{top:0}.cm-col::after{bottom:0}
-.cm-kj{position:absolute;left:5%;width:90%;top:calc(33*var(--u));opacity:.13;mix-blend-mode:multiply;z-index:0;pointer-events:none}
+.cm-kj{position:absolute;left:5%;width:90%;top:calc(33*var(--u));opacity:.13;z-index:0;pointer-events:none}
 
 .cm-nm{position:absolute;left:0;right:0;top:calc(4.6*var(--u));padding:0 calc(2.4*var(--u));z-index:2}
 .cm-nm h3{margin:0;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:max(11px,calc(var(--nf,3)*var(--u)));line-height:1.08;letter-spacing:.02em;text-transform:uppercase}
@@ -1073,11 +1103,11 @@ const CMCSS = `
 .cm-nm p::before{content:'';flex:none;width:max(6px,calc(1.1*var(--u)));height:max(6px,calc(1.1*var(--u)));background:var(--vermilion);transform:rotate(45deg)}
 
 /* ---------- the people (sit ABOVE the panels so they can pop out of them) ---------- */
-.cm-ph{position:absolute;left:calc(var(--l) - var(--w)*.08);width:calc(var(--w)*1.16);height:var(--ph);bottom:calc(21*var(--u));display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
+.cm-ph{will-change:transform,opacity;position:absolute;left:calc(var(--l) - var(--w)*.08);width:calc(var(--w)*1.16);height:var(--ph);bottom:calc(21*var(--u));display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
 .cm-ph.cm-c0,.cm-ph.cm-c1,.cm-ph.cm-c2{z-index:6}
 /* width AND height are set + object-fit, so a global img max-width reset can never squash the photo sideways */
 .cm-pimg{flex:none;display:block;height:100%;width:100%;max-width:none;object-fit:contain;object-position:center bottom;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent);
-  filter:drop-shadow(max(1.5px,calc(.35*var(--u))) 0 0 #fff) drop-shadow(min(-1.5px,calc(-.35*var(--u))) 0 0 #fff) drop-shadow(0 max(1.5px,calc(.35*var(--u))) 0 #fff) drop-shadow(0 min(-1.5px,calc(-.35*var(--u))) 0 #fff) drop-shadow(0 calc(1*var(--u)) calc(1.6*var(--u)) rgba(0,0,0,.35))}
+  filter:drop-shadow(0 0 max(1.5px,calc(.4*var(--u))) #fff)}
 
 /* ---------- ground, fade and the big headline ---------- */
 .cm-fade{position:absolute;left:0;right:0;bottom:0;height:calc(40*var(--u));z-index:8;pointer-events:none;background:linear-gradient(transparent,rgba(58,6,19,.8) 68%,rgba(42,3,16,.92))}
@@ -1120,21 +1150,18 @@ export function ConferenceManagers() {
         const tl = gsap.timeline({ paused: true })
         tl.fromTo(q('.cm-sun'), { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.6, ease: 'power3.out' }, 0)
           // the scrolls unroll from the top
-          .fromTo(q('.cm-col'), { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.2, stagger: each, ease: 'power3.inOut' }, 0.15)
+          .fromTo(q('.cm-col'), { opacity: 0, y: -24 }, { opacity: 1, y: 0, duration: 0.9, stagger: each, ease: 'power3.out' }, 0.15)
           .fromTo(q('.cm-nm'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.8, stagger: each, ease: 'power3.out' }, 0.8)
           .fromTo(q('.cm-ph'), { yPercent: 22, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.1, stagger: each, ease: 'expo.out' }, 0.7)
-          .fromTo(q('.cm-ill'), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.9, stagger: 0.1, ease: 'back.out(1.6)' }, 1.1)
-          .from(q('.cm-ch'), {
-            yPercent: -170, rotation: () => gsap.utils.random(-28, 28), opacity: 0, scale: 1.4,
-            duration: 0.9, stagger: 0.06, ease: 'back.out(1.8)',
-          }, 0.9)
+          .fromTo(q('.cm-ill'), { opacity: 0 }, { opacity: 1, duration: 0.8, stagger: 0.1, ease: 'power2.out' }, 1.1)
+          .from(q('.cm-ch'), { yPercent: -120, opacity: 0, duration: 0.7, stagger: 0.04, ease: 'power3.out' }, 0.9)
           .fromTo(q('.cm-hlbg'), { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.8, ease: 'power4.inOut' }, 1.3)
 
         revealOnce(tl, root, 'top 75%')
       })
     }, root)
 
-    document.fonts?.ready.then(() => ScrollTrigger.refresh())
+    refreshSoon()
     return () => ctx.revert()
   }, [])
 
@@ -1145,16 +1172,14 @@ export function ConferenceManagers() {
       <style>{CMCSS}</style>
       <div className="cm-stage">
         <div className="cm-sun" aria-hidden="true" />
-        <Ill className="cm-sil bld" src={ILLS.building} />
-        <Ill className="cm-sil drg" src={ILLS.dragon} />
-        <Ill className="cm-ill mask" src={ILLS.mask} />
-        <Ill className="cm-ill fan" src={ILLS.fan} />
+        <Ill eager className="cm-ill mask" src={ILLS.mask} />
+        <Ill eager className="cm-ill fan" src={ILLS.fan} />
 
         {CM.map((p, i) => {
           const [first, ...rest] = p.name.split(' ')
           return (
             <div className={`cm-col cm-c${i}`} key={p.name}>
-              <Ill className="cm-kj" src={ILLS.kanji[i % ILLS.kanji.length]} />
+              <Ill eager className="cm-kj" src={ILLS.kanji[i % ILLS.kanji.length]} />
               <div className="cm-nm" style={{ '--nf': Math.min(3.6, 22 / (Math.max(...p.name.split(' ').map((w) => w.length)) * 0.78)).toFixed(2) } as React.CSSProperties}>
                 <h3>{first}<br />{rest.join(' ')}</h3>
                 <p>{p.role}</p>
@@ -1165,8 +1190,8 @@ export function ConferenceManagers() {
 
         {CM.map((p, i) => <CmPerson key={p.name} p={p} i={i} />)}
 
-        <Ill className="cm-ill koi" src={ILLS.koi} />
-        <Ill className="cm-ill bon" src={ILLS.bonsai} />
+        <Ill eager className="cm-ill koi" src={ILLS.koi} />
+        <Ill eager className="cm-ill bon" src={ILLS.bonsai} />
         <h2 className="cm-ttl" aria-label="Conference Managers">
           <span className="cm-l">{chars('CONFERENCE')}</span>
           <span className="cm-hl"><span className="cm-hlbg" aria-hidden="true" />{chars('MANAGERS')}</span>
