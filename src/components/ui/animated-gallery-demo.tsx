@@ -599,16 +599,6 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
                 </a>
               </Button>
             </div>
-
-            <div className="cta w-full sm:w-auto">
-              <a
-                href={GALLERY_CONFIG.content.secondaryButtonHref}
-                className="inline-flex min-h-[46px] w-full cursor-pointer items-center justify-center rounded-full border border-[#252321]/80 px-9 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-[#252321] transition-all duration-300 hover:bg-[#252321] hover:text-[#F8F3E9] sm:w-auto sm:text-sm"
-                style={{ fontFamily: GALLERY_CONFIG.fonts.body }}
-              >
-                {GALLERY_CONFIG.content.secondaryButtonLabel}
-              </a>
-            </div>
           </div>
         </div>
       </div>
