@@ -779,7 +779,7 @@ const EBF_FLIES = Array.from({ length: 16 }, (_, i) => ({ left: 6 + ((i * 47) % 
 const EBF_PETALS = Array.from({ length: 9 }, (_, i) => ({ left: 4 + ((i * 53) % 92), scale: 0.7 + ((i * 41) % 60) / 100 }))
 
 const EBFCSS = `
-.ebf{--pw:112;--sh:130;--u:min(.89cqw,calc(100svh / var(--sh)));--H:calc(var(--sh)*var(--u));--gold:#c9362b;--gold2:#252321;position:relative;overflow:hidden;color:#252321;font-family:'Oswald',system-ui,sans-serif;
+.ebf{--pw:140;--sh:126;--u:min(.89cqw,calc(100svh / var(--sh)));--H:calc(var(--sh)*var(--u));--gold:#c9362b;--gold2:#252321;position:relative;overflow:hidden;color:#252321;font-family:'Oswald',system-ui,sans-serif;
   background:linear-gradient(#fffaf3 0,#f8f3e9 58%,#f1dccb 100%)}
 .ebf::before{content:'';position:absolute;inset:0;z-index:0;pointer-events:none;background-image:${WAVES_PALE};background-size:56px 28px;opacity:.55;-webkit-mask-image:linear-gradient(#000,transparent 85%);mask-image:linear-gradient(#000,transparent 85%)}
 .ebf-stage{position:relative;width:calc(100*var(--u));max-width:100%;height:var(--H);margin:0 auto}
@@ -787,7 +787,7 @@ const EBFCSS = `
 /* sky */
 .ebf-star{display:none;position:absolute;border-radius:50%;background:#fff1e4;opacity:.2;z-index:0;animation:ebfTw 3.4s ease-in-out infinite}
 @keyframes ebfTw{0%,100%{opacity:.15;transform:scale(1)}50%{opacity:.95;transform:scale(1.5)}}
-.ebf-moon{will-change:transform;position:absolute;left:50%;bottom:calc(28*var(--u));width:calc(66*var(--u));aspect-ratio:1;margin-left:calc(-33*var(--u));border-radius:50%;z-index:1;
+.ebf-moon{will-change:transform;position:absolute;left:50%;bottom:calc(25*var(--u));width:calc(76*var(--u));aspect-ratio:1;margin-left:calc(-38*var(--u));border-radius:50%;z-index:1;
   background:radial-gradient(circle at 38% 30%,#ea3b2c,#cf2519 55%,#a81810);
   box-shadow:0 calc(1.4*var(--u)) calc(3*var(--u)) rgba(120,10,10,.3),0 0 calc(14*var(--u)) calc(3*var(--u)) rgba(201,54,43,.2)}
 .ebf-moon::before{content:'';position:absolute;inset:calc(-3.2*var(--u));border-radius:50%;border:max(1px,calc(.22*var(--u))) solid rgba(201,54,43,.55)}
@@ -831,13 +831,15 @@ const EBFCSS = `
 .ebf-side.a{left:calc(19.5*var(--u))}.ebf-side.b{right:calc(19.5*var(--u))}
 @container (max-width:699px){
   .ebf-side{display:none}
-  .ebf{--H:clamp(calc(130*var(--u)),100svh,calc(200*var(--u)))}
+  .ebf{--H:clamp(calc(130*var(--u)),100svh,calc(200*var(--u)));--pw:142}
+  .ebf-photo{animation:none;width:calc(142*var(--u));margin:0 0 0 calc(142*var(--u)*-.5);bottom:calc(10*var(--u))}
+  .ebf-moon{width:calc(76*var(--u));margin-left:calc(-38*var(--u));bottom:calc(20*var(--u))}
+  .ebf-seal{left:calc(50% + min(calc(142*var(--u)*.31), 40cqw));bottom:calc(14*var(--u))}
   .ebf-ttl{font-size:calc(9.2*var(--u))}
   .ebf-eye{font-size:max(10px,calc(2.1*var(--u)))}
   /* lighter on phones: fewer stars, fireflies and petals, one cheap outline instead of six filters, no idle float */
   .ebf-star:nth-child(3n),.ebf-star:nth-child(3n+1){display:none}
   .ebf-fly:nth-of-type(odd),.ebf-petal:nth-of-type(odd){display:none}
-  .ebf-photo{animation:none}
   .ebf-photo img{filter:drop-shadow(0 0 max(1.5px,calc(.35*var(--u))) #fffaf3) drop-shadow(0 calc(1.2*var(--u)) calc(2*var(--u)) rgba(90,10,20,.4))}
   .ebf-moon::after{animation:none}
 }
@@ -886,7 +888,7 @@ function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
           .fromTo(q('.ebf-kj'), { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.8, ease: 'power3.out' }, 1.9)
           .fromTo(q('.ebf-side'), { opacity: 0, y: -24 }, { opacity: 0.75, y: 0, duration: 0.9, stagger: 0.15, ease: 'power3.out' }, 2)
           // the team is revealed from the centre of the moon, like a lantern being lit
-          .fromTo(q('.ebf-photo'), { clipPath: 'circle(0% at 50% 38%)', scale: 1.1, opacity: 1 }, { clipPath: 'circle(82% at 50% 38%)', scale: 1, duration: 2, ease: 'power3.inOut', transformOrigin: '50% 100%' }, 1.9)
+          .fromTo(q('.ebf-photo'), { clipPath: 'circle(0% at 50% 38%)', scale: 1.1, opacity: 1 }, { clipPath: 'circle(100% at 50% 38%)', scale: 1, duration: 2, ease: 'power3.inOut', transformOrigin: '50% 100%' }, 1.9)
           .fromTo(q('.ebf-glow'), { opacity: 0 }, { opacity: 0.55, duration: 0.5, ease: 'power2.out' }, 2.6)
           .to(q('.ebf-glow'), { opacity: 0, duration: 1.4, ease: 'power2.out' }, 3.1)
           .fromTo(q('.ebf-seal'), { opacity: 0, scale: 3, rotation: -28 }, { opacity: 1, scale: 1, rotation: -8, duration: 0.5, ease: 'back.out(2.4)' }, 3.5)
