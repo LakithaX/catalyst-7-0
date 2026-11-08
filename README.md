@@ -1,20 +1,5 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Catalyst 7.0
 
-# Run and deploy your AI Studio app
+**Catalyst 7.0** is the flagship leadership seminar of **AIESEC in SLIIT**.
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/9ea68a98-fba2-4abc-9231-5ab4b354cf98
-
-## Run Locally
-
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+A journey of leadership, connection, and growth, forged in the discipline of the samurai and the audacity of modern innovation. The experience brings young leaders together to learn, connect, and grow — with delegate registration, an event gallery, and official Catalyst merchandise.
