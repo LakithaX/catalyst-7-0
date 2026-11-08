@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useMemo, useRef, useState } from 'react'
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
@@ -21,8 +21,8 @@ if (typeof window !== 'undefined') {
 //            in and keeps drifting on scroll, portrait glides in + parallax,
 //            name skews in, red hanko seal STAMPS down last
 // ============================================================================
-type Person = { name: string; file: string }
-type Dept = {
+export type Person = { name: string; file: string; role?: string }
+export type Dept = {
   key: string
   mark: string // big watermark + title, e.g. "OCVP"
   tag: string // line under the title
@@ -32,6 +32,8 @@ type Dept = {
 }
 
 const DIR = '/assets/cat-oc-pics/'
+// a file starting with '/' is used as-is, so other rosters (EB) can point at their own folder
+export const photo = (f: string) => (f.startsWith('/') ? f : DIR + f)
 
 const DEPTS: Dept[] = [
   {
@@ -85,9 +87,31 @@ const DEPTS: Dept[] = [
 ]
 
 // scrolling fast? play the SAME animation, just quicker, so nothing pops in
-const playFor = (tl: gsap.core.Timeline, self: ScrollTrigger) => {
+export const playFor = (tl: gsap.core.Timeline, self: ScrollTrigger) => {
   const v = Math.abs(self.getVelocity())
   tl.timeScale(v > 4000 ? 3.5 : v > 1800 ? 2.2 : 1).play()
+}
+
+// play an entrance exactly once. ScrollTrigger is configured with limitCallbacks, so when the visitor
+// scrolls PAST a section in one jump (fast scroll, scrollbar drag, anchor, reload mid-page) only onLeave
+// fires and onEnter never does. Without handling that, the section would stay invisible forever.
+//   entering (from above or below) -> play normally (faster if scrolling fast)
+//   skipped over                   -> jump straight to the finished state
+export const revealOnce = (tl: gsap.core.Timeline, trigger: Element, start: string) => {
+  let done = false
+  const go = (self: ScrollTrigger, instant: boolean) => {
+    if (done) return
+    done = true
+    if (instant) tl.progress(1).pause()
+    else playFor(tl, self)
+    self.kill()
+  }
+  return ScrollTrigger.create({
+    trigger, start, end: 'bottom top',
+    onEnter: (self) => go(self, false),
+    onEnterBack: (self) => go(self, false),
+    onLeave: (self) => go(self, true),
+  })
 }
 
 // ============================================================================
@@ -151,7 +175,7 @@ const buildClips = (E: Edge[], count: number, kn: number) => {
 // ============================================================================
 const WAVES = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%23F4ECE0' stroke='%23A8102F' stroke-width='1.5'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`
 
-const CSS = `
+export const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Noto+Serif+JP:wght@700&display=swap');
 
 /* overflow-x:clip stops the slide-in animations from creating sideways scroll on phones */
@@ -237,7 +261,7 @@ const Row = ({
   const side = index % 2 ? 'r' : 'l'
   const first = person.name.split(' ')[0]
   const fs = Math.min(31, 189 / first.length)
-  const src = DIR + person.file
+  const src = photo(person.file)
 
   return (
     <section className={`ocx-row ${side}${isLast ? ' last' : ''}`} data-side={side}>
@@ -265,7 +289,7 @@ const Row = ({
 
       <div className="ocx-nm">
         <h3>{person.name}</h3>
-        <p>{role}</p>
+        <p>{person.role ?? role}</p>
       </div>
 
       <div className="ocx-seal" aria-hidden="true">{seal}</div>
@@ -281,7 +305,7 @@ const PETALS = Array.from({ length: 6 }, (_, i) => ({
   scale: 0.7 + ((i * 37) % 60) / 100,
 }))
 
-const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
+export const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [kn, setKn] = useState(1)
   const count = dept.members.length
@@ -330,10 +354,7 @@ const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
           .fromTo(q('.ocx-orn'), { scaleX: 0 }, { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, '-=0.7')
           .fromTo(q('.ocx-vk'), { opacity: 0, y: -30 }, { opacity: 0.72, y: 0, duration: 0.9, ease: 'power3.out' }, '-=0.8')
 
-        ScrollTrigger.create({
-          trigger: head, start: 'top 100%', once: true,
-          onEnter: (self) => playFor(intro, self),
-        })
+        revealOnce(intro, head, 'top 100%')
 
         // endless tweens (asterisk spin + petals): only run while the poster is on screen
         const loops: gsap.core.Tween[] = []
@@ -384,18 +405,15 @@ const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
           if (seal) {
             tl.fromTo(
               seal,
-              { opacity: 0, scale: 2.6, rotation: -sgn * 20 },
-              { opacity: 1, scale: 1, rotation: -sgn * 6, duration: 0.45, ease: 'back.out(2.4)' },
+              { opacity: 0, scale: 2.6, rotation: sgn * 20 },
+              { opacity: 1, scale: 1, rotation: sgn * 6, duration: 0.45, ease: 'back.out(2.4)' },
               '-=0.2',
             )
             // a little "thud" of the stamp landing
             tl.fromTo(row, { y: 0 }, { y: 3, duration: 0.06, yoyo: true, repeat: 1, ease: 'power1.inOut' }, '<0.3')
           }
 
-          ScrollTrigger.create({
-            trigger: row, start: 'top 112%', once: true,
-            onEnter: (self) => playFor(tl, self),
-          })
+          revealOnce(tl, row, 'top 112%')
 
           // gentle scroll parallax on the big first name only (cheap: plain text layer)
           if (big) gsap.fromTo(big, { x: sgn * 40 }, { x: -sgn * 40, ease: 'none', scrollTrigger: { trigger: row, start: 'top bottom', end: 'bottom top', scrub: true } })
@@ -403,7 +421,7 @@ const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
 
         // ----- wave divider fades in
         const wave = q('.ocx-wave')[0]
-        if (wave) gsap.from(wave, { opacity: 0, scaleX: 0.6, duration: 1.2, ease: 'power3.out', scrollTrigger: { trigger: wave, start: 'top 105%', once: true } })
+        if (wave) revealOnce(gsap.timeline({ paused: true }).from(wave, { opacity: 0, scaleX: 0.6, duration: 1.2, ease: 'power3.out' }), wave, 'top 105%')
       })
     }, root)
 
@@ -454,46 +472,55 @@ const Poster = ({ dept, last }: { dept: Dept; last: boolean }) => {
 // a torii gate and seigaiha waves. Scroll in = sun rises, brush letters drop in,
 // hanko stamps, the team walks into frame row by row, the camera flashes.
 // Photos come from DEPTS above, so a new person only has to be added once.
-// To move someone, change their name's position inside GROUP (order = left to right).
+// Order = hierarchy from DEPTS (see HIERARCHY below). To move someone, reorder them in DEPTS.
 // Upper-body crop: tweak --crop per row in GCSS (lower = tighter, higher = more torso).
 // ============================================================================
 const PEOPLE = new Map(DEPTS.flatMap((d) => d.members).map((m) => [m.name, m] as const))
 
+// HIERARCHY: the order comes straight from DEPTS at the top of this file, so reorder people there and
+// the group photo follows. President = big centre card. Everyone else reads left to right, top to bottom:
+//   top row    : OCVP Finance, then Partnership Development ...
+//   middle row : ... Marketing, Delegates & Events ...
+//   bottom row : ... Delegates x Logistics, Logistics (last)
+// (each of the two upper rows is split around the president, left half first, then right half)
+const ORDER = DEPTS.flatMap((d) => d.members.map((m) => m.name))
+const PRESIDENT = ORDER[0]
+const REST = ORDER.slice(1)
+const FRONT_REST = REST.slice(12)
+const FRONT_HALF = Math.floor(FRONT_REST.length / 2)
+
 const GROUP: { x0: number; x1: number; names: string[] }[] = [
-  { // back row
-    x0: 11, x1: 89,
-    names: ['Hari Branavan Arulnathan', 'Vimarshi Suraweera', 'Kaveesha Miran', 'Isuri Muthumalee', 'Maneesha Gunathilake', 'Lakwan Wijegunawardana'],
-  },
-  { // middle row
-    x0: 12, x1: 88,
-    names: ['Nethuli Gunathilaka', 'Chetha Atapattu', 'Gihansa Hasithmi', 'Dahamsa Peiris', 'Adithya Munasinghe', 'Yehan De Silva'],
-  },
-  { // front row (the president stands in the centre)
+  { x0: 11, x1: 89, names: REST.slice(0, 6) },   // top row
+  { x0: 12, x1: 88, names: REST.slice(6, 12) },  // middle row
+  { // bottom row: the president stands in the centre of it (he is drawn as the big card)
     x0: 13, x1: 87,
-    names: ['Vindhi Akmeemana', 'Isuri Naveesha', 'Monali Edirisinghe', 'Mahdy Hassan', 'Binushi Wikramarathne', 'Harshitha Yasiru', 'Tharuka Liyanage'],
+    names: [...FRONT_REST.slice(0, FRONT_HALF), PRESIDENT, ...FRONT_REST.slice(FRONT_HALF)],
   },
 ]
 
-const GROUP_ROWS = GROUP.map((row) => {
-  const n = row.names.length
-  return row.names
-    .map((name, i) => {
-      const person = PEOPLE.get(name)
-      if (!person) return null
-      const x = n === 1 ? 50 : row.x0 + (i * (row.x1 - row.x0)) / (n - 1)
-      return {
-        name,
-        file: person.file,
-        x: Number(x.toFixed(2)),
-        dy: i % 2 ? 0.9 : -0.7, // tiny height variation so it feels like real people
-        ws: name === 'Mahdy Hassan' ? 1.12 : 1,
-        z: 100 - Math.round(Math.abs(x - 50)), // centre people overlap the edge people
-      }
-    })
-    .filter(Boolean) as { name: string; file: string; x: number; dy: number; ws: number; z: number }[]
-})
+export type GroupDef = { x0: number; x1: number; names: string[] }[]
 
-const TOTAL_PEOPLE = GROUP_ROWS.reduce((n, r) => n + r.length, 0)
+export const buildGroupRows = (group: GroupDef, people: Map<string, Person>) =>
+  group.map((row) => {
+    const n = row.names.length
+    return row.names
+      .map((name, i) => {
+        const person = people.get(name)
+        if (!person) return null
+        const x = n === 1 ? 50 : row.x0 + (i * (row.x1 - row.x0)) / (n - 1)
+        return {
+          name,
+          file: person.file,
+          x: Number(x.toFixed(2)),
+          dy: i % 2 ? 0.9 : -0.7, // tiny height variation so it feels like real people
+          ws: name === 'Mahdy Hassan' ? 1.12 : 1,
+          z: 100 - Math.round(Math.abs(x - 50)), // centre people overlap the edge people
+        }
+      })
+      .filter(Boolean) as { name: string; file: string; x: number; dy: number; ws: number; z: number }[]
+  })
+
+const OC_ROWS = buildGroupRows(GROUP, PEOPLE)
 
 // torn top edge of the finale panel
 const TOP_CLIP = (() => {
@@ -503,29 +530,36 @@ const TOP_CLIP = (() => {
   return `polygon(${pts.join(',')},100% 100%,0 100%)`
 })()
 
-const GCSS = `
-.ocg{--u:1cqw;--ink:#2a0310;--cream:#fff1e4;position:relative;overflow:hidden;margin-top:calc(6*var(--u));padding-top:calc(4*var(--u));
-  background:radial-gradient(ellipse at 50% 52%,#b3132f 0,#8c0b26 45%,#4d0517 100%);font-family:'Oswald',system-ui,sans-serif;clip-path:${TOP_CLIP}}
-@container (min-width:700px){.ocg{--u:.8cqw}}
-@container (min-width:1100px){.ocg{--u:.62cqw}}
-@container (min-width:1600px){.ocg{--u:.5cqw}}
+export const GCSS = `
+.ocg{--uw:1cqw;--u:var(--uw);--ink:#252321;--paper:#FAF6EE;--red:#B51E23;--deep:#8F171B;position:relative;overflow:hidden;margin-top:calc(6*var(--u));padding-top:calc(4*var(--u));
+  background:linear-gradient(#e4d2b8 0,#efe3d0 calc(9*var(--u)),rgba(250,246,238,0) calc(32*var(--u))),radial-gradient(ellipse at 50% 46%,#fffdf8 0,#FAF6EE 52%,#F1E8DA 100%);
+  font-family:'Oswald',system-ui,sans-serif;clip-path:${TOP_CLIP}}
+@container (min-width:700px){.ocg{--uw:.9cqw}}
+@container (min-width:1100px){.ocg{--uw:.8cqw}}
+@container (min-width:1600px){.ocg{--uw:.65cqw}}
+/* FIT: the stage is 133u tall, so cap u by the viewport height too. The whole group then fits on one
+   screen on any laptop / monitor / ultrawide. The 6px floor keeps faces + names readable on short windows.
+   (phones < 600px use the flowing layout, so they are left alone) */
+@container (min-width:600px){.ocg{--u:min(var(--uw),max(.75svh,6px))}}
 
-.ocg-stage{position:relative;width:calc(100*var(--u));max-width:100%;height:calc(98*var(--u));margin:0 auto}
+.ocg-stage{position:relative;width:calc(100*var(--u));max-width:100%;height:auto;padding-bottom:calc(14*var(--u));margin:0 auto}
+@container (min-width:600px){.ocg-stage{height:calc(133*var(--u));padding-bottom:0}}
 
 /* ---------- backdrop: rays, sun, torii, clouds ---------- */
-.ocg-rays{position:absolute;left:50%;bottom:calc(-52*var(--u));width:calc(220*var(--u));height:calc(220*var(--u));margin-left:calc(-110*var(--u));border-radius:50%;
-  background:repeating-conic-gradient(rgba(255,214,222,.13) 0 5deg,transparent 5deg 10deg);
+.ocg-rays{position:absolute;left:50%;bottom:calc(-39*var(--u));width:calc(220*var(--u));height:calc(220*var(--u));margin-left:calc(-110*var(--u));border-radius:50%;
+  background:repeating-conic-gradient(rgba(201,54,43,.11) 0 5deg,transparent 5deg 10deg);
   -webkit-mask-image:radial-gradient(circle,#000 22%,transparent 68%);mask-image:radial-gradient(circle,#000 22%,transparent 68%);z-index:0;pointer-events:none}
-.ocg-sun{position:absolute;left:50%;bottom:calc(30*var(--u));width:calc(56*var(--u));aspect-ratio:1;margin-left:calc(-28*var(--u));border-radius:50%;
-  background:radial-gradient(circle at 40% 34%,#ff6a80,#e0243f 55%,#b3132f);box-shadow:0 0 calc(9*var(--u)) calc(2*var(--u)) rgba(255,150,170,.4);z-index:0}
+.ocg-sun{position:absolute;left:50%;bottom:calc(43*var(--u));width:calc(56*var(--u));aspect-ratio:1;margin-left:calc(-28*var(--u));border-radius:50%;
+  background:radial-gradient(circle at 40% 34%,#e6483a,#c9362b 55%,#a8102f);box-shadow:0 0 calc(9*var(--u)) calc(2*var(--u)) rgba(201,54,43,.28);z-index:0}
 .ocg-torii{position:absolute;left:50%;bottom:calc(14*var(--u));width:calc(82*var(--u));height:auto;margin-left:calc(-41*var(--u));opacity:.5;z-index:0;pointer-events:none}
-.ocg-kas{position:absolute;height:calc(5*var(--u));border-radius:50%;background:radial-gradient(ellipse,rgba(255,226,232,.42),transparent 70%);z-index:0;pointer-events:none}
+.ocg-torii g{fill:#7a1015}
+.ocg-kas{position:absolute;height:calc(5*var(--u));border-radius:50%;background:radial-gradient(ellipse,rgba(37,35,33,.1),transparent 70%);z-index:0;pointer-events:none}
 
 /* ---------- giant brush title (sits BEHIND the people) ---------- */
 .ocg-ttl{position:absolute;left:0;right:0;top:calc(2*var(--u));margin:0;text-align:center;white-space:nowrap;line-height:.95;z-index:1;
-  font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:calc(30*var(--u)*var(--fit,1));letter-spacing:.02em;color:var(--cream);
-  -webkit-text-stroke:max(1px,calc(.6*var(--u))) var(--ink);paint-order:stroke fill;
-  text-shadow:0 calc(.9*var(--u)) 0 var(--ink),0 calc(1.8*var(--u)) calc(2*var(--u)) rgba(0,0,0,.35)}
+  font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:calc(30*var(--u)*var(--fit,1));letter-spacing:.02em;color:#1d1a18;
+  -webkit-text-stroke:max(3px,calc(1.1*var(--u))) var(--paper);paint-order:stroke fill;
+  text-shadow:calc(.8*var(--u)) calc(.9*var(--u)) 0 rgba(181,30,35,.9)}
 .ocg-ttl-in{display:inline-block}
 .ocg-w{display:inline-block;white-space:nowrap}
 .ocg-w + .ocg-w{margin-left:.28em}
@@ -542,31 +576,79 @@ const GCSS = `
   bottom:calc(var(--rb) + var(--dy,0)*var(--u));
   box-sizing:border-box;padding:calc(1*var(--u)) calc(1*var(--u)) 0;overflow:hidden}
 .ocg-p img{display:block;width:100%;height:auto;
-  filter:drop-shadow(max(1.5px,calc(.35*var(--u))) 0 0 #fff) drop-shadow(min(-1.5px,calc(-.35*var(--u))) 0 0 #fff) drop-shadow(0 max(1.5px,calc(.35*var(--u))) 0 #fff) drop-shadow(0 min(-1.5px,calc(-.35*var(--u))) 0 #fff)}
+  filter:drop-shadow(max(1.5px,calc(.35*var(--u))) 0 0 #fff) drop-shadow(min(-1.5px,calc(-.35*var(--u))) 0 0 #fff) drop-shadow(0 max(1.5px,calc(.35*var(--u))) 0 #fff) drop-shadow(0 min(-1.5px,calc(-.35*var(--u))) 0 #fff) drop-shadow(0 calc(.5*var(--u)) calc(.9*var(--u)) rgba(37,35,33,.3))}
 /* fade the cut edge on the back two rows (front row's cut is hidden by the ground) */
 .ocg-row.r0 .ocg-p,.ocg-row.r1 .ocg-p{-webkit-mask-image:linear-gradient(#000 68%,transparent 100%);mask-image:linear-gradient(#000 68%,transparent 100%)}
 
 /* ---------- ground: seigaiha waves + caption ---------- */
-.ocg-ground{position:absolute;left:0;right:0;bottom:0;height:calc(12*var(--u));z-index:5;background:linear-gradient(#5a0719,#2f030e);border-top:max(2px,calc(.5*var(--u))) solid #f4ece0;pointer-events:none}
-.ocg-ground::after{content:'';position:absolute;inset:0;background-image:${WAVES};background-size:40px 20px;background-position:center top;opacity:.5;
+.ocg-ground{position:absolute;left:0;right:0;bottom:0;height:calc(12*var(--u));z-index:5;box-sizing:border-box;background:linear-gradient(#f4ece0,#ead9c0);border-top:max(3px,calc(.6*var(--u))) solid var(--red);border-bottom:max(3px,calc(.6*var(--u))) solid var(--red);pointer-events:none}
+.ocg-ground::after{content:'';position:absolute;inset:0;background-image:${WAVES};background-size:40px 20px;background-position:center top;opacity:.85;
   -webkit-mask-image:linear-gradient(transparent,#000 55%);mask-image:linear-gradient(transparent,#000 55%)}
 .ocg-cap{position:absolute;left:0;right:0;bottom:calc(3.2*var(--u));text-align:center;z-index:6;pointer-events:none}
-.ocg-cap span{display:inline-block;padding:.55em 1.5em;background:rgba(42,3,16,.82);border:1px solid rgba(255,241,228,.5);color:var(--cream);font-weight:500;font-size:max(10px,calc(2.1*var(--u)));letter-spacing:.28em;text-transform:uppercase;white-space:nowrap}
+.ocg-cap span{display:inline-block;padding:.55em 1.5em;background:var(--red);border:1px solid rgba(250,246,238,.7);box-shadow:0 calc(.5*var(--u)) calc(1.2*var(--u)) rgba(37,35,33,.3);color:#fff1e4;font-weight:500;font-size:max(10px,calc(2.1*var(--u)));letter-spacing:.28em;text-transform:uppercase;white-space:nowrap}
 
 /* ---------- japanese details ---------- */
-.ocg-kj{position:absolute;top:calc(6*var(--u));z-index:3;display:flex;flex-direction:column;align-items:center;gap:calc(1.6*var(--u));writing-mode:vertical-rl;font-family:'Noto Serif JP','Shippori Mincho',serif;font-weight:700;font-size:max(14px,calc(4.4*var(--u)));letter-spacing:.25em;color:var(--cream);opacity:.82;pointer-events:none}
-.ocg-kj::before{content:'';width:2px;height:calc(7*var(--u));background:#ff6a80}
+.ocg-kj{position:absolute;top:calc(6*var(--u));z-index:3;display:flex;flex-direction:column;align-items:center;gap:calc(1.6*var(--u));writing-mode:vertical-rl;font-family:'Noto Serif JP','Shippori Mincho',serif;font-weight:700;font-size:max(14px,calc(4.4*var(--u)));letter-spacing:.25em;color:var(--ink);opacity:.82;pointer-events:none}
+.ocg-kj::before{content:'';width:2px;height:calc(7*var(--u));background:var(--red)}
 .ocg-kj.a{left:calc(2.5*var(--u))}.ocg-kj.b{right:calc(2.5*var(--u))}
-.ocg-seal{position:absolute;right:calc(7*var(--u));top:calc(22*var(--u));z-index:6;width:max(34px,calc(11*var(--u)));aspect-ratio:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;background:#fff1e4;color:#a8102f;font-family:'Noto Serif JP','Shippori Mincho',serif;font-weight:700;font-size:max(15px,calc(4.6*var(--u)));letter-spacing:.05em;border-radius:calc(.8*var(--u));box-shadow:0 calc(.5*var(--u)) calc(1.4*var(--u)) rgba(30,0,8,.5),inset 0 0 0 2px rgba(168,16,47,.3);transform:rotate(-8deg);pointer-events:none}
-.ocg-vf{position:absolute;z-index:6;width:max(16px,calc(5*var(--u)));height:max(16px,calc(5*var(--u)));border:0 solid var(--cream);opacity:.4;pointer-events:none}
+.ocg-seal{position:absolute;right:calc(5*var(--u));top:calc(17*var(--u));z-index:6;width:max(34px,calc(11*var(--u)));aspect-ratio:1;display:flex;align-items:center;justify-content:center;writing-mode:vertical-rl;background:var(--red);color:#fff1e4;font-family:'Noto Serif JP','Shippori Mincho',serif;font-weight:700;font-size:max(15px,calc(4.6*var(--u)));letter-spacing:.05em;border-radius:calc(.8*var(--u));box-shadow:0 calc(.5*var(--u)) calc(1.4*var(--u)) rgba(37,35,33,.4),inset 0 0 0 3px rgba(255,255,255,.25);transform:rotate(-8deg);pointer-events:none}
+.ocg-vf{position:absolute;z-index:6;width:max(16px,calc(5*var(--u)));height:max(16px,calc(5*var(--u)));border:0 solid var(--ink);opacity:.4;pointer-events:none}
 .ocg-vf.tl{top:calc(2*var(--u));left:calc(2*var(--u));border-top-width:2px;border-left-width:2px}
 .ocg-vf.tr{top:calc(2*var(--u));right:calc(2*var(--u));border-top-width:2px;border-right-width:2px}
 .ocg-vf.bl{bottom:calc(14*var(--u));left:calc(2*var(--u));border-bottom-width:2px;border-left-width:2px}
 .ocg-vf.br{bottom:calc(14*var(--u));right:calc(2*var(--u));border-bottom-width:2px;border-right-width:2px}
-.ocg-rec{position:absolute;z-index:6;top:calc(2.6*var(--u));left:calc(9*var(--u));color:var(--cream);font-weight:500;font-size:max(9px,calc(1.9*var(--u)));letter-spacing:.2em;opacity:.75;pointer-events:none}
-.ocg-petal{position:absolute;top:0;z-index:7;width:max(7px,calc(1.7*var(--u)));height:max(5px,calc(1.2*var(--u)));background:#fff6f8;border-radius:100% 0 100% 0;opacity:.9;pointer-events:none;box-shadow:0 0 6px rgba(255,255,255,.5)}
+.ocg-rec{position:absolute;z-index:6;top:calc(2.6*var(--u));left:calc(9*var(--u));color:var(--ink);font-weight:700;font-size:max(9px,calc(1.9*var(--u)));letter-spacing:.2em;opacity:.75;pointer-events:none}
+.ocg-petal{position:absolute;top:0;z-index:7;width:max(7px,calc(1.7*var(--u)));height:max(5px,calc(1.2*var(--u)));background:linear-gradient(135deg,#ffd0d9,#f08aa0);border-radius:100% 0 100% 0;opacity:.9;pointer-events:none}
 @container (max-width:699px){.ocg-petal:nth-of-type(n+6){display:none}}
 .ocg-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:9}
+
+/* phones: sun + rays sit behind the big head card instead of the bottom */
+@container (max-width:599px){
+  .ocg-sun{bottom:auto;top:calc(55*var(--u))}
+  .ocg-rays{bottom:auto;top:calc(-27*var(--u))}
+}
+
+/* ---------- the formation: everyone together, V of slanted frames ---------- */
+/* phones: head card on top, everyone else wraps below, pentagon frames, names on plates */
+.og-fm{position:relative;z-index:3;display:flex;flex-wrap:wrap;justify-content:center;gap:calc(3*var(--u)) calc(2*var(--u));padding:calc(32*var(--u)) calc(2*var(--u)) 0}
+.og-c{--w:calc(27*var(--u));--h:calc(46*var(--u));--clip:polygon(0 0,50% 7%,100% 0,100% 93%,50% 100%,0 93%);
+  position:relative;flex:none;margin:0;width:var(--w);display:flex;flex-direction:column;align-items:center}
+.og-c.lead{--w:calc(56*var(--u));--h:calc(84*var(--u));margin:0 calc(22*var(--u))}
+
+/* >= 600: absolute V. --x / --y come from the layout maths in the component (units of u) */
+@container (min-width:600px){
+  .og-fm{position:absolute;inset:0;display:block;padding:0}
+  .og-c{position:absolute;left:calc(var(--x)*var(--u));top:calc(var(--y)*var(--u));--w:calc(11*var(--u));--h:calc(19.5*var(--u));margin:0}
+  .og-c.lead{--w:calc(24*var(--u));--h:calc(42*var(--u));margin:0}
+  .og-c.sl{--clip:polygon(0 0,100% 10%,100% 100%,0 90%)}
+  .og-c.sr{--clip:polygon(0 10%,100% 0,100% 90%,0 100%)}
+  .og-c.sc{--clip:polygon(0 0,50% 9%,100% 0,100% 91%,50% 100%,0 91%)}
+}
+.og-c.lead{--clip:polygon(0 0,100% 0,100% 84%,50% 100%,0 84%)}
+
+.og-fw{position:relative;flex:none;width:var(--w);height:var(--h);transition:translate .4s cubic-bezier(.2,.8,.2,1);
+  filter:drop-shadow(max(1.5px,calc(.28*var(--u))) 0 0 var(--ink)) drop-shadow(min(-1.5px,calc(-.28*var(--u))) 0 0 var(--ink)) drop-shadow(0 max(1.5px,calc(.28*var(--u))) 0 var(--ink)) drop-shadow(0 min(-1.5px,calc(-.28*var(--u))) 0 var(--ink)) drop-shadow(0 calc(1*var(--u)) calc(1.4*var(--u)) rgba(37,35,33,.28))}
+.og-fr{position:absolute;inset:0;background:#d6b25e;clip-path:var(--clip)}
+.og-in{position:absolute;inset:max(1.5px,calc(.4*var(--u)));overflow:hidden;clip-path:var(--clip);
+  background:radial-gradient(ellipse at 50% 36%,rgba(255,150,120,.5),transparent 62%),linear-gradient(#cf2b2b,#9b1519 68%,#7a0e12)}
+@media (hover:hover){.og-c:hover .og-fw{translate:0 calc(-.8*var(--u))}}
+/* photo box fills the frame (small gap at the top for the slanted edge). cover + top = the head always sits at the top of the frame, shoulders fill the rest */
+.og-ph{position:absolute;left:0;right:0;bottom:0;top:9%;display:flex;align-items:flex-start;justify-content:center}
+.og-img{display:block;width:100%;height:100%;max-width:none;object-fit:cover;object-position:50% 0;
+  filter:drop-shadow(max(1.5px,calc(.3*var(--u))) 0 0 #fff) drop-shadow(min(-1.5px,calc(-.3*var(--u))) 0 0 #fff) drop-shadow(0 max(1.5px,calc(.3*var(--u))) 0 #fff) drop-shadow(0 calc(.5*var(--u)) calc(.9*var(--u)) rgba(37,35,33,.3))}
+
+/* paper name plate under every frame; first name crimson */
+.og-plate{position:relative;z-index:2;margin-top:calc(-.9*var(--u));max-width:calc(var(--w) + 1.2*var(--u));box-sizing:border-box;padding:.28em .6em .22em;text-align:center;text-wrap:balance;overflow-wrap:break-word;
+  background:var(--paper);border:max(1px,calc(.22*var(--u))) solid var(--ink);box-shadow:calc(.4*var(--u)) calc(.4*var(--u)) 0 var(--red);
+  font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-synthesis:none;font-weight:400;font-size:max(10px,calc(var(--w)*.1));line-height:1.05;letter-spacing:.03em;text-transform:uppercase;color:var(--ink)}
+.og-plate b{color:var(--red);font-weight:400}
+@container (min-width:600px){.og-plate{font-size:max(8px,calc(1.3*var(--u)));max-width:calc(var(--w) + 2.4*var(--u))}.og-c.lead .og-plate{font-size:max(11px,calc(2.7*var(--u)));max-width:calc(var(--w)*1.15)}}
+.og-c.lead .og-plate{font-size:max(12px,calc(var(--w)*.12))}
+
+/* banner above the head of the committee */
+.og-ban{position:relative;z-index:2;width:var(--w);box-sizing:border-box;margin-bottom:calc(.9*var(--u));padding:.55em .6em;text-align:center;text-wrap:balance;
+  background:linear-gradient(#c9262b,var(--deep));color:#fff1e4;font-weight:500;font-size:max(9.5px,calc(var(--w)*.058));letter-spacing:.16em;text-transform:uppercase;line-height:1.2;
+  box-shadow:inset 0 0 0 max(1.5px,calc(.25*var(--u))) #d6b25e,0 0 0 max(1.5px,calc(.28*var(--u))) var(--ink),0 calc(.7*var(--u)) calc(1.2*var(--u)) rgba(37,35,33,.3)}
 `
 
 const FINALE_PETALS = Array.from({ length: 10 }, (_, i) => ({
@@ -574,7 +656,126 @@ const FINALE_PETALS = Array.from({ length: 10 }, (_, i) => ({
   scale: 0.7 + ((i * 41) % 60) / 100,
 }))
 
-export function OcGroup() {
+
+// ============================================================================
+// FORMATION (the finale): everyone together, like a team poster.
+//   leader        = the middle person of the LAST row, big, in the centre with a banner
+//   rows 0 .. n-2 = the two "wings": each row is split left / right of the leader, and every
+//                   wing row steps down toward the leader so the tops form a V
+//   last row      = the bottom V under the leader (everyone except the leader)
+// So with GROUP above: back row + middle row become the wings, the front row is the bottom V,
+// and whoever stands in the centre of the front row (the president) is the head.
+// Units are "u" (the stage is 100u wide).
+// ============================================================================
+type GSlot = { name: string; file: string; x: number; y: number; side: 'l' | 'r' | 'c'; tier: number; lead?: boolean }
+
+const FM = { FW: 11, FH: 19.5, GAP: 1.2, Y0: 30, TD: 26, YB: 92, LEAD_X: 38 }
+
+const layoutFormation = (rows: ReturnType<typeof buildGroupRows>): GSlot[] => {
+  if (!rows.length) return []
+  const out: GSlot[] = []
+  const step = FM.FW + FM.GAP
+  const drop = FM.FH * 0.1 // each frame steps down 10% of its height toward the centre
+  const front = rows[rows.length - 1]
+  const mid = Math.floor((front.length - 1) / 2)
+  const lead = front[mid]
+  if (lead) out.push({ name: lead.name, file: lead.file, x: FM.LEAD_X, y: FM.Y0, side: 'c', tier: -1, lead: true })
+
+  // wings
+  rows.slice(0, -1).forEach((row, t) => {
+    const nl = Math.ceil(row.length / 2)
+    const nr = row.length - nl
+    row.forEach((p, i) => {
+      const left = i < nl
+      const c = left ? i : i - nl
+      const x = left ? FM.LEAD_X - 1 - FM.FW - (nl - 1 - c) * step : 100 - FM.LEAD_X + 1 + c * step
+      const d = left ? c : nr - 1 - c
+      out.push({ name: p.name, file: p.file, x, y: FM.Y0 + 1 + t * FM.TD + d * drop, side: left ? 'l' : 'r', tier: t })
+    })
+  })
+
+  // bottom V (centre lowest)
+  const bottom = front.filter((_, i) => i !== mid)
+  const m = bottom.length
+  const x0 = (100 - (m * FM.FW + (m - 1) * FM.GAP)) / 2
+  const h = (m - 1) / 2
+  bottom.forEach((p, i) => {
+    out.push({
+      name: p.name, file: p.file, x: x0 + i * step, y: FM.YB + Math.min(i, m - 1 - i) * drop,
+      side: i === h ? 'c' : i < h ? 'l' : 'r', tier: rows.length - 1,
+    })
+  })
+  return out
+}
+
+// ----------------------------------------------------------------------------
+// FACE FIXES: per-person crop. Every photo is a different shape, so one crop can't suit all.
+//   keep : how much of the person to show, from the top of the head down.
+//          1 = the whole photo (close-up headshots)   .3 = tight head + shoulders (full-body photos)
+//          LOWER = closer on the face / bigger head,  HIGHER = more body / smaller head.  Default .52
+//   pos  : optional CSS object-position. First number = sideways: LOWER moves the person to the RIGHT in the frame,
+//          HIGHER moves them LEFT ('50% 0' is the default centre).
+//   top  : optional gap above the photo inside the frame, e.g. '14%' (default 9%). Raise it if the hair is clipped by the slanted frame edge.
+// To fix someone: add / edit one line here, save, refresh.
+// ----------------------------------------------------------------------------
+const FACE: Record<string, { keep?: number; pos?: string; top?: string }> = {
+  'Mahdy Hassan': { keep: 0.78, top: '12%' },                  // president: hair was clipped, chin hidden
+  'Hari Branavan Arulnathan': { keep: 0.8, top: '11%' },       // was zoomed in too far
+  'Nethuli Gunathilaka': { keep: 0.72, pos: '15% 0' },         // face was pushed off the left side
+  'Gihansa Hasithmi': { keep: 1, pos: '25% 0' },               // close-up photo: show the whole face
+  'Yehan De Silva': { keep: 0.36, pos: '12% 0', top: '14%' },  // head was clipped by the slanted frame top
+  'Monali Edirisinghe': { keep: 0.3 },
+  'Binushi Wikramarathne': { keep: 0.42 },
+}
+
+const GroupCard = ({ s, label }: { s: GSlot; label: string }) => {
+  const [failed, setFailed] = useState(false)
+  // trims transparent padding and keeps the upper body so every head ends up the same size
+  const face = FACE[s.name]
+  const url = useCutout(photo(s.file), face?.keep ?? 0.52)
+  const [first, ...rest] = s.name.split(' ')
+  return (
+    <figure
+      className={`og-c s${s.side}${s.lead ? ' lead og-lead' : ` og-t${s.tier}`}`}
+      style={{ '--x': s.x.toFixed(2), '--y': s.y.toFixed(2) } as React.CSSProperties}
+    >
+      {s.lead && <div className="og-ban">{label}</div>}
+      <div className="og-fw">
+        <div className="og-fr" aria-hidden="true" />
+        <div className="og-in">
+          <div className="og-ph" style={face?.top ? { top: face.top } : undefined}>
+            {url && !failed && <img className="og-img" src={url} alt={s.name} style={face?.pos ? { objectPosition: face.pos } : undefined} decoding="async" draggable={false} onError={() => setFailed(true)} />}
+          </div>
+        </div>
+      </div>
+      <figcaption className="og-plate"><b>{first}</b>{rest.length ? ` ${rest.join(' ')}` : ''}</figcaption>
+    </figure>
+  )
+}
+
+export type GroupProps = {
+  rows?: ReturnType<typeof buildGroupRows>
+  words?: string[] // big brush title, one word per entry
+  kanjiA?: string
+  kanjiB?: string
+  seal?: string
+  caption?: string
+  label?: string
+  leaderLabel?: string // banner above the head of the committee
+}
+
+export function OcGroup({
+  rows = OC_ROWS,
+  words = ['OC', 'ELITES'],
+  kanjiA = '精鋭',
+  kanjiB = '実行委員会',
+  seal = '精鋭',
+  caption = 'The Organizing Committee',
+  label = 'OC Elites',
+  leaderLabel = 'Organizing Committee President',
+}: GroupProps) {
+  const total = rows.reduce((n, r) => n + r.length, 0)
+  const slots = layoutFormation(rows)
   const secRef = useRef<HTMLElement>(null)
   const stageRef = useRef<HTMLDivElement>(null)
   const ttlRef = useRef<HTMLHeadingElement>(null)
@@ -631,15 +832,16 @@ export function OcGroup() {
         })
         tl.fromTo(label, { opacity: 0 }, { opacity: 0.75, duration: 0.4 }, 1.2)
 
-        // the team walks into frame: back row, then middle, then front (centre person last)
-        ;['.ocg-row.r0', '.ocg-row.r1', '.ocg-row.r2'].forEach((sel, r) => {
+        // the team walks into frame: wings first, then the bottom V, the head of the committee last
+        rows.forEach((_, t) => {
           tl.fromTo(
-            q(`${sel} .ocg-p`),
-            { yPercent: 70, opacity: 0, scale: 0.9 },
+            q(`.og-t${t}`),
+            { yPercent: 45, opacity: 0, scale: 0.9 },
             { yPercent: 0, opacity: 1, scale: 1, duration: 1, stagger: { each: 0.07, from: 'edges' }, ease: 'expo.out', transformOrigin: '50% 100%' },
-            1.3 + r * 0.55,
+            1.3 + t * 0.5,
           )
         })
+        tl.fromTo(q('.og-lead'), { yPercent: 30, opacity: 0, scale: 0.88 }, { yPercent: 0, opacity: 1, scale: 1, duration: 1.2, ease: 'expo.out', transformOrigin: '50% 100%' }, 1.3 + rows.length * 0.5)
 
         // say cheese
         tl.addLabel('snap', '>-0.15')
@@ -648,10 +850,7 @@ export function OcGroup() {
           .call(() => { label.textContent = '● CAPTURED' }, undefined, 'snap')
           .fromTo(q('.ocg-cap'), { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' }, 'snap+=0.2')
 
-        ScrollTrigger.create({
-          trigger: root, start: 'top 70%', once: true,
-          onEnter: (self) => playFor(tl, self),
-        })
+        revealOnce(tl, root, 'top 70%')
 
         // ----- endless loops (rays, clouds, petals): only while the finale is on screen
         const loops: gsap.core.Tween[] = []
@@ -671,14 +870,6 @@ export function OcGroup() {
           trigger: root, start: 'top bottom', end: 'bottom top',
           onToggle: (self) => loops.forEach((t) => (self.isActive ? t.resume() : t.pause())),
         })
-
-        // ----- depth: each tier drifts at its own speed while scrolling (front moves most)
-        ;[1.5, 3, 5].forEach((s, r) => {
-          gsap.fromTo(q(`.ocg-row.r${r}`), { yPercent: s }, {
-            yPercent: -s, ease: 'none',
-            scrollTrigger: { trigger: root, start: 'top bottom', end: 'bottom top', scrub: true },
-          })
-        })
       })
     }, root)
 
@@ -693,7 +884,7 @@ export function OcGroup() {
   )
 
   return (
-    <section className="ocg" ref={secRef} aria-label={`OC Elites, the organizing committee group photo, ${TOTAL_PEOPLE} people`}>
+    <section className="ocg" ref={secRef} aria-label={`${label}, group photo, ${total} people`}>
       <div className="ocg-stage" ref={stageRef}>
         <div className="ocg-rays" aria-hidden="true" />
         <div className="ocg-kas" aria-hidden="true" style={{ top: 'calc(10*var(--u))', left: '4%', width: 'calc(34*var(--u))' }} />
@@ -709,30 +900,20 @@ export function OcGroup() {
           </g>
         </svg>
 
-        <h2 className="ocg-ttl" ref={ttlRef} aria-label="OC ELITES">
+        <h2 className="ocg-ttl" ref={ttlRef} aria-label={words.join(' ')}>
           <span className="ocg-ttl-in" ref={innerRef}>
-            {word('OC')}{word('ELITES')}
+            {words.map((w, i) => <React.Fragment key={i}>{word(w)}</React.Fragment>)}
           </span>
         </h2>
 
-        <div className="ocg-kj a" aria-hidden="true">精鋭</div>
-        <div className="ocg-kj b" aria-hidden="true">実行委員会</div>
+        <div className="ocg-kj a" aria-hidden="true">{kanjiA}</div>
+        <div className="ocg-kj b" aria-hidden="true">{kanjiB}</div>
 
-        {GROUP_ROWS.map((row, ri) => (
-          <div className={`ocg-row r${ri}`} key={ri}>
-            {row.map((p) => (
-              <figure
-                className="ocg-p"
-                key={p.name}
-                style={{ '--x': p.x, '--dy': p.dy, '--ws': p.ws, zIndex: p.z } as React.CSSProperties}
-              >
-                <img src={DIR + p.file} alt={p.name} loading="lazy" decoding="async" draggable={false} />
-              </figure>
-            ))}
-          </div>
-        ))}
+        <div className="og-fm">
+          {slots.map((sl) => <GroupCard key={sl.name} s={sl} label={leaderLabel} />)}
+        </div>
 
-        <div className="ocg-seal" aria-hidden="true">精鋭</div>
+        <div className="ocg-seal" aria-hidden="true">{seal}</div>
         <div className="ocg-vf tl" aria-hidden="true" />
         <div className="ocg-vf tr" aria-hidden="true" />
         <div className="ocg-vf bl" aria-hidden="true" />
@@ -744,8 +925,255 @@ export function OcGroup() {
       </div>
 
       <div className="ocg-ground" aria-hidden="true" />
-      <div className="ocg-cap" aria-hidden="true"><span>The Organizing Committee</span></div>
+      <div className="ocg-cap" aria-hidden="true"><span>{caption}</span></div>
       <div className="ocg-flash" aria-hidden="true" />
+    </section>
+  )
+}
+
+// ============================================================================
+// CONFERENCE MANAGERS: opens the OC tab, before the OCP poster.
+// Japanese "hanging scroll" panels (gold / sakura / indigo) on a night-indigo stage with a
+// rising sun, illustrations from public/assets/illustrations, and a big brush headline.
+// To add / edit: change ONE line in CM (order = left, CENTRE, right).
+//   ph   (optional) = person height in units (bigger = bigger person)
+//   keep (optional) = how much of the person to show from the top (0.55 = head to hips)
+// People are auto-trimmed in the browser (transparent padding removed, cropped to the
+// upper body), so every head ends up the same size whatever the original photo looks like.
+// ============================================================================
+const EB_DIR = '/assets/eb-pics/'
+const ILL = '/assets/illustrations/'
+
+const CM: { name: string; file: string; role: string; ph?: number; keep?: number }[] = [
+  { name: 'Senaya Jayasuriya', file: EB_DIR + 'senaya-jayasuriya.webp', role: 'Conference Manager' },
+  { name: 'Savinda Sithum', file: EB_DIR + 'savinda-sithum.webp', role: 'Conference Manager' },
+  { name: 'Sabeelur Rashaad', file: EB_DIR + 'sabeelur-rashaad.webp', role: 'Conference Manager' },
+]
+
+// file names as they appear in public/assets/illustrations (a missing one just hides itself)
+const ILLS = {
+  mask: ILL + 'alessandro_hrdz-mask-6976331.png',
+  fan: ILL + 'jakeloris-fan-7039967.webp',
+  koi: ILL + 'kacsoeszti-koi-1184783_1920.png',
+  bonsai: ILL + 'gdj-bonsai-tree-8143900.svg',
+  building: ILL + 'gdj-building-8171699.svg',
+  dragon: ILL + 'gdj-dragon-8095373.svg',
+  kanji: [
+    ILL + 'clker-free-vector-images-japanese-24153_1920.png', // 健
+    ILL + 'clker-free-vector-images-love-symbol-24154_1920.png', // 愛
+    ILL + 'clker-free-vector-images-luck-24155_1920.png', // 運
+  ],
+}
+
+const WAVES_WINE = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%2340081a' stroke='%23d6b25e' stroke-width='1.3'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`
+
+// trims the transparent padding off a cut-out and keeps only the top part of the person
+export const useCutout = (src: string, keep: number) => {
+  const [out, setOut] = useState<string | null>(null)
+  useEffect(() => {
+    let dead = false
+    let obj = ''
+    const img = new Image()
+    img.decoding = 'async'
+    img.onload = () => {
+      try {
+        const c = document.createElement('canvas')
+        c.width = img.naturalWidth
+        c.height = img.naturalHeight
+        const g = c.getContext('2d', { willReadFrequently: true })
+        if (!g) throw new Error('no ctx')
+        g.drawImage(img, 0, 0)
+        const { data, width, height } = g.getImageData(0, 0, c.width, c.height)
+        let t = height, b = -1, l = width, r = -1
+        for (let y = 0; y < height; y++) {
+          for (let x = 0; x < width; x++) {
+            if (data[(y * width + x) * 4 + 3] > 24) {
+              if (y < t) t = y
+              if (y > b) b = y
+              if (x < l) l = x
+              if (x > r) r = x
+            }
+          }
+        }
+        if (b < 0) throw new Error('empty')
+        const cw = r - l + 1
+        const ch = Math.max(1, Math.round((b - t + 1) * keep))
+        const o = document.createElement('canvas')
+        o.width = cw
+        o.height = ch
+        o.getContext('2d')!.drawImage(img, l, t, cw, ch, 0, 0, cw, ch)
+        o.toBlob((blob) => {
+          if (!blob || dead) return
+          obj = URL.createObjectURL(blob)
+          setOut(obj)
+        })
+      } catch {
+        if (!dead) setOut(src) // could not read pixels: show the original
+      }
+    }
+    img.onerror = () => { if (!dead) setOut(src) }
+    img.src = src
+    return () => {
+      dead = true
+      if (obj) URL.revokeObjectURL(obj)
+    }
+  }, [src, keep])
+  return out
+}
+
+const Ill = ({ src, className, style }: { src: string; className: string; style?: React.CSSProperties }) => {
+  const [bad, setBad] = useState(false)
+  if (bad) return null
+  return <img className={className} style={style} src={src} alt="" aria-hidden="true" loading="lazy" decoding="async" draggable={false} onError={() => setBad(true)} />
+}
+
+const CMCSS = `
+.cm{--u:1cqw;--ink:#2a0310;--cream:#fff1e4;--gold:#d6b25e;--vermilion:#d93a2b;position:relative;overflow:hidden;margin-bottom:calc(5*var(--u));padding-top:calc(5*var(--u));
+  background:radial-gradient(ellipse at 50% 42%,#a8142f 0,#7a0a22 48%,#3a0613 100%);font-family:'Oswald',system-ui,sans-serif;clip-path:${TOP_CLIP}}
+@container (min-width:700px){.cm{--u:.8cqw}}
+@container (min-width:1100px){.cm{--u:.62cqw}}
+@container (min-width:1600px){.cm{--u:.5cqw}}
+
+/* faint sun rays */
+.cm::before{content:'';position:absolute;left:50%;top:34%;width:calc(240*var(--u));height:calc(240*var(--u));margin:calc(-120*var(--u)) 0 0 calc(-120*var(--u));border-radius:50%;
+  background:repeating-conic-gradient(rgba(255,241,228,.06) 0 5deg,transparent 5deg 10deg);
+  -webkit-mask-image:radial-gradient(circle,#000 18%,transparent 66%);mask-image:radial-gradient(circle,#000 18%,transparent 66%);pointer-events:none}
+
+.cm-stage{position:relative;width:calc(100*var(--u));max-width:100%;height:calc(100*var(--u));margin:0 auto}
+
+/* ---------- backdrop ---------- */
+.cm-sun{position:absolute;left:50%;top:calc(2*var(--u));width:calc(66*var(--u));aspect-ratio:1;margin-left:calc(-33*var(--u));border-radius:50%;z-index:0;
+  background:radial-gradient(circle at 40% 34%,#ffb89f,#ff6a52 55%,#d93a2b);box-shadow:0 0 calc(10*var(--u)) calc(2*var(--u)) rgba(255,120,90,.28)}
+.cm-sil{position:absolute;pointer-events:none;filter:brightness(0) invert(1);opacity:.09;z-index:0}
+.cm-sil.bld{left:calc(-5*var(--u));bottom:calc(14*var(--u));width:calc(42*var(--u))}
+.cm-sil.drg{right:calc(-9*var(--u));top:calc(4*var(--u));width:calc(54*var(--u))}
+.cm-ill{position:absolute;pointer-events:none;filter:drop-shadow(0 calc(.6*var(--u)) calc(1.2*var(--u)) rgba(0,0,0,.45))}
+.cm-ill.mask{left:calc(1*var(--u));top:calc(1.5*var(--u));width:calc(11*var(--u));rotate:-8deg;z-index:5}
+.cm-ill.fan{right:calc(2.5*var(--u));top:calc(3*var(--u));width:calc(19*var(--u));rotate:9deg;z-index:5}
+.cm-ill.koi{left:calc(1.5*var(--u));bottom:calc(1.5*var(--u));width:calc(13*var(--u));z-index:11}
+.cm-ill.bon{right:calc(1.5*var(--u));bottom:calc(2*var(--u));width:calc(14*var(--u));z-index:11;filter:brightness(0) invert(1);opacity:.6}
+
+/* ---------- hanging-scroll panels ---------- */
+.cm-c0,.cm-c1,.cm-c2{--w:calc(27*var(--u));--ph:calc(46*var(--u))}
+.cm-c0{--l:calc(7*var(--u))}
+.cm-c1{--l:calc(36.5*var(--u))}
+.cm-c2{--l:calc(66*var(--u))}
+
+.cm-col{position:absolute;left:var(--l);width:var(--w);bottom:calc(18*var(--u));overflow:hidden;color:var(--ink);box-shadow:inset 0 0 0 max(1.5px,calc(.3*var(--u))) rgba(42,3,16,.28),0 calc(1.4*var(--u)) calc(3*var(--u)) rgba(0,0,0,.4)}
+.cm-col.cm-c0{height:calc(68*var(--u));z-index:2;background:linear-gradient(#f6d77c,#e0a73a 70%,#c98a22)}
+.cm-col.cm-c1{height:calc(68*var(--u));z-index:2;background:linear-gradient(#fde3e8,#f0b1bf 65%,#df8aa0)}
+.cm-col.cm-c2{height:calc(68*var(--u));z-index:2;background:linear-gradient(#fbf4e6,#eadcc0 65%,#d4be98)}
+.cm-col::before,.cm-col::after{content:'';position:absolute;left:0;right:0;height:calc(1.6*var(--u));z-index:4;background:linear-gradient(#5e3d20,#2c1b0c);box-shadow:inset 0 max(1px,calc(.2*var(--u))) 0 rgba(255,220,160,.35)}
+.cm-col::before{top:0}.cm-col::after{bottom:0}
+.cm-kj{position:absolute;left:5%;width:90%;top:calc(33*var(--u));opacity:.13;mix-blend-mode:multiply;z-index:0;pointer-events:none}
+
+.cm-nm{position:absolute;left:0;right:0;top:calc(4.6*var(--u));padding:0 calc(2.4*var(--u));z-index:2}
+.cm-nm h3{margin:0;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:max(11px,calc(var(--nf,3)*var(--u)));line-height:1.08;letter-spacing:.02em;text-transform:uppercase}
+.cm-nm p{display:flex;align-items:center;gap:.7em;margin:calc(1.4*var(--u)) 0 0;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:max(9.5px,calc(2*var(--u)));letter-spacing:.08em;text-transform:uppercase;color:rgba(42,3,16,.72)}
+.cm-nm p::before{content:'';flex:none;width:max(6px,calc(1.1*var(--u)));height:max(6px,calc(1.1*var(--u)));background:var(--vermilion);transform:rotate(45deg)}
+
+/* ---------- the people (sit ABOVE the panels so they can pop out of them) ---------- */
+.cm-ph{position:absolute;left:calc(var(--l) - var(--w)*.08);width:calc(var(--w)*1.16);height:var(--ph);bottom:calc(21*var(--u));display:flex;justify-content:center;align-items:flex-end;pointer-events:none}
+.cm-ph.cm-c0,.cm-ph.cm-c1,.cm-ph.cm-c2{z-index:6}
+/* width AND height are set + object-fit, so a global img max-width reset can never squash the photo sideways */
+.cm-pimg{flex:none;display:block;height:100%;width:100%;max-width:none;object-fit:contain;object-position:center bottom;-webkit-mask-image:linear-gradient(#000 78%,transparent);mask-image:linear-gradient(#000 78%,transparent);
+  filter:drop-shadow(max(1.5px,calc(.35*var(--u))) 0 0 #fff) drop-shadow(min(-1.5px,calc(-.35*var(--u))) 0 0 #fff) drop-shadow(0 max(1.5px,calc(.35*var(--u))) 0 #fff) drop-shadow(0 min(-1.5px,calc(-.35*var(--u))) 0 #fff) drop-shadow(0 calc(1*var(--u)) calc(1.6*var(--u)) rgba(0,0,0,.35))}
+
+/* ---------- ground, fade and the big headline ---------- */
+.cm-fade{position:absolute;left:0;right:0;bottom:0;height:calc(40*var(--u));z-index:8;pointer-events:none;background:linear-gradient(transparent,rgba(58,6,19,.8) 68%,rgba(42,3,16,.92))}
+.cm-ground{position:absolute;left:0;right:0;bottom:0;height:calc(14*var(--u));z-index:9;pointer-events:none;background:linear-gradient(#5a0719,#2f030e);border-top:max(2px,calc(.45*var(--u))) solid var(--gold)}
+.cm-ground::after{content:'';position:absolute;inset:0;background-image:${WAVES_WINE};background-size:40px 20px;background-position:center top;opacity:.55;-webkit-mask-image:linear-gradient(transparent,#000 60%);mask-image:linear-gradient(transparent,#000 60%)}
+
+.cm-ttl{position:absolute;left:0;right:0;bottom:calc(2.5*var(--u));z-index:10;margin:0;text-align:center;line-height:1;white-space:nowrap;
+  font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;font-size:calc(13*var(--u));letter-spacing:.02em;color:var(--cream)}
+.cm-l,.cm-hl{display:block;width:fit-content;margin:0 auto}
+.cm-l{-webkit-text-stroke:max(1px,calc(.5*var(--u))) var(--ink);paint-order:stroke fill;text-shadow:0 calc(.8*var(--u)) 0 var(--ink),0 calc(1.6*var(--u)) calc(1.8*var(--u)) rgba(0,0,0,.45)}
+.cm-hl{position:relative;margin-top:calc(1*var(--u));padding:.06em .34em .02em;text-shadow:0 calc(.5*var(--u)) 0 rgba(80,10,6,.55)}
+.cm-hlbg{position:absolute;inset:0;border-radius:calc(1.4*var(--u));background:linear-gradient(100deg,#f0553c,var(--vermilion) 55%,#a8241a);box-shadow:0 calc(.8*var(--u)) calc(2*var(--u)) rgba(0,0,0,.45),inset 0 0 0 max(1.5px,calc(.3*var(--u))) var(--gold)}
+.cm-hl .cm-ch{position:relative}
+.cm-ch{display:inline-block}
+`
+
+const CmPerson = ({ p, i }: { p: (typeof CM)[number]; i: number }) => {
+  const url = useCutout(photo(p.file), p.keep ?? 0.55)
+  return (
+    <div className={`cm-ph cm-c${i}`} style={p.ph ? ({ '--ph': `calc(${p.ph}*var(--u))` } as React.CSSProperties) : undefined}>
+      {url && <img className="cm-pimg" src={url} alt={p.name} decoding="async" draggable={false} />}
+    </div>
+  )
+}
+
+export function ConferenceManagers() {
+  const ref = useRef<HTMLElement>(null)
+
+  useLayoutEffect(() => {
+    const root = ref.current
+    if (!root) return
+
+    const ctx = gsap.context(() => {
+      const mm = gsap.matchMedia()
+
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        const q = gsap.utils.selector(root)
+        const each = { each: 0.16, from: 'edges' as const }
+
+        const tl = gsap.timeline({ paused: true })
+        tl.fromTo(q('.cm-sun'), { scale: 0.6, opacity: 0 }, { scale: 1, opacity: 1, duration: 1.6, ease: 'power3.out' }, 0)
+          // the scrolls unroll from the top
+          .fromTo(q('.cm-col'), { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.2, stagger: each, ease: 'power3.inOut' }, 0.15)
+          .fromTo(q('.cm-nm'), { opacity: 0, y: -14 }, { opacity: 1, y: 0, duration: 0.8, stagger: each, ease: 'power3.out' }, 0.8)
+          .fromTo(q('.cm-ph'), { yPercent: 22, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 1.1, stagger: each, ease: 'expo.out' }, 0.7)
+          .fromTo(q('.cm-ill'), { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.9, stagger: 0.1, ease: 'back.out(1.6)' }, 1.1)
+          .from(q('.cm-ch'), {
+            yPercent: -170, rotation: () => gsap.utils.random(-28, 28), opacity: 0, scale: 1.4,
+            duration: 0.9, stagger: 0.06, ease: 'back.out(1.8)',
+          }, 0.9)
+          .fromTo(q('.cm-hlbg'), { scaleX: 0, transformOrigin: '0% 50%' }, { scaleX: 1, duration: 0.8, ease: 'power4.inOut' }, 1.3)
+
+        revealOnce(tl, root, 'top 75%')
+      })
+    }, root)
+
+    document.fonts?.ready.then(() => ScrollTrigger.refresh())
+    return () => ctx.revert()
+  }, [])
+
+  const chars = (w: string) => w.split('').map((c, i) => <span className="cm-ch" key={i} aria-hidden="true">{c}</span>)
+
+  return (
+    <section className="cm" ref={ref} aria-label="Conference Managers">
+      <style>{CMCSS}</style>
+      <div className="cm-stage">
+        <div className="cm-sun" aria-hidden="true" />
+        <Ill className="cm-sil bld" src={ILLS.building} />
+        <Ill className="cm-sil drg" src={ILLS.dragon} />
+        <Ill className="cm-ill mask" src={ILLS.mask} />
+        <Ill className="cm-ill fan" src={ILLS.fan} />
+
+        {CM.map((p, i) => {
+          const [first, ...rest] = p.name.split(' ')
+          return (
+            <div className={`cm-col cm-c${i}`} key={p.name}>
+              <Ill className="cm-kj" src={ILLS.kanji[i % ILLS.kanji.length]} />
+              <div className="cm-nm" style={{ '--nf': Math.min(3.6, 22 / (Math.max(...p.name.split(' ').map((w) => w.length)) * 0.78)).toFixed(2) } as React.CSSProperties}>
+                <h3>{first}<br />{rest.join(' ')}</h3>
+                <p>{p.role}</p>
+              </div>
+            </div>
+          )
+        })}
+
+        {CM.map((p, i) => <CmPerson key={p.name} p={p} i={i} />)}
+
+        <Ill className="cm-ill koi" src={ILLS.koi} />
+        <Ill className="cm-ill bon" src={ILLS.bonsai} />
+        <h2 className="cm-ttl" aria-label="Conference Managers">
+          <span className="cm-l">{chars('CONFERENCE')}</span>
+          <span className="cm-hl"><span className="cm-hlbg" aria-hidden="true" />{chars('MANAGERS')}</span>
+        </h2>
+      </div>
+      <div className="cm-fade" aria-hidden="true" />
+      <div className="cm-ground" aria-hidden="true" />
     </section>
   )
 }
@@ -757,6 +1185,7 @@ export function OcRoster() {
   return (
     <div className="ocx-wrap">
       <style>{CSS + GCSS}</style>
+      <ConferenceManagers />
       {DEPTS.map((d, i) => (
         <Poster key={d.key} dept={d} last={i === DEPTS.length - 1} />
       ))}

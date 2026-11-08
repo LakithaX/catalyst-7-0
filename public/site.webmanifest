@@ -1,0 +1,27 @@
+{
+  "name": "Catalyst 7.0 - AIESEC in SLIIT",
+  "short_name": "Catalyst 7.0",
+  "description": "Catalyst 7.0 - The premier youth leadership conference by AIESEC in SLIIT.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F8F3E9",
+  "theme_color": "#C9362B",
+  "icons": [
+    {
+      "src": "/assets/brand/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/assets/brand/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

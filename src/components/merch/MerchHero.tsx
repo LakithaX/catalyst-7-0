@@ -211,7 +211,7 @@ const JapaneseSumiLandscape = () => (
     {/* Traditional Japanese Blossom Tree Illustration */}
     <div className="absolute left-[3%] sm:left-[8%] bottom-0 w-32 sm:w-48 md:w-60 h-auto opacity-20 pointer-events-none select-none z-10">
       <img
-        src="/assets/illustrations/susannp4-tree-1586365_1920.png"
+        src="/assets/illustrations/susannp4-tree-1586365_1920.webp"
         alt=""
         className="w-full h-auto object-contain filter grayscale"
       />
@@ -280,7 +280,7 @@ export const MerchHero: React.FC = () => {
           {/* Traditional Fan Watermark */}
           <div className="absolute -top-10 -left-8 w-40 sm:w-52 h-auto opacity-[0.06] pointer-events-none select-none z-0">
             <img
-              src="/assets/illustrations/jakeloris-fan-7039967.png"
+              src="/assets/illustrations/jakeloris-fan-7039967.webp"
               alt=""
               className="w-full h-auto object-contain"
             />

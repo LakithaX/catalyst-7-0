@@ -10,7 +10,7 @@ export const CartDrawer: React.FC = () => {
   return (
     <AnimatePresence>
       {isCartOpen && (
-        <div className="fixed inset-0 z-50 flex justify-end">
+        <div className="fixed inset-0 z-[70] flex justify-end">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -37,8 +37,8 @@ export const CartDrawer: React.FC = () => {
                     CATALYST 7.0
                   </span>
                 </div>
-                <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321]">
-                  CLAIM CART ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
+                <h3 className="brush-heading font-['Jansina','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321]">
+                  YOUR CART ({cartItems.reduce((acc, item) => acc + item.quantity, 0)})
                 </h3>
               </div>
               <button
@@ -56,16 +56,16 @@ export const CartDrawer: React.FC = () => {
                 <div className="h-full flex flex-col items-center justify-center text-center py-12">
                   <div className="w-20 h-20 rounded-full bg-[#252321]/5 flex items-center justify-center p-3 mb-4">
                     <img
-                      src="/assets/illustrations/jakeloris-fan-7039967.png"
+                      src="/assets/illustrations/jakeloris-fan-7039967.webp"
                       alt="Japanese Fan"
                       className="w-full h-auto object-contain filter drop-shadow-[0_4px_10px_rgba(201,54,43,0.18)]"
                     />
                   </div>
-                  <h4 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
+                  <h4 className="brush-heading font-['Jansina','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
                     YOUR CART IS EMPTY
                   </h4>
                   <p className="font-['Droid_Serif',Georgia,serif] italic text-xs text-[#736B63] max-w-xs mb-6">
-                    No merchandise reserved yet. Explore the official collection and add pieces to claim.
+                    Your cart is empty. Explore the official collection and add the pieces you love.
                   </p>
                   <button
                     onClick={closeCart}
@@ -96,12 +96,12 @@ export const CartDrawer: React.FC = () => {
                           {item.category}
                         </span>
                         {item.priceDisplay && (
-                          <span className="font-['Bison',sans-serif] text-sm font-black text-[#C9362B]">
+                          <span className="font-['Jansina','Bison',sans-serif] text-sm font-black text-[#C9362B]">
                             {item.priceDisplay}
                           </span>
                         )}
                       </div>
-                      <h5 className="font-['Bison',sans-serif] font-bold text-base tracking-wide text-[#252321] truncate">
+                      <h5 className="font-['Jansina','Bison',sans-serif] font-bold text-base tracking-wide text-[#252321] truncate">
                         {item.name}
                       </h5>
                       <p className="text-xs text-[#736B63] uppercase tracking-wider truncate mb-2">
@@ -153,7 +153,7 @@ export const CartDrawer: React.FC = () => {
             {cartItems.length > 0 && (
               <div className="p-6 border-t border-[#252321]/10 bg-[#F3ECE0] space-y-4">
                 <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif] tracking-wider uppercase">
-                  <span className="text-[#736B63] font-medium">Total Pieces:</span>
+                  <span className="text-[#736B63] font-medium">Items:</span>
                   <span className="text-[#252321] font-mono font-bold text-sm">
                     {cartItems.reduce((acc, item) => acc + item.quantity, 0)} Items
                   </span>
@@ -161,7 +161,7 @@ export const CartDrawer: React.FC = () => {
 
                 <div className="flex items-center justify-between text-xs font-['Montserrat',sans-serif] tracking-wider uppercase pt-1 border-t border-[#252321]/10">
                   <span className="text-[#252321] font-bold">Estimated Total:</span>
-                  <span className="text-[#C9362B] font-['Bison',sans-serif] font-black text-xl tracking-wider">
+                  <span className="text-[#C9362B] font-['Jansina','Bison',sans-serif] font-black text-xl tracking-wider">
                     LKR {cartItems.reduce((acc, item) => acc + (item.priceLkr || 0) * item.quantity, 0).toLocaleString()}
                   </span>
                 </div>
@@ -181,7 +181,7 @@ export const CartDrawer: React.FC = () => {
                     }}
                     className="w-full py-3.5 px-4 rounded-full bg-[#C9362B] hover:bg-[#9E171C] text-xs font-['Montserrat',sans-serif] font-bold tracking-widest uppercase text-white shadow-[0_4px_16px_rgba(201,54,43,0.3)] transition-all cursor-pointer flex items-center justify-center gap-2"
                   >
-                    <span>Proceed to Claim</span>
+                    <span>Checkout</span>
                     <ArrowRight size={14} />
                   </button>
 
@@ -190,7 +190,7 @@ export const CartDrawer: React.FC = () => {
                     onClick={closeCart}
                     className="w-full py-2.5 px-4 rounded-full border border-[#E5DDD0] bg-white text-center block text-xs font-['Montserrat',sans-serif] tracking-widest uppercase text-[#736B63] hover:text-[#252321] hover:border-[#252321]/30 transition-colors font-semibold"
                   >
-                    View Full Cart Page
+                    View Full Cart
                   </Link>
                 </div>
               </div>

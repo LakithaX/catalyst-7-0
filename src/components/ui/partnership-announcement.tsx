@@ -27,20 +27,20 @@ const PARTNER_CTA = { label: "Become a partner", href: "#contact" };
 // Illustrations from /public/assets/illustrations
 const ART = {
   mask: "/assets/illustrations/alessandro_hrdz-mask-6976331.png",
-  fan: "/assets/illustrations/jakeloris-fan-7039967.png",
-  tree: "/assets/illustrations/susannp4-tree-1586365_1920.png",
+  fan: "/assets/illustrations/jakeloris-fan-7039967.webp",
+  tree: "/assets/illustrations/susannp4-tree-1586365_1920.webp",
   koi: "/assets/illustrations/kacsoeszti-koi-1184783_1920.png",
 };
 
 const INK = "#252321";
 const RED = "#C9362B";
 const RED_DARK = "#B51E23";
-const HEAD = "'Shippori Mincho', 'Noto Serif JP', serif";
-// Jansina is loaded from /public/fonts via @font-face in index.css. Used for big headings only (it gets hard to read when small).
-const JANSINA = "'Jansina', 'Zen Antique', 'Shippori Mincho', 'Noto Serif JP', serif";
-const BRUSH = "'Yuji Boku', 'Zen Antique', 'Noto Serif JP', serif";
-const LABEL = "'Noto Sans JP', 'Montserrat', sans-serif";
-const BODY = "'Inter', system-ui, -apple-system, sans-serif";
+const HEAD = "var(--font-display)";
+// Fonts come from the CSS variables in index.css (:root).
+const DISPLAY = "var(--font-display)";
+const BRUSH = "var(--font-accent)";
+const LABEL = "var(--font-label)";
+const BODY = "var(--font-body)";
 
 const SEIGAIHA =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23C9362B' stroke-width='1.4'%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3C/g%3E%3C/svg%3E\")";
@@ -86,8 +86,8 @@ const PartnerMark = ({ partner, large = false }: { partner: Partner; large?: boo
     <span
       className="px-3 text-center leading-tight"
       style={{
-        fontFamily: large ? JANSINA : HEAD,
-        fontWeight: large ? 400 : 800,
+        fontFamily: large ? DISPLAY : HEAD,
+        fontWeight: 700,
         fontSize: large ? "clamp(1.8rem, 3.6vw, 2.6rem)" : "1rem",
         letterSpacing: large ? "0.04em" : "0.06em",
         color: INK,
@@ -229,8 +229,8 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
             <h2
               id="partners-title"
               style={{
-                fontFamily: JANSINA,
-                fontWeight: 400,
+                fontFamily: DISPLAY,
+                fontWeight: 700,
                 fontSize: "clamp(2.1rem, 6.2vw, 4rem)",
                 letterSpacing: "0.03em",
                 lineHeight: 1.05,
@@ -267,7 +267,7 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
             </div>
             <div data-g="cardbody">
               <p style={{ fontFamily: LABEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", color: RED_DARK, margin: 0 }}>PRESENTING PARTNER</p>
-              <h3 style={{ fontFamily: JANSINA, fontWeight: 400, fontSize: "clamp(1.7rem, 3.2vw, 2.3rem)", letterSpacing: "0.03em", lineHeight: 1.1, margin: "6px 0 0" }}>{PRESENTING.name}</h3>
+              <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: "clamp(1.7rem, 3.2vw, 2.3rem)", letterSpacing: "0.03em", lineHeight: 1.1, margin: "6px 0 0" }}>{PRESENTING.name}</h3>
               <p style={{ fontSize: 16, lineHeight: 1.65, color: "#3D3833", marginTop: 10 }}>{PRESENTING.blurb}</p>
             </div>
           </div>

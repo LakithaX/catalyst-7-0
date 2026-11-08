@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'motion/react';
+import { CatalystMark } from './brand/CatalystMark';
 
 const TWEEN_EASING: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -43,14 +44,38 @@ export const GlobalLoader: React.FC = () => {
             />
             <path d="M 58 51 L 69 41 M 229 220 L 222 231 M 32 167 L 35 181" stroke="#C9362B" strokeWidth="2" strokeLinecap="round" opacity="0.55" />
           </svg>
-          <motion.img
-            src="/assets/catalyst_7_logo.png"
-            alt=""
-            className="relative w-36 sm:w-44 h-auto object-contain"
-            initial={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: reduceMotion ? 0 : 0.5, ease: TWEEN_EASING }}
-          />
+          <div className="relative flex flex-col items-center justify-center gap-1.5 z-10">
+            <motion.div
+              initial={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.85, rotate: reduceMotion ? 0 : -8 }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                rotate: 0,
+                y: reduceMotion ? 0 : [0, -4, 0, 4, 0],
+              }}
+              transition={{
+                duration: reduceMotion ? 0 : 0.6,
+                ease: TWEEN_EASING,
+                y: reduceMotion
+                  ? { duration: 0 }
+                  : { repeat: Infinity, duration: 3.5, ease: 'easeInOut' },
+              }}
+            >
+              <CatalystMark
+                size={54}
+                priority
+                className="w-11 sm:w-13 h-auto drop-shadow-[0_4px_12px_rgba(201,54,43,0.25)]"
+              />
+            </motion.div>
+            <motion.img
+              src="/assets/catalyst_7_logo.png"
+              alt=""
+              className="w-28 sm:w-34 h-auto object-contain"
+              initial={{ opacity: reduceMotion ? 1 : 0, scale: reduceMotion ? 1 : 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: reduceMotion ? 0 : 0.5, delay: reduceMotion ? 0 : 0.1, ease: TWEEN_EASING }}
+            />
+          </div>
         </div>
         <p className="mt-8 font-['Montserrat',sans-serif] text-[10px] sm:text-[11px] font-bold tracking-[0.28em] text-[#736B63] uppercase leading-relaxed">
           Enter the experience

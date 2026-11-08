@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { CatalystMark } from "../brand/CatalystMark";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -37,7 +38,7 @@ const LOGOS = {
 const SCENE = {
   mist: "/assets/hero-section-assets/atmospheric-mist.webp",
   mountains: "/assets/hero-section-assets/background-mountains.webp",
-  foreground: "/assets/hero-section-assets/foreground-landscape.png",
+  foreground: "/assets/hero-section-assets/foreground-landscape.webp",
   torii: "/assets/hero-section-assets/torii-gate.webp",
   pagoda: "/assets/hero-section-assets/pagoda.webp",
   branch: "/assets/hero-section-assets/sakura-branch.webp",
@@ -46,7 +47,7 @@ const SCENE = {
 const INK = "#252321";
 const RED = "#C9362B";
 const RED_DEEP = "#A3261D";
-const DARK = "#1A1816";
+const DARK = "#000"; // pure black: the landscape fades into this
 const IVORY = "#F8F3E9";
 const DISPLAY = "'Zen Antique', 'Shippori Mincho', 'Noto Serif JP', serif";
 // Jansina is loaded from /public/fonts via @font-face in index.css; the rest is the fallback if it fails to load.
@@ -54,8 +55,6 @@ const JANSINA = "'Jansina', 'Zen Antique', 'Shippori Mincho', 'Noto Serif JP', s
 const BRUSH = "'Yuji Boku', 'Zen Antique', 'Noto Serif JP', serif";
 const BODY = "'Inter', system-ui, -apple-system, sans-serif";
 
-/** Height of the dark ground silhouette. Torii and pagoda are sunk into it so they stand on the ground. */
-const GROUND_H = "clamp(48px, 6vw, 96px)";
 
 const SEIGAIHA =
   "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='none' stroke='%23C9362B' stroke-width='1.4'%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3C/g%3E%3C/svg%3E\")";
@@ -113,41 +112,10 @@ const SakuraRule = ({ className = "" }: { className?: string }) => (
   </div>
 );
 
-/** Deterministic random */
-function rng(seed: number) {
-  let a = seed;
-  return () => {
-    a |= 0; a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-/** Rolling hill ridge (smooth curves). */
-const HILLS = "M0 120 L0 84 C140 60 280 98 430 80 S720 56 900 82 S1240 98 1440 72 L1440 120 Z";
-
-/** Row of tiered pine trees standing on `base`. */
-function pines(seed: number, base: number, minH: number, maxH: number, gap: number) {
-  const r = rng(seed);
-  let d = "";
-  for (let x = 10; x < 1440; x += gap * (0.8 + r() * 0.9)) {
-    const h = minH + r() * (maxH - minH);
-    const w = h * 0.5;
-    const tier = (apexY: number, halfW: number, baseY: number) => `M${x.toFixed(1)} ${apexY.toFixed(1)} L${(x - halfW).toFixed(1)} ${baseY.toFixed(1)} L${(x + halfW).toFixed(1)} ${baseY.toFixed(1)} Z `;
-    d += tier(base - h, w * 0.34, base - h * 0.5);
-    d += tier(base - h * 0.82, w * 0.44, base - h * 0.24);
-    d += tier(base - h * 0.52, w * 0.52, base);
-  }
-  return d;
-}
-
 const PETAL_X = [8, 22, 38, 56, 72, 88];
 
 export default function OutroFooter({ active = false }: { active?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
-  const backTrees = useMemo(() => pines(7, 92, 20, 40, 44), []);
-  const frontTrees = useMemo(() => pines(21, 112, 14, 28, 34), []);
   const year = new Date().getFullYear();
 
   useEffect(() => {
@@ -248,8 +216,11 @@ export default function OutroFooter({ active = false }: { active?: boolean }) {
         <div data-g="cols" className="grid gap-10 text-center md:grid-cols-[1.15fr_1.2fr_1fr] md:gap-0 md:text-left">
           {/* Brand */}
           <div data-g="col" className="flex flex-col items-center md:items-start md:pr-10">
-            <Link to="/" aria-label="Catalyst 7.0 home">
-              <Img src={LOGOS.catalyst} alt="Catalyst 7.0" className="h-auto w-[170px] object-contain sm:w-[200px]" />
+            <Link to="/" aria-label="Catalyst 7.0 home" className="group inline-flex items-center gap-3">
+              <div className="relative flex items-center justify-center rounded-2xl bg-white/80 p-1.5 shadow-[0_2px_10px_rgba(37,35,33,0.06)] border border-[#252321]/10 group-hover:border-[#C9362B]/30 transition-all duration-300">
+                <CatalystMark size={40} className="h-8 sm:h-10 w-auto" />
+              </div>
+              <Img src={LOGOS.catalyst} alt="Catalyst 7.0" className="h-auto w-[150px] object-contain sm:w-[180px] transition-transform duration-300 group-hover:scale-[1.02]" />
             </Link>
             <p style={{ margin: "14px 0 0", maxWidth: 300, fontSize: 15, lineHeight: 1.65, color: "#4A453F" }}>
               The Samurai&rsquo;s Journey, presented by AIESEC in SLIIT.
@@ -319,10 +290,10 @@ export default function OutroFooter({ active = false }: { active?: boolean }) {
         </div>
 
         {/* Torii and pagoda: bases sit behind the ground silhouette */}
-        <div data-g="torii" className="absolute left-[24%] w-[clamp(40px,5vw,84px)]" style={{ bottom: `calc(${GROUND_H} * 0.55)` }}>
+        <div data-g="torii" className="absolute left-[24%] w-[clamp(40px,5vw,84px)]" style={{ bottom: "10%" }}>
           <Img src={SCENE.torii} className="h-auto w-full" />
         </div>
-        <div data-g="pagoda" className="absolute right-[8%] w-[clamp(52px,6.6vw,116px)]" style={{ bottom: `calc(${GROUND_H} * 0.5)` }}>
+        <div data-g="pagoda" className="absolute right-[8%] w-[clamp(52px,6.6vw,116px)]" style={{ bottom: "9%" }}>
           <Img src={SCENE.pagoda} className="h-auto w-full" />
         </div>
 
@@ -334,18 +305,20 @@ export default function OutroFooter({ active = false }: { active?: boolean }) {
           ))}
         </div>
 
-        {/* Ground (drawn last so it covers the feet of the torii and pagoda) */}
-        <svg viewBox="0 0 1440 120" preserveAspectRatio="none" className="absolute inset-x-0 bottom-0 block w-full" style={{ height: GROUND_H }}>
-          <path d={HILLS} fill="#2A2622" />
-          <path d={backTrees} fill="#2A2622" />
-          <path d="M0 108 H1440 V120 H0 Z" fill={DARK} />
-          <path d={frontTrees} fill={DARK} />
-        </svg>
+        {/* Black fade: the landscape melts into solid black, and so do the feet of the torii and pagoda */}
+        <div
+          className="absolute inset-x-0 bottom-0"
+          style={{ height: "46%", background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.55) 45%, #000 88%)" }}
+        />
       </div>
 
       {/* Credits */}
-      <div style={{ background: DARK }}>
-        <div data-g="credits" className={`flex flex-col items-center justify-between gap-1 pb-7 pt-2 text-center sm:flex-row sm:text-left ${wrap}`}>
+      <div style={{ background: DARK, marginTop: -1 }}>
+        <div data-g="credits" className={`flex flex-col items-center justify-center gap-1.5 pb-7 pt-3 text-center ${wrap}`}>
+          <div className="flex items-center gap-2 mb-0.5 opacity-80">
+            <CatalystMark size={18} className="h-4 w-auto" />
+            <span style={{ fontSize: 11, color: "#E6DCC8", letterSpacing: "0.15em", fontWeight: 700 }}>CATALYST 7.0</span>
+          </div>
           <p style={{ margin: 0, fontSize: 14, color: "#E6DCC8", letterSpacing: "0.04em" }}>© {year} Catalyst 7.0 · AIESEC in SLIIT. All rights reserved.</p>
           <p style={{ margin: 0, fontFamily: BRUSH, fontSize: 18, color: "#E9B9A5", letterSpacing: "0.14em" }}>共に、先へ</p>
         </div>

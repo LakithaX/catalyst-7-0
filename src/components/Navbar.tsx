@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
+import { motion, useReducedMotion } from 'motion/react';
 import { MERCH_PRODUCTS } from '../data/merchProducts';
 import { useMerch } from '../context/MerchContext';
+import { CatalystMark } from './brand/CatalystMark';
 
 const LOGO_SRC = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/assets/catalyst_7_logo.png`;
 
@@ -17,13 +19,15 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const location = useLocation();
-  const { totalCartCount } = useMerch();
+  const { totalCartCount, openCart, isCartOpen } = useMerch();
+  const shouldReduceMotion = useReducedMotion();
+  const isCartActive = location.pathname.startsWith('/merch/cart') || isCartOpen;
 
   const isHome = location.pathname === '/' || location.pathname === '';
   const isAbout = location.pathname.startsWith('/about') || location.pathname.startsWith('/oc');
   const isRegister = location.pathname.startsWith('/register') || location.pathname.startsWith('/registration');
   const isGallery = location.pathname.startsWith('/gallery');
-  const isMerch = location.pathname.startsWith('/merch');
+  const isMerch = location.pathname.startsWith('/merch') && !location.pathname.startsWith('/merch/cart');
   const isGame = location.pathname.startsWith('/game');
   const isContact = location.pathname.startsWith('/contact');
 
@@ -39,9 +43,22 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
     };
   }, [mobileMenuOpen]);
 
+  // Close menus on Escape key press
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setMobileMenuOpen(false);
+        setMerchOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   // Close mobile menu on route change
   useEffect(() => {
     setMobileMenuOpen(false);
+    setIsVisible(true);
   }, [location.pathname]);
 
   // Intelligent scroll hide/reveal controller
@@ -106,44 +123,68 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
     setMobileMenuOpen(false);
     if (location.pathname === '/' || location.pathname === '') {
       e.preventDefault();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.dispatchEvent(new CustomEvent('catalyst:go-to-hero'));
     }
   };
 
-  const handleAboutClick = (e: React.MouseEvent) => {
-    setMobileMenuOpen(false);
-    if (location.pathname === '/' || location.pathname === '') {
-      const aboutEl = document.getElementById('about');
-      if (aboutEl) {
-        e.preventDefault();
-        aboutEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
-
-  const handleGalleryClick = (e: React.MouseEvent) => {
-    setMobileMenuOpen(false);
-    if (location.pathname === '/' || location.pathname === '') {
-      const galleryEl = document.getElementById('gallery');
-      if (galleryEl) {
-        e.preventDefault();
-        galleryEl.scrollIntoView({ behavior: 'smooth' });
-      }
-    }
-  };
 
   const handleContactClick = () => {
     setMobileMenuOpen(false);
   };
 
   // Logo pill rendered on cream pill with soft shadow and backdrop blur
+  const renderCartButton = (forHero: boolean) => (
+    <button
+      type="button"
+      onClick={openCart}
+      aria-label={totalCartCount === 0 ? 'Cart, empty' : `Cart, ${totalCartCount} items`}
+      title="Cart"
+      className={`relative min-w-[44px] min-h-[44px] w-11 h-11 flex items-center justify-center rounded-full transition-all duration-200 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2 ${
+        forHero
+          ? 'bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm'
+          : 'hover:bg-[#252321]/5 border border-[#252321]/10 bg-[#FAF6EE]/50'
+      } ${
+        isCartActive ? 'text-[#B51E23]' : 'text-[#0e1118] hover:text-[#B51E23]'
+      }`}
+    >
+      <ShoppingBag size={21} className="transition-transform duration-200 hover:scale-105" />
+      {totalCartCount > 0 && (
+        <motion.span
+          key={totalCartCount}
+          initial={shouldReduceMotion ? false : { scale: 0.6 }}
+          animate={{ scale: 1 }}
+          transition={{ duration: 0.2 }}
+          className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-[#B51E23] text-white text-[10px] font-bold font-sans rounded-full flex items-center justify-center border-2 border-white shadow-sm pointer-events-none"
+        >
+          {totalCartCount > 9 ? '9+' : totalCartCount}
+        </motion.span>
+      )}
+    </button>
+  );
+
+  const registerButton = (
+    <Link
+      to="/register"
+      className="transition-all duration-200 cursor-pointer whitespace-nowrap bg-[#B51E23] hover:bg-[#9E171C] text-white rounded-full px-4 py-2 text-xs sm:text-sm font-bold tracking-wider shadow-sm hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-100 flex items-center justify-center font-['Bison',sans-serif] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
+    >
+      REGISTER
+    </Link>
+  );
+
   const logoPill = (
     <Link
       to="/"
+      state={{ directToHero: true }}
       onClick={handleHomeClick}
-      className="flex items-center shrink-0 pointer-events-auto cursor-pointer group bg-[#FAF6EE]/90 rounded-full px-3 py-1.5 backdrop-blur-sm shadow-[0_2px_8px_rgba(37,35,33,0.08)] border border-[#252321]/10 hover:border-[#252321]/20 transition-all duration-300"
+      className="flex items-center gap-2 sm:gap-2.5 shrink-0 pointer-events-auto cursor-pointer group bg-[#FAF6EE]/90 rounded-full px-3 py-1.5 backdrop-blur-sm shadow-[0_2px_8px_rgba(37,35,33,0.08)] border border-[#252321]/10 hover:border-[#252321]/20 transition-all duration-300"
       title="Catalyst 7.0 - Home"
+      aria-label="Catalyst 7.0 home"
     >
+      <CatalystMark
+        size="sm"
+        priority
+        className="h-6 sm:h-8 md:h-10 w-auto transition-transform duration-300 group-hover:scale-105"
+      />
       <img
         src={LOGO_SRC}
         alt="Catalyst 7.0"
@@ -170,10 +211,13 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
           {logoPill}
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center gap-3 sm:gap-6 lg:gap-8 xl:gap-10 font-['Bison',sans-serif] text-sm md:text-base font-bold tracking-wider text-[#0e1118] pointer-events-auto uppercase shrink-0">
+          <div className="hidden lg:flex items-center gap-6 lg:gap-8 xl:gap-10 pointer-events-auto shrink-0">
+            <nav aria-label="Main" className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-['Bison',sans-serif] text-sm lg:text-base font-bold tracking-wider text-[#0e1118] uppercase shrink-0">
             <Link
               to="/"
+              state={{ directToHero: true }}
               onClick={handleHomeClick}
+              aria-current={isHome ? 'page' : undefined}
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isHome ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
@@ -182,7 +226,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             </Link>
             <Link
               to="/about"
-              onClick={handleAboutClick}
+              aria-current={isAbout ? 'page' : undefined}
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isAbout ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
@@ -190,14 +234,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               ABOUT
             </Link>
             <Link
-              to="/register"
-              className="transition-all cursor-pointer whitespace-nowrap bg-[#B51E23] hover:bg-[#9E171C] text-white rounded-full px-4 py-2 text-xs sm:text-sm font-bold tracking-wider shadow-sm hover:shadow-md hover:scale-105 active:scale-100 flex items-center justify-center"
-            >
-              REGISTER
-            </Link>
-            <Link
               to="/gallery"
-              onClick={handleGalleryClick}
+              aria-current={isGallery ? 'page' : undefined}
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isGallery ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
@@ -214,6 +252,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               <Link
                 to="/merch"
                 onClick={() => setMerchOpen(false)}
+                aria-current={isMerch ? 'page' : undefined}
                 className={`transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap py-1 ${
                   isMerch ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
@@ -280,6 +319,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
 
             <Link
               to="/game"
+              aria-current={isGame ? 'page' : undefined}
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isGame ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
@@ -289,6 +329,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             <Link
               to="/contact"
               onClick={handleContactClick}
+              aria-current={isContact ? 'page' : undefined}
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isContact ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
@@ -297,12 +338,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             </Link>
           </nav>
 
-          {/* Mobile Menu Button (< 768px) */}
-          <div className="flex md:hidden items-center pointer-events-auto">
+          {/* Actions group: Cart, then REGISTER */}
+          <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+            {renderCartButton(true)}
+            {registerButton}
+          </div>
+        </div>
+
+          {/* Mobile Actions (< 1024px) */}
+          <div className="flex lg:hidden items-center gap-2 pointer-events-auto">
+            {renderCartButton(true)}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-              className="w-10 h-10 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer"
+              className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
             >
               {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -320,11 +369,14 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             {logoPill}
 
             {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-3 sm:gap-6 lg:gap-8 xl:gap-10 font-['Bison',sans-serif] text-sm md:text-base font-bold tracking-wider text-[#0e1118] pointer-events-auto uppercase shrink-0">
+            <div className="hidden lg:flex items-center gap-6 lg:gap-8 xl:gap-10 pointer-events-auto shrink-0">
+            <nav aria-label="Main" className="flex items-center gap-4 lg:gap-6 xl:gap-8 font-['Bison',sans-serif] text-sm lg:text-base font-bold tracking-wider text-[#0e1118] uppercase shrink-0">
               <Link
                 to="/"
+                state={{ directToHero: true }}
                 onClick={handleHomeClick}
-                className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                aria-current={isHome ? 'page' : undefined}
+              className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isHome ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
               >
@@ -332,7 +384,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               </Link>
               <Link
                 to="/about"
-                onClick={handleAboutClick}
+                aria-current={isAbout ? 'page' : undefined}
                 className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isAbout ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
@@ -340,14 +392,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 ABOUT
               </Link>
               <Link
-                to="/register"
-                className="transition-all cursor-pointer whitespace-nowrap bg-[#B51E23] hover:bg-[#9E171C] text-white rounded-full px-4 py-2 text-xs sm:text-sm font-bold tracking-wider shadow-sm hover:shadow-md hover:scale-105 active:scale-100 flex items-center justify-center"
-              >
-                REGISTER
-              </Link>
-              <Link
                 to="/gallery"
-                onClick={handleGalleryClick}
+                aria-current={isGallery ? 'page' : undefined}
                 className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isGallery ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
@@ -364,7 +410,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 <Link
                   to="/merch"
                   onClick={() => setMerchOpen(false)}
-                  className={`transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap py-1 ${
+                  aria-current={isMerch ? 'page' : undefined}
+                className={`transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap py-1 ${
                     isMerch ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                   }`}
                 >
@@ -430,7 +477,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
 
               <Link
                 to="/game"
-                className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                aria-current={isGame ? 'page' : undefined}
+              className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isGame ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
               >
@@ -439,7 +487,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               <Link
                 to="/contact"
                 onClick={handleContactClick}
-                className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                aria-current={isContact ? 'page' : undefined}
+              className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isContact ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
               >
@@ -447,12 +496,20 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               </Link>
             </nav>
 
-            {/* Mobile Menu Button (< 768px) */}
-            <div className="flex md:hidden items-center pointer-events-auto">
+            {/* Actions group: Cart, then REGISTER */}
+            <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+              {renderCartButton(false)}
+              {registerButton}
+            </div>
+          </div>
+
+            {/* Mobile Actions (< 1024px) */}
+            <div className="flex lg:hidden items-center gap-2 pointer-events-auto">
+              {renderCartButton(false)}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 aria-label={mobileMenuOpen ? 'Close Menu' : 'Open Menu'}
-                className="w-10 h-10 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer"
+                className="min-w-[44px] min-h-[44px] w-11 h-11 rounded-full bg-[#FAF6EE]/90 border border-[#252321]/10 shadow-[0_2px_8px_rgba(37,35,33,0.08)] backdrop-blur-sm flex items-center justify-center text-[#0e1118] hover:text-[#B51E23] transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#B51E23] focus-visible:ring-offset-2"
               >
                 {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
@@ -463,7 +520,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
 
       {/* Mobile Drawer / Overlay Menu */}
       {mobileMenuOpen && (
-        <div className="fixed inset-0 z-[100] md:hidden flex flex-col bg-[#F8F3E9] text-[#252321] select-none animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] lg:hidden flex flex-col bg-[#F8F3E9] text-[#252321] select-none animate-in fade-in duration-200">
           {/* Header of mobile drawer */}
           <div className="w-full px-4 py-4 flex items-center justify-between border-b border-[#252321]/10">
             {logoPill}
@@ -481,6 +538,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             <nav className="flex flex-col gap-2 font-['Bison',sans-serif] text-2xl font-bold tracking-wider text-[#0e1118] uppercase">
               <Link
                 to="/"
+                state={{ directToHero: true }}
                 onClick={handleHomeClick}
                 className={`py-3 px-4 rounded-xl transition-all ${
                   isHome ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5'
@@ -490,7 +548,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               </Link>
               <Link
                 to="/about"
-                onClick={handleAboutClick}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`py-3 px-4 rounded-xl transition-all ${
                   isAbout ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5'
                 }`}
@@ -499,7 +557,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               </Link>
               <Link
                 to="/gallery"
-                onClick={handleGalleryClick}
+                onClick={() => setMobileMenuOpen(false)}
                 className={`py-3 px-4 rounded-xl transition-all ${
                   isGallery ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5'
                 }`}

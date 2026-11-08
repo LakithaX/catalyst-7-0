@@ -1,7 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
+import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
+import { getSS, setSS, delSS, isFreshHomeReload, markHomeBootHandled } from '../utils/navState';
 import { SakuraPetals } from '../components/SakuraPetals';
-import { BackgroundMusic } from '../components/BackgroundMusic';
+
 import { EntryGate } from '../components/EntryGate';
 import { JapaneseParallaxHero } from '../components/JapaneseParallaxHero';
 import AnimatedGalleryDemo from '../components/ui/animated-gallery-demo';
@@ -52,14 +54,14 @@ const SUN_MAX = 3;
 
 // Everything the entrance needs. Preloaded so the intro never pops in layer by layer.
 const ENTRANCE_ASSETS = [
-  '/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.png',
-  '/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.png',
-  '/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.png',
-  '/assets/aistudio/Asset_5_clean.png',
-  '/assets/aistudio/Asset_3_clean.png',
-  '/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.png',
-  '/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.png',
-  '/assets/aistudio/Asset_10_clean.png',
+  '/assets/aistudio/Asset_1___Sky__Atmosphere_4f43e559.webp',
+  '/assets/aistudio/Asset_2___Mt._Fuji__Distant_Peaks_d9588285.webp',
+  '/assets/aistudio/Asset_4___Hill_Left__Shoreline__604a9863.webp',
+  '/assets/aistudio/Asset_5_clean.webp',
+  '/assets/aistudio/Asset_3_clean.webp',
+  '/assets/aistudio/Asset_6___Torii_Back_Pillars_a1056345.webp',
+  '/assets/aistudio/Asset_7___Torii_Main_Gate_f6440592.webp',
+  '/assets/aistudio/Asset_10_clean.webp',
 ];
 
 // true after the visitor clicked "Enter" once in this page load (resets on refresh, so the gate + music restart)
@@ -74,19 +76,40 @@ const easeInOutSine = (t: number) => 0.5 - 0.5 * Math.cos(Math.PI * t);
 const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 export default function HomePage() {
+  const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
   const reduceMotionRef = useRef<boolean>(false);
   reduceMotionRef.current = !!shouldReduceMotion;
 
   const isMobileRef = useRef<boolean>(false);
 
+  // Browser refresh while on the home page = start the whole entrance again (gate, EXPERIENCE, music).
+  const freshReload = isFreshHomeReload();
+  if (freshReload) {
+    delSS('catalyst7_intro_done');
+    delSS('catalyst7_hero_locked');
+    entryGateDismissed = false;
+  }
+  useEffect(() => {
+    markHomeBootHandled();
+  }, []);
+
+  const introDone = getSS('catalyst7_intro_done') === '1';
+  const heroLocked = getSS('catalyst7_hero_locked') === '1';
+
+  const shouldStartAtHero = (!freshReload && Boolean(location.state?.directToHero)) || heroLocked;
+  if (shouldStartAtHero || introDone) {
+    entryGateDismissed = true;
+  }
+
   // "Enter" screen: its click is the user gesture that lets the music start, and it starts the intro
-  const [gateOpen, setGateOpen] = useState<boolean>(entryGateDismissed);
-  const gateOpenRef = useRef<boolean>(entryGateDismissed);
+  const [gateOpen, setGateOpen] = useState<boolean>(() => shouldStartAtHero || introDone || entryGateDismissed);
+  const gateOpenRef = useRef<boolean>(gateOpen);
   const handleEnter = useCallback(() => {
     entryGateDismissed = true;
     gateOpenRef.current = true;
     setGateOpen(true);
+    setSS('catalyst7_intro_done', '1');
   }, []);
 
   // Keep the page from scrolling while the gate is showing
@@ -103,8 +126,8 @@ export default function HomePage() {
 
   // The ONLY React state the entrance needs. Everything per-frame lives in refs + direct DOM writes,
   // so scrolling / moving the mouse never re-renders the page (and the heavy sections behind the curtain).
-  const [isLockedToHero, setIsLockedToHero] = useState<boolean>(false);
-  const isLockedToHeroRef = useRef<boolean>(false);
+  const [isLockedToHero, setIsLockedToHero] = useState<boolean>(() => shouldStartAtHero);
+  const isLockedToHeroRef = useRef<boolean>(isLockedToHero);
 
   // Mouse wind velocity for the petals (read by the canvas loop directly)
   const mouseVelRef = useRef<number>(0);
@@ -222,7 +245,27 @@ export default function HomePage() {
     isLockedToHeroRef.current = true;
     cancelAutoScroll();
     setIsLockedToHero(true);
+    setSS('catalyst7_intro_done', '1');
+    setSS('catalyst7_hero_locked', '1');
   }, [cancelAutoScroll]);
+
+  // Handle direct click on HOME from the navbar when already on the home page
+  useEffect(() => {
+    const handleGoToHero = () => {
+      entryGateDismissed = true;
+      gateOpenRef.current = true;
+      setGateOpen(true);
+      setSS('catalyst7_intro_done', '1');
+      setSS('catalyst7_hero_locked', '1');
+      if (!isLockedToHeroRef.current) {
+        lockToSection2();
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    window.addEventListener('catalyst:go-to-hero', handleGoToHero);
+    return () => window.removeEventListener('catalyst:go-to-hero', handleGoToHero);
+  }, [lockToSection2]);
 
   useLayoutEffect(() => {
     if (!isLockedToHero) return;
@@ -233,6 +276,7 @@ export default function HomePage() {
   // Recalculate GSAP ScrollTrigger coordinates once Section 2 becomes normal flow.
   useEffect(() => {
     if (isLockedToHero) {
+      window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
       const refreshTriggers = () => ScrollTrigger.refresh(true);
       const t1 = setTimeout(refreshTriggers, 100);
       const t2 = setTimeout(refreshTriggers, 500);
@@ -646,8 +690,8 @@ export default function HomePage() {
   return (
     <div className="relative bg-[#F8F3E9]">
       <JapaneseCursor />
-      {/* Background music: starts from 0:00 on every load, loops forever, has a mute button */}
-      <BackgroundMusic src="/audio/background-music.mp3" volume={0.45} />
+
+
 
       {/* Enter screen: one click starts the music + the intro */}
       <EntryGate visible={!gateOpen} onEnter={handleEnter} />

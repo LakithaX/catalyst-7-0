@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800;900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Noto+Sans+JP:wght@500;700&family=Noto+Serif+JP:wght@700&family=Shippori+Mincho:wght@700;800&family=Yuji+Boku&family=Zen+Antique&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800;900&family=Playfair+Display:ital,wght@1,700;1,800&family=Yuji+Boku&family=Zen+Kaku+Gothic+New:wght@500;700&family=Noto+Sans+JP:wght@500;700&family=Noto+Serif+JP:wght@700&display=swap');
 
 @font-face {
   font-family: 'Osaka Bright';
@@ -77,13 +76,19 @@
 }
 
 :root {
-  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  /* ===== SITE FONTS: change the whole look by editing these 4 lines ===== */
+  --font-display: 'Cinzel', 'Noto Serif JP', serif;                          /* big titles: Trajan-style caps */
+  --font-accent:  'Playfair Display', 'Yuji Boku', 'Noto Serif JP', serif;      /* gold italic accents (kanji falls back to Yuji Boku) */
+  --font-label:   'Cinzel', 'Noto Serif JP', serif;                            /* buttons, small caps labels */
+  --font-body:    'Zen Kaku Gothic New', 'Noto Sans JP', sans-serif;            /* paragraphs */
+  --font-sans: var(--font-body);
 
   /* Entrance typography: change a font by editing ONE line here */
-  --entrance-font-title: 'Jansina', 'Shinkansen', sans-serif;                  /* EXPERIENCE */
-  --entrance-font-accent: 'Jansina', 'Shinkansen', sans-serif;                 /* the gold "in" */
-  --entrance-font-org: 'Jansina', 'Shinkansen', sans-serif;                    /* AIESEC in SLIIT */
-  --entrance-font-small: 'Jansina', 'Shinkansen', 'Montserrat', sans-serif;    /* PRESENTS + scroll cue */
+  --entrance-font-title: var(--font-display);
+  --entrance-font-accent: var(--font-accent);
+  --entrance-font-org: var(--font-display);
+  --entrance-font-small: var(--font-label);
+  --metal-ivory: linear-gradient(180deg, #fffaf0 0%, #f4e8d0 48%, #cdb48a 100%);
   --entrance-font-kanji: 'Yuji Boku', 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', 'MS PMincho', serif; /* 体験 */
   --entrance-ivory: #fff3dc;
   --entrance-gold: #f6c768;
@@ -127,8 +132,9 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: #0b1a20;
-  font-family: 'Droid Serif', Georgia, serif;
+  font-family: var(--font-body);
   overflow-x: clip;
+  font-synthesis: none; /* never fake-bold single-weight fonts */
 }
 
 /* Native scroll must remain instant — scroll-behavior:smooth conflicts with GSAP.
@@ -866,21 +872,21 @@ html, body {
 .title-experience {
   font-family: var(--entrance-font-title);
   font-size: clamp(2.4rem, 10.5vw, 7rem);
-  font-weight: 400;
+  font-weight: 700;
   font-synthesis: none;
-  letter-spacing: 0.05em;
-  padding-left: 0.05em; /* optically re-centres tracked caps */
+  letter-spacing: 0.06em;
+  padding-left: 0.06em; /* optically re-centres tracked caps */
   line-height: 1;
   text-transform: uppercase;
-  color: #fff6e2;
-  text-shadow:
-    -1.5px 0 0 var(--entrance-outline), 1.5px 0 0 var(--entrance-outline),
-    0 -1.5px 0 var(--entrance-outline), 0 1.5px 0 var(--entrance-outline),
-    -1px -1px 0 var(--entrance-outline), 1px -1px 0 var(--entrance-outline),
-    -1px 1px 0 var(--entrance-outline), 1px 1px 0 var(--entrance-outline),
-    0 5px 0 rgba(120, 20, 24, 0.55),
-    0 14px 30px rgba(10, 2, 6, 0.7),
-    0 0 46px rgba(246, 199, 104, 0.4);
+  color: transparent;
+  background: var(--metal-ivory);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 2px 0 rgba(60, 8, 12, 0.75))
+    drop-shadow(0 12px 22px rgba(10, 2, 6, 0.65))
+    drop-shadow(0 0 34px rgba(246, 199, 104, 0.22));
 }
 
 .title-kanji,
@@ -914,44 +920,43 @@ html, body {
 .title-org {
   font-family: var(--entrance-font-org);
   font-size: clamp(1.9rem, 7.2vw, 5rem);
-  font-weight: 400;
+  font-weight: 700;
   font-synthesis: none;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
   line-height: 1;
   white-space: nowrap;
   text-transform: uppercase;
-  color: #ffffff;
-  text-shadow:
-    -1.5px 0 0 var(--entrance-outline), 1.5px 0 0 var(--entrance-outline),
-    0 -1.5px 0 var(--entrance-outline), 0 1.5px 0 var(--entrance-outline),
-    -1px -1px 0 var(--entrance-outline), 1px -1px 0 var(--entrance-outline),
-    -1px 1px 0 var(--entrance-outline), 1px 1px 0 var(--entrance-outline),
-    0 5px 0 rgba(120, 20, 24, 0.5),
-    0 14px 30px rgba(10, 2, 6, 0.7),
-    0 0 54px rgba(239, 68, 68, 0.45);
+  color: transparent;
+  background: var(--metal-ivory);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter:
+    drop-shadow(0 2px 0 rgba(60, 8, 12, 0.75))
+    drop-shadow(0 12px 22px rgba(10, 2, 6, 0.65))
+    drop-shadow(0 0 34px rgba(246, 199, 104, 0.22));
 }
 .title-org-in {
   font-family: var(--entrance-font-accent);
-  font-style: normal;
-  font-weight: 400;
+  font-style: italic;
+  font-weight: 800;
   text-transform: none;
-  font-size: 1.3em;
+  font-size: 0.85em;
   line-height: 0;
   letter-spacing: 0.02em;
   margin: 0 0.15em;
   position: relative;
   top: 0.05em;
-  color: var(--entrance-gold);
-  text-shadow:
-    -1.5px 0 0 var(--entrance-outline), 1.5px 0 0 var(--entrance-outline),
-    0 -1.5px 0 var(--entrance-outline), 0 1.5px 0 var(--entrance-outline),
-    0 5px 16px rgba(10, 2, 6, 0.75),
-    0 0 30px rgba(246, 199, 104, 0.55);
+  background: none;
+  -webkit-text-fill-color: #f2c25c;
+  color: #f2c25c;
+  text-shadow: 0 0 22px rgba(246, 199, 104, 0.55);
+  padding: 0 0.1em;
 }
 
 .presents-line b {
   font-family: var(--entrance-font-small);
-  font-weight: 400;
+  font-weight: 600;
   font-synthesis: none;
   font-size: clamp(0.8rem, 2vw, 1.2rem);
   letter-spacing: 0.45em;
@@ -985,7 +990,7 @@ html, body {
 .scroll-cue-label {
   font-family: var(--entrance-font-small);
   font-size: 0.8rem;
-  font-weight: 400;
+  font-weight: 700;
   font-synthesis: none;
   letter-spacing: 0.34em;
   padding-left: 0.34em;

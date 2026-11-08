@@ -1,6 +1,8 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { TagMark } from '../components/brand/CatalystTag';
+import { useParams, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { gsap } from 'gsap';
 import {
   Heart,
   ArrowLeft,
@@ -20,11 +22,17 @@ import Navbar from '../components/Navbar';
 import { CartDrawer } from '../components/merch/CartDrawer';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
+import { MerchCartButton } from '../components/merch/MerchCartButton';
 import { MerchProductCard } from '../components/merch/MerchProductCard';
+import { scrollTopOrRestore } from '../utils/navState';
+import { NavCartButton } from '../components/merch/NavCartButton';
+import { useMerchMotion } from '../hooks/useMerchMotion';
+import { WaveDivider, Chars, Ill, SectionTag, SEIGAIHA, KANJI_FONT } from '../components/merch/MerchDecor';
+
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 export const ProductDetailPage: React.FC = () => {
   const { productId } = useParams<{ productId: string }>();
-  const navigate = useNavigate();
   const { addToCart, isWishlisted, toggleWishlist, openCart } = useMerch();
 
   const product: MerchProduct | undefined = productId ? getProductById(productId) : undefined;
@@ -35,6 +43,11 @@ export const ProductDetailPage: React.FC = () => {
   const [sizeError, setSizeError] = useState(false);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const [isClaimedEffect, setIsClaimedEffect] = useState(false);
+  const [showBar, setShowBar] = useState(false);
+
+  const pageRef = useRef<HTMLDivElement>(null);
+  const ctaRef = useRef<HTMLDivElement>(null);
+  const sizeRef = useRef<HTMLDivElement>(null);
 
   // Reset states when product changes
   useEffect(() => {
@@ -46,7 +59,7 @@ export const ProductDetailPage: React.FC = () => {
     } else {
       setSelectedSize(undefined);
     }
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    scrollTopOrRestore();
 
     if (product) {
       document.title = `${product.name} — ${product.variant} | Catalyst 7.0 Merch`;
@@ -77,20 +90,39 @@ export const ProductDetailPage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextImage, prevImage, isLightboxOpen]);
 
+  // mobile sticky add-to-cart bar: shows once the main button has scrolled off the top
+  useEffect(() => {
+    const el = ctaRef.current;
+    if (!el || typeof IntersectionObserver === 'undefined') return;
+    const io = new IntersectionObserver(
+      ([entry]) => setShowBar(!entry.isIntersecting && entry.boundingClientRect.top < 0),
+      { threshold: 0 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [productId]);
+
+  // scroll effects, tilt, magnetic buttons, letter drop-in (re-armed when the product changes)
+  useMerchMotion(pageRef, [productId]);
+
   if (!product) {
     return (
-      <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col">
+      <div className="flex min-h-screen flex-col bg-[#F8F3E9] text-[#252321]">
         <Navbar />
-        <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-          <h2 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-4xl text-[#252321] mb-4">
+        <div className="relative flex flex-1 flex-col items-center justify-center overflow-hidden p-6 text-center">
+          <Ill
+            src="/assets/illustrations/alessandro_hrdz-mask-6976331.png"
+            className="mb-6 w-28 drop-shadow-[0_10px_20px_rgba(201,54,43,0.25)]"
+          />
+          <h2 className="brush-heading mb-4 font-['Jansina','Bison',sans-serif] text-4xl text-[#252321]">
             PIECE NOT FOUND
           </h2>
-          <p className="font-['Droid_Serif',Georgia,serif] italic text-[#736B63] mb-8">
+          <p className="mb-8 max-w-md font-['Droid_Serif',Georgia,serif] italic text-[#736B63]">
             The merchandise item you are looking for does not exist in the Catalyst 7.0 archive.
           </p>
           <Link
             to="/merch"
-            className="py-3 px-6 rounded-full bg-[#C9362B] text-white font-['Montserrat',sans-serif] font-bold text-xs tracking-widest uppercase hover:bg-[#9E171C] transition-colors"
+            className="rounded-full bg-[#C9362B] px-7 py-3 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-widest text-white transition-colors hover:bg-[#9E171C]"
           >
             Back to Collection
           </Link>
@@ -102,9 +134,14 @@ export const ProductDetailPage: React.FC = () => {
   const wishlisted = isWishlisted(product.id);
   const requiresSize = Boolean(product.options?.sizes && product.options.sizes.length > 1);
 
-  const handleClaim = () => {
+  const handleAddToCart = () => {
     if (requiresSize && !selectedSize) {
       setSizeError(true);
+      const box = sizeRef.current;
+      if (box) {
+        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        gsap.fromTo(box, { x: -12 }, { x: 0, duration: 0.7, ease: 'elastic.out(1, 0.3)' });
+      }
       return;
     }
 
@@ -119,63 +156,91 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col selection:bg-[#C9362B] selection:text-white">
+    <div
+      ref={pageRef}
+      className="relative flex min-h-screen flex-col overflow-x-clip bg-[#F8F3E9] text-[#252321] selection:bg-[#C9362B] selection:text-white"
+    >
+      {/* scroll progress thread */}
+      <div
+        data-progress
+        aria-hidden="true"
+        className="fixed left-0 top-0 z-[80] h-[3px] w-full origin-left bg-gradient-to-r from-[#F6C768] via-[#C9362B] to-[#8C0B26] motion-reduce:hidden"
+      />
+
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
-        {/* Sleek Inline Breadcrumb & Collection Return */}
-        <div className="flex items-center justify-between gap-4 pb-4 mb-6 border-b border-[#252321]/10 text-xs font-['Montserrat',sans-serif]">
-          <div className="flex min-w-0 items-center gap-2 text-[11px] tracking-wider uppercase font-semibold">
-            <Link to="/" className="hidden sm:inline text-[#736B63] hover:text-[#252321] transition-colors">
+      <main className="relative z-10 mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 sm:py-10 lg:px-8">
+        {/* Breadcrumb & Collection Return */}
+        <div
+          data-reveal="fade"
+          className="mb-6 flex items-center justify-between gap-4 border-b border-[#252321]/15 pb-4 font-['Montserrat',sans-serif] text-xs"
+        >
+          <div className="flex min-w-0 items-center gap-2 text-[11px] font-semibold uppercase tracking-wider">
+            <Link to="/" state={{ directToHero: true }} className="hidden text-[#736B63] transition-colors hover:text-[#252321] sm:inline">
               HOME
             </Link>
-            <span className="hidden sm:inline text-[#252321]/20">/</span>
-            <Link to="/merch" className="hidden sm:inline text-[#736B63] hover:text-[#252321] transition-colors">
+            <span className="hidden text-[#252321]/25 sm:inline">/</span>
+            <Link to="/merch" className="hidden text-[#736B63] transition-colors hover:text-[#252321] sm:inline">
               COLLECTION
             </Link>
-            <span className="hidden sm:inline text-[#252321]/20">/</span>
-            <span className="text-[#C9362B] font-bold whitespace-nowrap">{product.category}</span>
+            <span className="hidden text-[#252321]/25 sm:inline">/</span>
+            <span className="whitespace-nowrap font-bold text-[#C9362B]">{product.category}</span>
           </div>
 
+          <div className="flex shrink-0 items-center gap-2">
           <Link
             to="/merch"
-            className="inline-flex shrink-0 items-center gap-1.5 text-[11px] font-bold tracking-widest uppercase whitespace-nowrap text-[#736B63] hover:text-[#C9362B] transition-colors"
+            className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap text-[11px] font-bold uppercase tracking-widest text-[#736B63] transition-colors hover:text-[#C9362B]"
           >
             <ArrowLeft size={13} />
             <span>ALL PIECES (9)</span>
           </Link>
+          <NavCartButton />
+          </div>
         </div>
 
         {/* ── SHOWROOM COMPOSITION ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-          {/* ================================================================
-              LEFT PANEL: DOMINANT PRODUCT PHOTOGRAPHY & IMAGE NAVIGATION
-              ================================================================ */}
-          <div className="lg:col-span-7 flex flex-col items-center">
-            {/* Main Stage Card */}
-            <div className="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] max-h-[640px] rounded-2xl bg-white border border-[#E5DDD0] overflow-hidden shadow-[0_15px_40px_rgba(37,35,33,0.08)] flex items-center justify-center p-8 group">
-              {/* Giant Subtle Background Watermark & Bonsai Tree */}
-              <div className="absolute inset-0 flex items-center justify-center opacity-[0.035] pointer-events-none select-none">
-                <img
-                  src="/assets/illustrations/gdj-bonsai-tree-8143900.svg"
-                  alt=""
-                  className="w-3/5 h-auto object-contain filter grayscale"
-                />
-              </div>
-
-              {/* Radial Studio Spotlight */}
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-12 lg:gap-12">
+          {/* ================= LEFT: STAGE ================= */}
+          <div className="flex flex-col items-center lg:col-span-7">
+            <div className="group relative aspect-[4/5] max-h-[680px] w-full overflow-hidden rounded-3xl border border-[#252321]/15 bg-[#FFFAF3] shadow-[0_24px_60px_rgba(120,30,30,0.14)] sm:aspect-square md:aspect-[4/5]">
+              {/* wave pattern */}
               <div
-                className="absolute inset-0 pointer-events-none"
+                aria-hidden="true"
+                className="absolute inset-0 opacity-70"
+                style={{ backgroundImage: SEIGAIHA, backgroundSize: '56px 28px' }}
+              />
+              {/* soft vignette so the product reads clearly */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-0"
                 style={{
                   background:
-                    'radial-gradient(circle at 50% 40%, rgba(201, 54, 43, 0.05) 0%, rgba(248, 243, 233, 0.6) 60%, transparent 100%)',
+                    'radial-gradient(circle at 50% 46%, rgba(255,250,243,0) 0%, rgba(255,250,243,0.55) 72%, rgba(255,250,243,0.85) 100%)',
                 }}
               />
 
-              {/* Top Watermark Tag */}
-              <div className="absolute top-6 left-6 z-20 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-[#C9362B]" />
-                <span className="font-['Montserrat',sans-serif] text-[10px] tracking-[0.3em] uppercase text-[#C9362B] font-bold">
+              {/* giant kanji, drifts while scrolling */}
+              <span
+                data-parallax="0.1"
+                aria-hidden="true"
+                className="pointer-events-none absolute -right-6 top-6 select-none text-[20rem] font-black leading-none text-[#C9362B]/[0.07]"
+                style={{ fontFamily: KANJI_FONT }}
+              >
+                侍
+              </span>
+
+              {/* the rising sun behind the product */}
+              <div data-reveal="scale" aria-hidden="true" className="absolute left-[14%] top-[10%] aspect-square w-[72%]">
+                <div className="h-full w-full rounded-full bg-[radial-gradient(circle_at_38%_30%,#ee4a38,#cf2519_55%,#a81810)] shadow-[0_24px_60px_rgba(168,24,16,0.35)]" />
+                <div className="animate-spin-very-slow absolute -inset-[7%] rounded-full border border-dashed border-[#C9362B]/50" />
+                <div className="absolute -inset-[14%] rounded-full border border-[#C9362B]/20" />
+              </div>
+
+              {/* tag */}
+              <div className="absolute left-6 top-6 z-20 flex items-center gap-2">
+                <TagMark />
+                <span className="font-['Montserrat',sans-serif] text-[10px] font-bold uppercase tracking-[0.3em] text-[#C9362B]">
                   CATALYST 7.0 ARCHIVE
                 </span>
               </div>
@@ -183,36 +248,44 @@ export const ProductDetailPage: React.FC = () => {
               {/* Zoom Lightbox Trigger */}
               <button
                 onClick={() => setIsLightboxOpen(true)}
-                className="absolute top-5 right-5 z-20 p-2.5 rounded-full bg-white/90 border border-[#E5DDD0] hover:border-[#C9362B] text-[#736B63] hover:text-[#C9362B] shadow-xs transition-all cursor-pointer"
+                className="absolute right-5 top-5 z-20 cursor-pointer rounded-full border border-[#E5DDD0] bg-white/90 p-2.5 text-[#736B63] shadow-xs transition-all hover:border-[#C9362B] hover:text-[#C9362B]"
                 title="Expand Fullscreen View"
+                aria-label="Expand fullscreen view"
               >
                 <Maximize2 size={16} />
               </button>
 
-              {/* The Dominant Cutout Product Image with Smooth Transition */}
-              <div className="relative z-10 w-full h-full flex items-center justify-center">
+              {/* Product with mouse tilt */}
+              <div data-tilt className="absolute inset-0 z-10 flex items-center justify-center p-8">
                 <AnimatePresence mode="wait">
                   <motion.img
                     key={activeImageIndex}
                     src={images[activeImageIndex]}
                     alt={`${product.name} - View ${activeImageIndex + 1}`}
-                    initial={{ opacity: 0, scale: 0.94 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.94 }}
-                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-                    className="max-w-[85%] max-h-[85%] object-contain filter drop-shadow-[0_15px_30px_rgba(37,35,33,0.15)] select-none cursor-zoom-in"
+                    initial={{ opacity: 0, scale: 0.92, rotate: -2 }}
+                    animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                    exit={{ opacity: 0, scale: 0.92, rotate: 2 }}
+                    transition={{ duration: 0.4, ease: EASE }}
+                    className="max-h-[86%] max-w-[86%] cursor-zoom-in select-none object-contain drop-shadow-[0_22px_34px_rgba(60,0,10,0.35)]"
                     onClick={() => setIsLightboxOpen(true)}
                   />
                 </AnimatePresence>
               </div>
 
-              {/* Left / Right Gallery Navigation Controls */}
+              {/* swimming koi */}
+              <Ill
+                data-float="14"
+                src="/assets/illustrations/kacsoeszti-koi-1184783_1920.png"
+                className="absolute bottom-8 left-4 z-[5] w-20 opacity-90 sm:w-28"
+              />
+
+              {/* Gallery Navigation */}
               {hasMultipleImages && (
                 <>
                   <button
                     onClick={prevImage}
                     aria-label="Previous product view"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#E5DDD0] hover:border-[#C9362B] text-[#252321] flex items-center justify-center backdrop-blur-sm shadow-md hover:scale-105 transition-all cursor-pointer"
+                    className="absolute left-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E5DDD0] bg-white text-[#252321] shadow-md backdrop-blur-sm transition-all hover:scale-105 hover:border-[#C9362B]"
                   >
                     <ChevronLeft size={20} />
                   </button>
@@ -220,118 +293,129 @@ export const ProductDetailPage: React.FC = () => {
                   <button
                     onClick={nextImage}
                     aria-label="Next product view"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-white border border-[#E5DDD0] hover:border-[#C9362B] text-[#252321] flex items-center justify-center backdrop-blur-sm shadow-md hover:scale-105 transition-all cursor-pointer"
+                    className="absolute right-4 top-1/2 z-20 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#E5DDD0] bg-white text-[#252321] shadow-md backdrop-blur-sm transition-all hover:scale-105 hover:border-[#C9362B]"
                   >
                     <ChevronRight size={20} />
                   </button>
+
+                  <div className="absolute bottom-6 left-1/2 z-20 -translate-x-1/2 rounded-full border border-[#E5DDD0] bg-white/95 px-3.5 py-1 font-['Montserrat',sans-serif] text-[10px] font-bold uppercase tracking-widest text-[#C9362B] shadow-xs">
+                    {activeImageIndex === 0 ? 'FRONT VIEW' : 'BUSHIDO BACK ARTWORK'}
+                  </div>
                 </>
               )}
 
-              {/* View Indicator Label */}
-              {hasMultipleImages && (
-                <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/95 border border-[#E5DDD0] shadow-xs text-[10px] font-['Montserrat',sans-serif] tracking-widest text-[#C9362B] font-bold uppercase">
-                  {activeImageIndex === 0 ? 'FRONT VIEW' : 'BUSHIDO BACK ARTWORK'}
-                </div>
-              )}
+              {/* wave edge along the bottom */}
+              <div
+                aria-hidden="true"
+                className="absolute inset-x-0 bottom-0 z-[6] h-5 opacity-80"
+                style={{ backgroundImage: SEIGAIHA, backgroundSize: '40px 20px', backgroundRepeat: 'repeat-x' }}
+              />
             </div>
 
-            {/* Thumbnail Navigation Row */}
+            {/* Thumbnails */}
             {hasMultipleImages && (
-              <div className="flex items-center gap-3 mt-4">
+              <div className="mt-4 flex items-center gap-3">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`relative w-16 h-16 rounded-xl bg-white border overflow-hidden p-1.5 transition-all cursor-pointer ${
+                    aria-label={`Show view ${idx + 1}`}
+                    className={`relative h-16 w-16 cursor-pointer overflow-hidden rounded-xl border bg-white p-1.5 transition-all ${
                       activeImageIndex === idx
-                        ? 'border-[#C9362B] ring-2 ring-[#C9362B]/30 shadow-sm'
-                        : 'border-[#E5DDD0] hover:border-[#C9362B]/50 opacity-80 hover:opacity-100'
+                        ? 'border-[#C9362B] shadow-sm ring-2 ring-[#C9362B]/30'
+                        : 'border-[#E5DDD0] opacity-80 hover:border-[#C9362B]/50 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-contain" />
+                    <img src={img} alt="" className="h-full w-full object-contain" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* ================================================================
-              RIGHT PANEL: EDITORIAL PRODUCT INFORMATION & CONTROLS
-              ================================================================ */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-6">
-            <div>
-              {/* Category & Collection Eyebrow */}
-              <div className="flex items-center gap-2 mb-5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B]" />
-                <span className="font-['Montserrat',sans-serif] text-xs tracking-[0.25em] text-[#C9362B] uppercase font-bold">
-                  {product.category} / CATALYST 7.0
-                </span>
+          {/* ================= RIGHT: INFO (sticks while you scroll the stage) ================= */}
+          <div className="flex flex-col lg:sticky lg:top-24 lg:col-span-5">
+            <div data-reveal="right">
+              <div className="mb-5">
+                <SectionTag kanji="品">{product.category} / CATALYST 7.0</SectionTag>
               </div>
 
-              {/* Product Headline & Price */}
-              <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-x-4 gap-y-3 mb-5">
-                <h1 className="brush-heading min-w-0 font-['Osaka_Bright','Bison',sans-serif] text-4xl sm:text-5xl lg:text-6xl uppercase tracking-wider text-[#252321]">
-                  {product.name}
+              {/* Headline & Price */}
+              <div className="mb-4 flex flex-col justify-between gap-x-4 gap-y-3 xl:flex-row xl:items-end">
+                <h1
+                  data-chars
+                  aria-label={product.name}
+                  className="brush-heading min-w-0 font-['Jansina','Bison',sans-serif] text-4xl uppercase tracking-wider text-[#1B0209] sm:text-5xl lg:text-6xl"
+                >
+                  <Chars text={product.name} />
                 </h1>
-                <span className="shrink-0 font-['Bison',sans-serif] text-3xl sm:text-4xl font-black text-[#C9362B] tracking-wider whitespace-nowrap leading-none">
+                <span className="relative shrink-0 self-start whitespace-nowrap rounded-md bg-[#C9362B] px-4 py-2 font-['Jansina','Bison',sans-serif] text-2xl font-black leading-none tracking-wider text-[#FFF1E4] shadow-[0_8px_22px_rgba(201,54,43,0.35)] sm:text-3xl xl:self-auto">
                   {product.priceDisplay}
                 </span>
               </div>
 
-              {/* Variant Subtitle */}
-              <h2 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-2xl sm:text-3xl uppercase tracking-widest text-[#736B63] mb-6">
+              {/* Variant */}
+              <h2 className="brush-heading mb-6 font-['Jansina','Bison',sans-serif] text-2xl uppercase tracking-widest text-[#736B63] sm:text-3xl">
                 {product.variant}
               </h2>
 
-              {/* Availability & Claim Status Badge */}
-              <div className="p-4 rounded-xl bg-white border border-[#E5DDD0] shadow-xs space-y-2 mb-6 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase font-medium">
+              {/* Availability ticket */}
+              <div className="relative mb-6 space-y-2.5 overflow-hidden rounded-2xl border border-[#252321]/15 bg-white p-5 text-xs shadow-[0_10px_30px_rgba(37,35,33,0.07)]">
+                <span
+                  aria-hidden="true"
+                  className="absolute right-4 top-3 flex h-10 w-10 rotate-6 items-center justify-center rounded-[3px] bg-[#C9362B] text-[13px] leading-none tracking-[0.1em] text-[#FFF1E4] shadow-[0_4px_10px_rgba(201,54,43,0.3)] [writing-mode:vertical-rl]"
+                  style={{ fontFamily: KANJI_FONT }}
+                >
+                  公式
+                </span>
+
+                <div className="flex items-center justify-between pr-14">
+                  <span className="font-['Montserrat',sans-serif] font-medium uppercase tracking-wider text-[#736B63]">
                     Price:
                   </span>
-                  <span className="font-mono font-bold text-sm text-[#C9362B]">{product.priceDisplay}</span>
+                  <span className="font-mono text-sm font-bold text-[#C9362B]">{product.priceDisplay}</span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase font-medium">
+                  <span className="font-['Montserrat',sans-serif] font-medium uppercase tracking-wider text-[#736B63]">
                     Status:
                   </span>
-                  <span className="font-['Montserrat',sans-serif] font-bold text-[#252321] tracking-widest uppercase flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B]" />
+                  <span className="flex items-center gap-1.5 font-['Montserrat',sans-serif] font-bold uppercase tracking-widest text-[#252321]">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[#C9362B]" />
                     {product.claimStatus}
                   </span>
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase font-medium">
+                  <span className="font-['Montserrat',sans-serif] font-medium uppercase tracking-wider text-[#736B63]">
                     Eligibility:
                   </span>
-                  <span className="text-[#C9362B] font-bold">{product.claimEligibility}</span>
+                  <span className="font-bold text-[#C9362B]">{product.claimEligibility}</span>
                 </div>
 
-                <div className="flex items-center justify-between pt-1 border-t border-[#252321]/10">
-                  <span className="font-['Montserrat',sans-serif] text-[#736B63] tracking-wider uppercase flex items-center gap-1 font-medium">
+                <div className="flex items-center justify-between border-t border-dashed border-[#252321]/25 pt-2.5">
+                  <span className="flex items-center gap-1 font-['Montserrat',sans-serif] font-medium uppercase tracking-wider text-[#736B63]">
                     <MapPin size={12} className="text-[#C9362B]" /> Pickup:
                   </span>
-                  <span className="text-[#252321] font-medium">{product.pickupLocation}</span>
+                  <span className="font-medium text-[#252321]">{product.pickupLocation}</span>
                 </div>
               </div>
 
               {/* Size Selection (for Apparel) */}
               {product.options?.sizes && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <label className="font-['Montserrat',sans-serif] text-xs font-bold tracking-[0.2em] uppercase text-[#252321]">
+                <div ref={sizeRef} className="mb-6">
+                  <div className="mb-2 flex items-center justify-between">
+                    <label className="font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-[0.2em] text-[#252321]">
                       SELECT SIZE:
                     </label>
                     {sizeError && (
-                      <span className="text-[11px] font-['Montserrat',sans-serif] text-[#C9362B] tracking-wider font-bold animate-pulse">
+                      <span className="animate-pulse font-['Montserrat',sans-serif] text-[11px] font-bold tracking-wider text-[#C9362B]">
                         Please choose a size
                       </span>
                     )}
                   </div>
 
-                  <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex flex-wrap items-center gap-3">
                     {product.options.sizes.map((size) => {
                       const isSelected = selectedSize === size;
                       return (
@@ -341,10 +425,12 @@ export const ProductDetailPage: React.FC = () => {
                             setSelectedSize(size);
                             setSizeError(false);
                           }}
-                          className={`min-w-[48px] h-12 px-4 rounded-lg font-['Montserrat',sans-serif] font-bold text-xs tracking-wider uppercase transition-all cursor-pointer ${
+                          className={`h-12 min-w-[52px] cursor-pointer rounded-lg border-2 px-4 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-wider transition-all duration-200 ${
                             isSelected
-                              ? 'bg-[#C9362B] border border-[#C9362B] text-white shadow-[0_4px_14px_rgba(201,54,43,0.35)] scale-105'
-                              : 'bg-white border border-[#E5DDD0] text-[#252321] hover:border-[#C9362B]'
+                              ? '-translate-y-0.5 border-[#C9362B] bg-[#C9362B] text-white shadow-[0_8px_18px_rgba(201,54,43,0.4)]'
+                              : sizeError
+                                ? 'border-[#C9362B]/60 bg-white text-[#252321] hover:border-[#C9362B]'
+                                : 'border-[#252321]/20 bg-white text-[#252321] hover:-translate-y-0.5 hover:border-[#C9362B]'
                           }`}
                         >
                           {size}
@@ -355,74 +441,115 @@ export const ProductDetailPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Actions: CLAIM MERCH & WISHLIST */}
-              <div className="space-y-3 pt-2">
+              {/* Actions */}
+              <div ref={ctaRef} className="space-y-3 pt-2">
                 <button
-                  onClick={handleClaim}
-                  className={`w-full py-4 px-6 rounded-full font-['Montserrat',sans-serif] font-bold text-xs sm:text-sm tracking-[0.22em] uppercase transition-all shadow-[0_6px_25px_rgba(201,54,43,0.3)] flex items-center justify-center gap-2 cursor-pointer ${
-                    isClaimedEffect
-                      ? 'bg-[#252321] text-white'
-                      : 'bg-[#C9362B] hover:bg-[#9E171C] text-white hover:brightness-105 hover:-translate-y-0.5'
+                  data-magnetic
+                  onClick={handleAddToCart}
+                  className={`group relative flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-full px-6 py-4 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-[0.22em] text-white shadow-[0_10px_30px_rgba(201,54,43,0.35)] transition-colors sm:text-sm before:absolute before:inset-0 before:-translate-x-full before:bg-gradient-to-r before:from-transparent before:via-white/30 before:to-transparent before:transition-transform before:duration-700 hover:before:translate-x-full ${
+                    isClaimedEffect ? 'bg-[#252321]' : 'bg-[#C9362B] hover:bg-[#9E171C]'
                   }`}
                 >
                   {isClaimedEffect ? (
                     <>
                       <Check size={18} />
-                      <span>ADDED TO CLAIM BAG</span>
+                      <span>ADDED TO CART</span>
                     </>
                   ) : (
                     <>
                       <ShoppingBag size={18} />
-                      <span>CLAIM MERCH</span>
+                      <span>ADD TO CART</span>
                     </>
                   )}
                 </button>
 
                 <button
                   onClick={() => toggleWishlist(product.id)}
-                  className={`w-full py-3.5 px-6 rounded-full border text-xs font-['Montserrat',sans-serif] font-bold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 cursor-pointer ${
+                  className={`flex w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 px-6 py-3.5 font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-[0.2em] transition-all ${
                     wishlisted
                       ? 'border-[#C9362B] bg-[#C9362B]/10 text-[#C9362B]'
-                      : 'border-[#E5DDD0] bg-white text-[#736B63] hover:text-[#252321] hover:border-[#C9362B]'
+                      : 'border-[#252321]/15 bg-white text-[#736B63] hover:border-[#C9362B] hover:text-[#252321]'
                   }`}
                 >
-                  <Heart
-                    size={16}
-                    className={wishlisted ? 'fill-[#C9362B] text-[#C9362B]' : ''}
-                  />
+                  <Heart size={16} className={wishlisted ? 'fill-[#C9362B] text-[#C9362B]' : ''} />
                   <span>{wishlisted ? 'IN YOUR WISHLIST' : 'ADD TO WISHLIST'}</span>
                 </button>
+              </div>
+
+              {/* reassurance */}
+              <div className="mt-6 grid gap-3 text-[11px] text-[#736B63] sm:grid-cols-2">
+                <div className="flex items-start gap-2 rounded-xl border border-[#252321]/10 bg-[#FAF6EE] p-3">
+                  <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-[#C9362B]" />
+                  <span className="leading-relaxed">Official AIESEC in SLIIT merchandise.</span>
+                </div>
+                <div className="flex items-start gap-2 rounded-xl border border-[#252321]/10 bg-[#FAF6EE] p-3">
+                  <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-[#C9362B]" />
+                  <span className="leading-relaxed">Order now, collect at the seminar.</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        {/* ── RELATED MERCHANDISE SECTION ── */}
-        <section className="mt-24 pt-16 border-t border-[#252321]/10">
-          <div className="flex items-center justify-between mb-8">
+        {/* ── RELATED MERCHANDISE ── */}
+        <section className="relative mt-24 pt-4">
+          <WaveDivider className="mb-14" />
+
+          <div className="mb-8 flex items-end justify-between" data-reveal="up">
             <div>
-              <span className="font-['Montserrat',sans-serif] text-[10px] tracking-[0.25em] text-[#C9362B] uppercase font-bold block mb-3">
-                DISCOVER MORE
-              </span>
-              <h3 className="brush-heading font-['Osaka_Bright','Bison',sans-serif] text-3xl sm:text-4xl uppercase tracking-wider text-[#252321]">
+              <div className="mb-3">
+                <SectionTag kanji="続">DISCOVER MORE</SectionTag>
+              </div>
+              <h3 className="brush-heading font-['Jansina','Bison',sans-serif] text-3xl uppercase tracking-wider text-[#1B0209] sm:text-4xl">
                 RELATED PIECES
               </h3>
             </div>
             <Link
               to="/merch"
-              className="text-xs font-['Montserrat',sans-serif] font-bold text-[#C9362B] hover:text-[#9E171C] tracking-widest uppercase transition-colors"
+              className="font-['Montserrat',sans-serif] text-xs font-bold uppercase tracking-widest text-[#C9362B] transition-colors hover:text-[#9E171C]"
             >
               VIEW ALL (9) →
             </Link>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div data-reveal-group className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {relatedProducts.map((rel) => (
               <MerchProductCard key={rel.id} product={rel} />
             ))}
           </div>
         </section>
       </main>
+
+      {/* ── MOBILE STICKY ADD-TO-CART BAR ── */}
+      <AnimatePresence>
+        {showBar && !isLightboxOpen && (
+          <motion.div
+            initial={{ y: 96 }}
+            animate={{ y: 0 }}
+            exit={{ y: 96 }}
+            transition={{ duration: 0.35, ease: EASE }}
+            className="fixed inset-x-0 bottom-0 z-40 border-t border-[#252321]/10 bg-[#FFFAF3]/95 px-4 py-3 backdrop-blur lg:hidden"
+          >
+            <div className="mx-auto flex max-w-xl items-center gap-3">
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-['Montserrat',sans-serif] text-[11px] font-bold uppercase tracking-wider text-[#252321]">
+                  {product.name}
+                </p>
+                <p className="font-['Jansina','Bison',sans-serif] text-lg font-black leading-tight tracking-wider text-[#C9362B]">
+                  {product.priceDisplay}
+                </p>
+              </div>
+              <button
+                onClick={handleAddToCart}
+                className="flex shrink-0 cursor-pointer items-center gap-2 rounded-full bg-[#C9362B] px-6 py-3 font-['Montserrat',sans-serif] text-[11px] font-bold uppercase tracking-[0.2em] text-white shadow-[0_6px_18px_rgba(201,54,43,0.35)]"
+              >
+                <ShoppingBag size={15} />
+                <span>Add to cart</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ── LIGHTBOX OVERLAY ── */}
       <AnimatePresence>
@@ -437,7 +564,7 @@ export const ProductDetailPage: React.FC = () => {
             />
             <button
               onClick={() => setIsLightboxOpen(false)}
-              className="absolute top-6 right-6 z-20 p-3 rounded-full text-white/80 hover:text-white bg-black/40 hover:bg-black/60 transition-all cursor-pointer"
+              className="absolute right-6 top-6 z-20 cursor-pointer rounded-full bg-black/40 p-3 text-white/80 transition-all hover:bg-black/60 hover:text-white"
               aria-label="Close Lightbox"
             >
               <X size={24} />
@@ -447,12 +574,12 @@ export const ProductDetailPage: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="relative z-10 max-w-4xl max-h-[85vh] w-full flex items-center justify-center p-4"
+              className="relative z-10 flex max-h-[85vh] w-full max-w-4xl items-center justify-center p-4"
             >
               <img
                 src={images[activeImageIndex]}
                 alt=""
-                className="max-w-full max-h-[80vh] object-contain filter drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
+                className="max-h-[80vh] max-w-full object-contain drop-shadow-[0_20px_40px_rgba(0,0,0,0.5)]"
               />
             </motion.div>
           </div>
@@ -461,6 +588,7 @@ export const ProductDetailPage: React.FC = () => {
 
       {/* Shared Overlays */}
       <CartDrawer />
+      <MerchCartButton raised={showBar} hidden={isLightboxOpen} />
       <ClaimConfirmationModal />
       <MerchToast />
     </div>

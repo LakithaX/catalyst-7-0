@@ -2,6 +2,9 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import GlobalLoader from './components/GlobalLoader';
+import { BackgroundMusic } from './components/BackgroundMusic';
+import Layout from './components/Layout';
+import { initBoot } from './utils/navState';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
@@ -13,6 +16,13 @@ const CartPage = lazy(() => import('./pages/CartPage'));
 const GameComingSoonPage = lazy(() => import('./pages/GameComingSoonPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
 
+initBoot();
+
+// Runs as soon as this file loads, before the browser can restore an old scroll position on refresh.
+if (typeof window !== 'undefined' && 'scrollRestoration' in window.history) {
+  window.history.scrollRestoration = 'manual';
+}
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
@@ -22,6 +32,9 @@ export default function App() {
     let fallbackTimer: ReturnType<typeof setTimeout> | undefined;
     const removeImageListeners: Array<() => void> = [];
     setIsLoading(true);
+    // Every route change and every refresh starts at the top of the page.
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+
     // Wait for the new route's DOM to mount
     const tick = setTimeout(() => {
       const images = Array.from(document.images).filter(img => img.loading !== 'lazy');
@@ -60,7 +73,10 @@ export default function App() {
       ]).then(() => {
         removeImageListeners.forEach(remove => remove());
         if (fallbackTimer) clearTimeout(fallbackTimer);
-        if (!cancelled) setIsLoading(false);
+        if (!cancelled) {
+          window.scrollTo({ top: 0, left: 0, behavior: 'instant' as ScrollBehavior });
+          setIsLoading(false);
+        }
       });
     }, 50);
 
@@ -74,23 +90,33 @@ export default function App() {
 
   return (
     <>
+      <BackgroundMusic />
       <AnimatePresence>
         {isLoading && <GlobalLoader />}
       </AnimatePresence>
       <Suspense fallback={<GlobalLoader />}>
       <Routes>
+        {/* GROUP A: No layout, footer comes from HomePage itself */}
         <Route path="/" element={<HomePage />} />
-        <Route path="/about" element={<AboutPage />} />
+
+        {/* GROUP B: No layout, no footer at all */}
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/registration" element={<RegisterPage />} />
-        <Route path="/oc" element={<OcPosterPage />} />
-        <Route path="/about/oc" element={<OcPosterPage />} />
-        <Route path="/gallery" element={<GalleryPage />} />
-        <Route path="/merch" element={<MerchPage />} />
-        <Route path="/merch/:productId" element={<ProductDetailPage />} />
-        <Route path="/merch/cart" element={<CartPage />} />
-        <Route path="/game" element={<GameComingSoonPage />} />
-        <Route path="/contact" element={<ContactPage />} />
+
+        {/* GROUP C: Wrapped in Layout to get the site OutroFooter */}
+        <Route element={<Layout />}>
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/oc" element={<OcPosterPage />} />
+          <Route path="/about/oc" element={<OcPosterPage />} />
+          <Route path="/gallery" element={<GalleryPage />} />
+          <Route path="/merch" element={<MerchPage />} />
+          <Route path="/merch/cart" element={<CartPage />} />
+          <Route path="/merch/:productId" element={<ProductDetailPage />} />
+          <Route path="/game" element={<GameComingSoonPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Route>
+
+        {/* GROUP A (catch-all): Last route in the list */}
         <Route path="*" element={<HomePage />} />
       </Routes>
       </Suspense>

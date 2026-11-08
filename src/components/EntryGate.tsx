@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { CatalystMark } from './brand/CatalystMark';
 
 // Folder in /public that holds the illustrations
 const ART = '/assets/illustrations/';
@@ -18,7 +19,7 @@ interface EntryGateProps {
  * It fades out, then unmounts itself.
  */
 export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
-  const [mounted, setMounted] = useState(true);
+  const [mounted, setMounted] = useState(visible);
 
   useEffect(() => {
     if (visible) {
@@ -42,23 +43,23 @@ export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
           background: radial-gradient(circle, rgba(244,63,94,0.55) 0%, rgba(220,38,38,0.32) 38%, rgba(220,38,38,0.08) 60%, transparent 72%);
           pointer-events: none; }
         .gate > *:not(.gate-sun):not(.gate-art) { position: relative; z-index: 1; }
-        .gate-eyebrow { font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.42em;
+        .gate-eyebrow { font-family: var(--font-label); font-size: 0.78rem; font-weight: 600; letter-spacing: 0.42em;
           padding-left: 0.42em; text-transform: uppercase; color: #f6c768; margin: 0 0 1.1rem; }
-        .gate-title { font-family: 'Cinzel', 'Trajan Pro', Georgia, serif; font-weight: 800; font-size: clamp(2.4rem, 9vw, 5.6rem); line-height: 1;
+        .gate-title { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.4rem, 9vw, 5.6rem); line-height: 1;
           letter-spacing: 0.12em; padding-left: 0.12em; text-transform: uppercase; margin: 0 0 0.6rem;
           text-shadow: 0 8px 28px rgba(10,2,6,0.8), 0 0 50px rgba(239,68,68,0.45); }
         .gate-title span { color: #f6c768; }
-        .gate-kanji { font-family: 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif; font-size: 0.95rem; letter-spacing: 0.6em; padding-left: 0.6em;
+        .gate-kanji { font-family: var(--font-accent), 'Noto Serif JP', 'Yu Mincho', 'Hiragino Mincho ProN', serif; font-size: 0.95rem; letter-spacing: 0.6em; padding-left: 0.6em;
           color: #f6c768; margin: 0 0 2.6rem; display: inline-flex; align-items: center; gap: 0.9em; }
         .gate-kanji i { display: block; width: clamp(28px, 8vw, 70px); height: 1px; background: linear-gradient(to right, transparent, #f6c768); }
         .gate-kanji i:last-child { background: linear-gradient(to left, transparent, #f6c768); }
-        .gate-btn { font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif; font-size: 0.8rem; font-weight: 800; letter-spacing: 0.4em; padding: 1.05rem 2.4rem 1.05rem 2.8rem;
+        .gate-btn { font-family: var(--font-display); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.4em; padding: 1.05rem 2.4rem 1.05rem 2.8rem;
           text-transform: uppercase; color: #fff3dc; background: rgba(191,48,48,0.9); border: 1px solid rgba(246,199,104,0.7); border-radius: 999px; cursor: pointer;
           animation: gate-pulse 2.4s ease-out infinite; transition: transform 0.25s, background 0.25s; }
         .gate-btn:hover { background: #d13a3a; transform: scale(1.04); }
         .gate-btn:active { transform: scale(0.98); }
         .gate-btn:focus-visible { outline: 2px solid #f6c768; outline-offset: 4px; }
-        .gate-note { font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif; font-size: 0.62rem; font-weight: 600; letter-spacing: 0.28em;
+        .gate-note { font-family: var(--font-label); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.28em;
           padding-left: 0.28em; text-transform: uppercase; color: rgba(255,243,220,0.55); margin: 1.6rem 0 0; }
         .gate-art { position: absolute; z-index: 0; pointer-events: none; user-select: none; opacity: 0;
           animation: gate-art-in 1.8s ease-out forwards; }
@@ -94,6 +95,15 @@ export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
         <div className="gate-art gate-bonsai"><img src={`${ART}gdj-bonsai-tree-8143900.svg`} alt="" onError={hide} /></div>
         <div className="gate-art gate-mask"><img src={`${ART}alessandro-hrdz-mask-6976331.png`} alt="" onError={hide} /></div>
         <div className="gate-art gate-koi"><img src={`${ART}kacsoeszti-koi-1184783_1920.png`} alt="" onError={hide} /></div>
+
+        <div className="relative mb-5 flex items-center justify-center">
+          <div className="absolute w-28 h-28 rounded-full bg-[#f6c768]/15 blur-xl pointer-events-none" />
+          <CatalystMark
+            size={72}
+            priority
+            className="relative w-16 sm:w-20 h-auto drop-shadow-[0_8px_24px_rgba(201,54,43,0.4)]"
+          />
+        </div>
 
         <p className="gate-eyebrow">AIESEC in SLIIT presents</p>
         <h1 className="gate-title">

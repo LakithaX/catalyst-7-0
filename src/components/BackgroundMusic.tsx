@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 
 interface BackgroundMusicProps {
-  /** File in /public. Put your track at public/audio/background-music.mp3 (or change this). */
+  /** File in /public. Default: /audio/background-music.mp3 */
   src?: string;
   /** Final volume, 0..1 */
   volume?: number;
@@ -9,31 +10,57 @@ interface BackgroundMusicProps {
 
 type Status = 'waiting' | 'playing' | 'muted' | 'error';
 
+const STORAGE_KEY = 'catalyst7_bgm_muted';
+
+const getInitialMuted = (): boolean => {
+  try {
+    return localStorage.getItem(STORAGE_KEY) === 'true';
+  } catch {
+    return false;
+  }
+};
+
+const setStoredMuted = (muted: boolean) => {
+  try {
+    localStorage.setItem(STORAGE_KEY, muted ? 'true' : 'false');
+  } catch {
+    // ignore blocked storage
+  }
+};
+
 /**
- * Background music for the home page.
- *  - A NEW Audio element is created on every load, so the track starts from 0:00 after a refresh.
- *  - `loop` is on: it repeats forever.
- *  - Browsers only allow SOUND after the visitor interacts with the page (click / tap / key press;
- *    scrolling and mouse movement do not count). So:
- *      1. we try normal autoplay (works if the browser allows it),
- *      2. otherwise we start the track silently, and the first click / tap / key press
- *         restarts it from 0:00 and fades the sound in.
- *  - A speaker button (bottom-left) mutes / unmutes. It never disappears; if the file can't be
- *    loaded it turns red and says so.
+ * Global background music player for Catalyst 7.0.
+ *  - Mounted once at the App root outside <Routes> so music continues seamlessly across navigation.
+ *  - Single HTMLAudioElement ref, looping forever.
+ *  - Persists mute preference in localStorage under catalyst7_bgm_muted.
+ *  - Listens for first user gesture (pointerdown/keydown) on any page to start playback if not muted,
+ *    ignoring clicks on the toggle button itself so toggle behavior is clean.
+ *  - Pauses when tab is hidden and resumes when tab is visible again (only if playing before).
+ *  - Placed at bottom-left with z-index: 35 (below modals, cart drawer, and entry gate).
  */
 export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   src = '/audio/background-music.mp3',
   volume = 0.45,
 }) => {
+  const location = useLocation();
+  const isProductDetail =
+    location.pathname.startsWith('/merch/') &&
+    location.pathname !== '/merch' &&
+    location.pathname !== '/merch/cart';
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fadeRaf = useRef<number | null>(null);
-  const audibleRef = useRef(false); // sound is currently on
-  const armedRef = useRef(false); // playing silently, waiting for a gesture
+  const btnRef = useRef<HTMLButtonElement | null>(null);
+
+  const audibleRef = useRef(false);
+  const armedRef = useRef(false);
   const everAudibleRef = useRef(false);
-  const wantPlayRef = useRef(true);
+  const isInitialMuted = getInitialMuted();
+  const wantPlayRef = useRef(!isInitialMuted);
+  const wasPlayingBeforeHiddenRef = useRef(false);
   const startAudibleRef = useRef<() => void>(() => {});
 
-  const [status, setStatus] = useState<Status>('waiting');
+  const [status, setStatus] = useState<Status>(isInitialMuted ? 'muted' : 'waiting');
   const [errorText, setErrorText] = useState('');
 
   const fadeTo = useCallback((target: number, ms: number, done?: () => void) => {
@@ -75,17 +102,19 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
     audio.addEventListener('error', onError);
     audio.src = src;
 
-    const events: (keyof WindowEventMap)[] = ['pointerup', 'click', 'touchend', 'keydown'];
-    const onGesture = () => startAudible();
-    const removeGestureListeners = () =>
-      events.forEach((e) => window.removeEventListener(e, onGesture, { capture: true } as EventListenerOptions));
+    const events: (keyof WindowEventMap)[] = ['pointerdown', 'keydown', 'touchend', 'click'];
 
-    // Make the sound audible (needs a user gesture unless the browser already allows autoplay)
+    const removeGestureListeners = () => {
+      events.forEach((e) =>
+        window.removeEventListener(e, onGesture, { capture: true } as EventListenerOptions)
+      );
+    };
+
     const startAudible = () => {
       if (audibleRef.current || !wantPlayRef.current) return;
       audio.muted = false;
       audio.volume = 0;
-      if (!everAudibleRef.current) audio.currentTime = 0; // first time: always from the beginning
+      if (!everAudibleRef.current) audio.currentTime = 0;
       audio
         .play()
         .then(() => {
@@ -97,44 +126,59 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
           removeGestureListeners();
         })
         .catch(() => {
-          // Still not allowed: keep waiting for a real gesture
+          // Keep waiting for an interaction
         });
     };
     startAudibleRef.current = startAudible;
 
-    events.forEach((e) => window.addEventListener(e, onGesture, { capture: true, passive: true }));
+    const onGesture = (e: Event) => {
+      // Ignore gestures originating on the toggle button itself so button click handles toggle cleanly
+      if (btnRef.current && e.target instanceof Node && btnRef.current.contains(e.target)) {
+        return;
+      }
+      startAudible();
+    };
 
-    // Don't play music from a background tab
+    events.forEach((e) =>
+      window.addEventListener(e, onGesture, { capture: true, passive: true })
+    );
+
     const onVisibility = () => {
       if (document.hidden) {
-        audio.pause();
-      } else if ((audibleRef.current || armedRef.current) && wantPlayRef.current) {
+        if (audibleRef.current) {
+          wasPlayingBeforeHiddenRef.current = true;
+          audio.pause();
+        }
+      } else if (wasPlayingBeforeHiddenRef.current && wantPlayRef.current) {
+        wasPlayingBeforeHiddenRef.current = false;
         audio.play().catch(() => {});
       }
     };
     document.addEventListener('visibilitychange', onVisibility);
 
-    // 1) Normal autoplay (allowed on some browsers / after repeat visits)
-    audio.muted = false;
-    audio
-      .play()
-      .then(() => {
-        audibleRef.current = true;
-        everAudibleRef.current = true;
-        setStatus('playing');
-        fadeTo(volume, 2500);
-        removeGestureListeners();
-      })
-      .catch(() => {
-        // 2) Blocked → start silently so the track is already "armed"; first gesture restarts it with sound
-        audio.muted = true;
-        audio
-          .play()
-          .then(() => {
-            armedRef.current = true;
-          })
-          .catch(() => {});
-      });
+    // If visitor already explicitly muted, respect it and do not attempt autoplay
+    if (wantPlayRef.current) {
+      audio.muted = false;
+      audio
+        .play()
+        .then(() => {
+          audibleRef.current = true;
+          everAudibleRef.current = true;
+          setStatus('playing');
+          fadeTo(volume, 2500);
+          removeGestureListeners();
+        })
+        .catch(() => {
+          // Autoplay blocked: start silently to arm audio
+          audio.muted = true;
+          audio
+            .play()
+            .then(() => {
+              armedRef.current = true;
+            })
+            .catch(() => {});
+        });
+    }
 
     return () => {
       removeGestureListeners();
@@ -151,15 +195,19 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
   const toggle = useCallback(() => {
     const audio = audioRef.current;
     if (!audio || status === 'error') return;
+
     if (audibleRef.current) {
-      // mute
+      // Mute
       wantPlayRef.current = false;
       audibleRef.current = false;
+      setStoredMuted(true);
       setStatus('muted');
       fadeTo(0, 500, () => audio.pause());
     } else {
-      // unmute / first start
+      // Unmute / start
       wantPlayRef.current = true;
+      setStoredMuted(false);
+      setStatus('playing');
       startAudibleRef.current();
     }
   }, [status, fadeTo]);
@@ -174,28 +222,37 @@ export const BackgroundMusic: React.FC<BackgroundMusicProps> = ({
         @keyframes bgm-bar { 0%,100% { transform: scaleY(0.25); } 50% { transform: scaleY(1); } }
         @keyframes bgm-hint { 0%,100% { box-shadow: 0 0 0 0 rgba(246,199,104,.55); } 70% { box-shadow: 0 0 0 12px rgba(246,199,104,0); } }
         @media (prefers-reduced-motion: reduce) { .bgm-btn, .bgm-btn span { animation: none !important; } }
+        .bgm-wrap {
+          position: fixed;
+          left: max(1rem, env(safe-area-inset-left));
+          bottom: max(1rem, env(safe-area-inset-bottom));
+          z-index: 35;
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          transition: bottom 0.25s ease;
+        }
+        @media (max-width: 1023px) {
+          .bgm-wrap.has-sticky-bar {
+            bottom: max(5.5rem, calc(5rem + env(safe-area-inset-bottom)));
+          }
+        }
       `}</style>
 
-      <div
-        style={{
-          position: 'fixed',
-          left: 'max(1rem, env(safe-area-inset-left))',
-          bottom: 'max(1rem, env(safe-area-inset-bottom))',
-          zIndex: 60,
-          display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-        }}
-      >
+      <div className={`bgm-wrap ${isProductDetail ? 'has-sticky-bar' : ''}`}>
         <button
+          ref={btnRef}
           type="button"
           onClick={toggle}
-          aria-label={playing ? 'Mute background music' : 'Play background music'}
+          aria-label={playing ? 'Mute music' : 'Play music'}
+          aria-pressed={playing}
           title={status === 'error' ? errorText : playing ? 'Mute music' : 'Play music'}
-          className="bgm-btn"
+          className="bgm-btn focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f6c768] focus-visible:ring-offset-2"
           style={{
             width: 44,
             height: 44,
+            minWidth: 44,
+            minHeight: 44,
             borderRadius: '50%',
             border: `1px solid ${status === 'error' ? 'rgba(239,68,68,0.8)' : 'rgba(246,199,104,0.55)'}`,
             background: 'rgba(14,6,10,0.78)',

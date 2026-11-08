@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, CheckCircle2, ArrowRight, User, Mail, Phone, School, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { CatalystMark } from './brand/CatalystMark';
 
 interface RegistrationModalProps {
   isOpen: boolean;

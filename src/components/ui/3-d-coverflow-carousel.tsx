@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { getProductById } from "../../data/merchProducts";
+import { useMerch } from "../../context/MerchContext";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -26,6 +27,19 @@ const BRUSH = "'Yuji Boku', 'Zen Antique', 'Noto Serif JP', serif";
 const Chevron = ({ dir }: { dir: "l" | "r" }) => (
   <svg width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5} aria-hidden="true">
     <path strokeLinecap="round" strokeLinejoin="round" d={dir === "l" ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"} />
+  </svg>
+);
+
+const BagIcon = () => (
+  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.2} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12l1 13H5L6 7z" />
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 7V6a3 3 0 016 0v1" />
+  </svg>
+);
+
+const CheckIcon = () => (
+  <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3} aria-hidden="true">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
   </svg>
 );
 
@@ -59,16 +73,16 @@ export interface CoverFlowCarouselProps {
 }
 
 export const defaultMerchItems: CarouselItem[] = [
-  { tag: "#OfficialMerch", titleLine1: "DELEGATE TEE", titleLine2: "– OBSIDIAN BLACK", desc: "Signature heavyweight cotton tee featuring the Catalyst 7.0 crest and Japanese calligraphy", img: "/assets/catalyst-merch/del-black-front.webp", ctaText: "Claim Merch", ctaUrl: "/merch/delegate-tee-black", productId: "delegate-tee-black" },
-  { tag: "#SignatureDrop", titleLine1: "DELEGATE TEE", titleLine2: "– BUSHIDO BACK", desc: "Detailed back-print artwork capturing the spirit of purpose, honour and connection", img: "/assets/catalyst-merch/del-black-back.webp", ctaText: "Claim Merch", ctaUrl: "/merch/delegate-tee-black", productId: "delegate-tee-black" },
-  { tag: "#Streetwear", titleLine1: "BUCKET HAT", titleLine2: "– TOKYO EDITION", desc: "Structured all-weather canvas bucket hat with high-density embroidered insignia", img: "/assets/catalyst-merch/del-bucket-hat.webp", ctaText: "Claim Merch", ctaUrl: "/merch/bucket-hat-tokyo", productId: "bucket-hat-tokyo" },
-  { tag: "#LimitedEdition", titleLine1: "DELEGATE TEE", titleLine2: "– PURE IVORY", desc: "Minimalist off-white premium silhouette with understated chest seal embroidery", img: "/assets/catalyst-merch/del-white-front.webp", ctaText: "Claim Merch", ctaUrl: "/merch/delegate-tee-white", productId: "delegate-tee-white" },
-  { tag: "#CollectorPack", titleLine1: "STICKER PACK", titleLine2: "– BUSHIDO SET", desc: "Matte waterproof vinyl decals crafted with authentic Japanese ukiyo-e motifs", img: "/assets/catalyst-merch/stickers-pack-1.webp", ctaText: "Claim Merch", ctaUrl: "/merch/stickers-bushido", productId: "stickers-bushido" },
-  { tag: "#CollectorPack", titleLine1: "STICKER PACK", titleLine2: "– SHINOBI SET", desc: "Custom die-cut metallic & matte sticker sheets designed for laptops and gear", img: "/assets/catalyst-merch/stickers-pack-2.webp", ctaText: "Claim Merch", ctaUrl: "/merch/stickers-shinobi", productId: "stickers-shinobi" },
-  { tag: "#Accessory", titleLine1: "WRISTBAND", titleLine2: "– SANDSTONE BEIGE", desc: "High-density jacquard woven seminar band with antique gold locking slider", img: "/assets/catalyst-merch/wristband-beige.webp", ctaText: "Claim Merch", ctaUrl: "/merch/wristband-beige", productId: "wristband-beige" },
-  { tag: "#Accessory", titleLine1: "WRISTBAND", titleLine2: "– IMPERIAL PURPLE", desc: "Rich royal purple woven delegate band adorned with commemorative silver threads", img: "/assets/catalyst-merch/wristband-purple.webp", ctaText: "Claim Merch", ctaUrl: "/merch/wristband-purple", productId: "wristband-purple" },
-  { tag: "#ExclusiveDrop", titleLine1: "SERIES I", titleLine2: "– COMMEMORATIVE", desc: "Official Catalyst 7.0 collector merchandise crafted for AIESEC in SLIIT delegates", img: "/assets/catalyst-merch/S1.webp", ctaText: "Claim Merch", ctaUrl: "/merch/special-series-1", productId: "special-series-1" },
-  { tag: "#ExclusiveDrop", titleLine1: "SERIES II", titleLine2: "– SPECIAL RELEASE", desc: "Curated festival showcase collectible commemorating two days of leadership", img: "/assets/catalyst-merch/S2.webp", ctaText: "Claim Merch", ctaUrl: "/merch/special-series-2", productId: "special-series-2" },
+  { tag: "#OfficialMerch", titleLine1: "DELEGATE TEE", titleLine2: "– OBSIDIAN BLACK", desc: "Signature heavyweight cotton tee featuring the Catalyst 7.0 crest and Japanese calligraphy", img: "/assets/catalyst-merch/del-black-front.webp", ctaText: "Add to Cart", ctaUrl: "/merch/delegate-tee-black", productId: "delegate-tee-black" },
+  { tag: "#SignatureDrop", titleLine1: "DELEGATE TEE", titleLine2: "– BUSHIDO BACK", desc: "Detailed back-print artwork capturing the spirit of purpose, honour and connection", img: "/assets/catalyst-merch/del-black-back.webp", ctaText: "Add to Cart", ctaUrl: "/merch/delegate-tee-black", productId: "delegate-tee-black" },
+  { tag: "#Streetwear", titleLine1: "BUCKET HAT", titleLine2: "– TOKYO EDITION", desc: "Structured all-weather canvas bucket hat with high-density embroidered insignia", img: "/assets/catalyst-merch/del-bucket-hat.webp", ctaText: "Add to Cart", ctaUrl: "/merch/bucket-hat-tokyo", productId: "bucket-hat-tokyo" },
+  { tag: "#LimitedEdition", titleLine1: "DELEGATE TEE", titleLine2: "– PURE IVORY", desc: "Minimalist off-white premium silhouette with understated chest seal embroidery", img: "/assets/catalyst-merch/del-white-front.webp", ctaText: "Add to Cart", ctaUrl: "/merch/delegate-tee-white", productId: "delegate-tee-white" },
+  { tag: "#CollectorPack", titleLine1: "STICKER PACK", titleLine2: "– BUSHIDO SET", desc: "Matte waterproof vinyl decals crafted with authentic Japanese ukiyo-e motifs", img: "/assets/catalyst-merch/stickers-pack-1.webp", ctaText: "Add to Cart", ctaUrl: "/merch/stickers-bushido", productId: "stickers-bushido" },
+  { tag: "#CollectorPack", titleLine1: "STICKER PACK", titleLine2: "– SHINOBI SET", desc: "Custom die-cut metallic & matte sticker sheets designed for laptops and gear", img: "/assets/catalyst-merch/stickers-pack-2.webp", ctaText: "Add to Cart", ctaUrl: "/merch/stickers-shinobi", productId: "stickers-shinobi" },
+  { tag: "#Accessory", titleLine1: "WRISTBAND", titleLine2: "– SANDSTONE BEIGE", desc: "High-density jacquard woven seminar band with antique gold locking slider", img: "/assets/catalyst-merch/wristband-beige.webp", ctaText: "Add to Cart", ctaUrl: "/merch/wristband-beige", productId: "wristband-beige" },
+  { tag: "#Accessory", titleLine1: "WRISTBAND", titleLine2: "– IMPERIAL PURPLE", desc: "Rich royal purple woven delegate band adorned with commemorative silver threads", img: "/assets/catalyst-merch/wristband-purple.webp", ctaText: "Add to Cart", ctaUrl: "/merch/wristband-purple", productId: "wristband-purple" },
+  { tag: "#ExclusiveDrop", titleLine1: "SERIES I", titleLine2: "– COMMEMORATIVE", desc: "Official Catalyst 7.0 collector merchandise crafted for AIESEC in SLIIT delegates", img: "/assets/catalyst-merch/S1.webp", ctaText: "Add to Cart", ctaUrl: "/merch/special-series-1", productId: "special-series-1" },
+  { tag: "#ExclusiveDrop", titleLine1: "SERIES II", titleLine2: "– SPECIAL RELEASE", desc: "Curated festival showcase collectible commemorating two days of leadership", img: "/assets/catalyst-merch/S2.webp", ctaText: "Add to Cart", ctaUrl: "/merch/special-series-2", productId: "special-series-2" },
 ];
 
 export const defaultDishes: CarouselItem[] = defaultMerchItems;
@@ -108,7 +122,7 @@ function computeDims(size: Size, panelH: number, stageW: number) {
   }
   w = Math.max(w, 190);
   h = Math.min(h, w / 0.5);
-  const imgH = clamp(h * 0.58, 110, h - 185);
+  const imgH = clamp(h * 0.55, 110, h - 225);
   return { w: Math.round(w), h: Math.round(h), imgH: Math.round(imgH), shift: Math.round(w * shiftK), scale, rot: size === "mobile" ? 18 : 20 };
 }
 
@@ -123,6 +137,17 @@ export function CoverFlowCarousel({
   onCtaClick,
 }: CoverFlowCarouselProps) {
   const navigate = useNavigate();
+  // Defensive: if this carousel is ever rendered outside <MerchProvider>, fall back to opening the product page.
+  let merch: ReturnType<typeof useMerch> | null = null;
+  try {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    merch = useMerch();
+  } catch {
+    merch = null;
+  }
+  const [addedId, setAddedId] = useState<string | null>(null);
+  const [pickedSize, setPickedSize] = useState<Record<string, string>>({});
+  const [warnId, setWarnId] = useState<string | null>(null);
   const total = items.length;
   const [currentIndex, setCurrentIndex] = useState(0);
   const [size, setSize] = useState<Size>("desktop");
@@ -257,6 +282,31 @@ export function CoverFlowCarousel({
     navigate(item.productId ? `/merch/${item.productId}` : "/merch");
   };
 
+  // Standard shop behaviour: items with no size choice go straight into the cart.
+  // Items that need a size open the product page so the delegate can pick one first.
+  const needsSize = (item: CarouselItem) => {
+    const p = item.productId ? getProductById(item.productId) : undefined;
+    return Boolean(p?.options?.sizes && p.options.sizes.length > 1);
+  };
+
+  const handleCta = (item: CarouselItem) => {
+    const p = item.productId ? getProductById(item.productId) : undefined;
+    if (!p || !merch) return open(item);
+    let size: string | undefined = p.options?.sizes?.[0];
+    if (needsSize(item)) {
+      size = pickedSize[p.id];
+      if (!size) {
+        // no size chosen yet: highlight the size chips instead of adding
+        setWarnId(p.id);
+        window.setTimeout(() => setWarnId((cur) => (cur === p.id ? null : cur)), 1800);
+        return;
+      }
+    }
+    merch.addToCart(p, size, 1);
+    setAddedId(p.id);
+    window.setTimeout(() => setAddedId((cur) => (cur === p.id ? null : cur)), 1600);
+  };
+
   if (!items || total === 0) return null;
   const d = computeDims(size, panelH, stageW);
   const compact = vh < 780;
@@ -323,7 +373,7 @@ export function CoverFlowCarousel({
           {!compact && (
           <p className="hidden sm:block" style={{ fontSize: 15, lineHeight: 1.5, color: "#3D3833", marginTop: 6 }}>
             <span style={{ fontFamily: BRUSH, fontSize: 19, color: RED_DARK, marginRight: 8 }}>公式グッズ</span>
-            Official gear for delegates. Pick a piece and claim it.
+            Official gear for delegates. Pick a piece and add it to your cart.
           </p>
           )}
         </header>
@@ -535,12 +585,56 @@ export function CoverFlowCarousel({
                           {product.priceDisplay}
                         </span>
                       )}
+                      {isCenter && product && needsSize(item) && (
+                        <div
+                          role="radiogroup"
+                          aria-label="Select size"
+                          onClick={(e) => e.stopPropagation()}
+                          style={{ marginTop: 6, display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "center" }}
+                        >
+                          {product.options!.sizes!.map((sz: string) => {
+                            const on = pickedSize[product.id] === sz;
+                            const warn = warnId === product.id && !pickedSize[product.id];
+                            return (
+                              <button
+                                key={sz}
+                                type="button"
+                                role="radio"
+                                aria-checked={on}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setPickedSize((m) => ({ ...m, [product.id]: sz }));
+                                  setWarnId(null);
+                                }}
+                                style={{
+                                  minWidth: 36,
+                                  height: 30,
+                                  padding: "0 8px",
+                                  borderRadius: 6,
+                                  border: `1.5px solid ${warn ? RED : INK}`,
+                                  background: on ? RED : "#FFFFFF",
+                                  color: on ? "#FFFFFF" : warn ? RED : INK,
+                                  fontFamily: LABEL,
+                                  fontWeight: 700,
+                                  fontSize: 12,
+                                  letterSpacing: "0.06em",
+                                  cursor: "pointer",
+                                  boxShadow: on ? `2px 2px 0 ${INK}` : "none",
+                                }}
+                              >
+                                {sz}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
                       {isCenter && (
                         <button
                           type="button"
+                          aria-label={`Add to cart: ${item.titleLine1} ${item.titleLine2 ?? ""}`}
                           onClick={(e) => {
                             e.stopPropagation();
-                            open(item);
+                            handleCta(item);
                           }}
                           style={{
                             marginTop: 8,
@@ -552,7 +646,7 @@ export function CoverFlowCarousel({
                             padding: "0 22px",
                             whiteSpace: "nowrap",
                             borderRadius: 999,
-                            background: RED_DARK,
+                            background: addedId === item.productId ? INK : RED_DARK,
                             color: "#FFFFFF",
                             fontFamily: LABEL,
                             fontWeight: 700,
@@ -564,8 +658,17 @@ export function CoverFlowCarousel({
                             boxShadow: "0 4px 14px rgba(181,30,35,0.30)",
                           }}
                         >
-                          <span>{item.ctaText || "Claim Merch"}</span>
-                          <ArrowRightIcon />
+                          {addedId === item.productId ? (
+                            <>
+                              <CheckIcon />
+                              <span>Added</span>
+                            </>
+                          ) : (
+                            <>
+                              <BagIcon />
+                              <span>{item.ctaText || "Add to Cart"}</span>
+                            </>
+                          )}
                         </button>
                       )}
                     </div>

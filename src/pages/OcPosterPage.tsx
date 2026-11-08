@@ -1,4 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react'
+import { TagMark } from '../components/brand/CatalystTag';
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { ArrowRight } from 'lucide-react'
 import { Link } from 'react-router-dom'
@@ -78,9 +79,9 @@ const F = {
   koiSun: 'benkageyama-koi-5135969_1920.png',
   samurai: 'benkageyama-samurai-5135974_1920.png',
   mask: 'alessandro-hrdz-mask-6976331.png',
-  fan: 'jakeloris-fan-7039967.png',
+  fan: 'jakeloris-fan-7039967.webp',
   koi: 'kacsoeszti-koi-1184783_1920.png',
-  tree: 'susannp4-tree-1586365_1920.png',
+  tree: 'susannp4-tree-1586365_1920.webp',
   pagoda: 'gdj-building-8171699.svg',
   bonsai: 'gdj-bonsai-tree-8143900.svg',
   dragon: 'gdj-dragon-8095373.svg',
@@ -568,7 +569,7 @@ export default function OcPosterPage() {
 
             <div className="ocg-ptext">
               <motion.div className="ocg-ptag" {...rise(0.35)}>
-                <b aria-hidden="true">組</b>
+                <TagMark />
                 <span>The OC · Catalyst 7.0</span>
               </motion.div>
               <motion.h1 {...rise(0.5)}>
@@ -623,10 +624,6 @@ export default function OcPosterPage() {
           </Link>
         </section>
       </main>
-
-      <footer className="relative z-20 w-full border-t border-[#29211D]/10 bg-[#EFE1CB]/70 px-4 py-10 text-center">
-        <p className="text-[11px] text-[#736B63]">Catalyst 7.0 · AIESEC in SLIIT · All Rights Reserved</p>
-      </footer>
     </div>
   )
 }

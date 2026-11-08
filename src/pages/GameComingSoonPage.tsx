@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
+import { TagMark } from '../components/brand/CatalystTag';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
+import { scrollTopOrRestore } from '../utils/navState';
 
 export const GameComingSoonPage: React.FC = () => {
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'instant' });
+    scrollTopOrRestore();
     document.title = 'Catalyst 7.0 — Coming Soon';
   }, []);
 
@@ -55,7 +57,7 @@ export const GameComingSoonPage: React.FC = () => {
             className="flex items-center gap-2 mb-3 text-[11px] font-['Noto_Sans_JP',sans-serif] tracking-[0.3em] text-[#C9362B] uppercase font-bold"
           >
             <span className="w-6 h-[1.5px] bg-[#C9362B]/50" />
-            <span>CATALYST 7.0 · 武士道</span>
+            <TagMark /><span>CATALYST 7.0 · 武士道</span>
             <span className="w-6 h-[1.5px] bg-[#C9362B]/50" />
           </motion.div>
 
@@ -87,6 +89,7 @@ export const GameComingSoonPage: React.FC = () => {
           >
             <Link
               to="/"
+              state={{ directToHero: true }}
               className="inline-flex items-center gap-2 text-xs font-['Montserrat',sans-serif] font-bold tracking-[0.2em] uppercase text-[#736B63] hover:text-[#C9362B] transition-colors group"
             >
               <ArrowLeft size={14} className="transition-transform group-hover:-translate-x-1" />
@@ -96,11 +99,6 @@ export const GameComingSoonPage: React.FC = () => {
         </div>
 
       </main>
-
-      {/* Minimal Discreet Footer Note */}
-      <footer className="py-6 text-center text-[10px] font-mono tracking-widest text-[#736B63]/60 uppercase">
-        AIESEC in SLIIT &middot; Catalyst 7.0
-      </footer>
     </div>
   );
 };

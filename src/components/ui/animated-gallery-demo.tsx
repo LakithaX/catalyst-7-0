@@ -503,7 +503,7 @@ const TextRevealZone = ({ active }: { active: boolean }) => {
         <div className="flex flex-col items-center text-center lg:items-start lg:text-left">
           {/* Eyebrow */}
           <div className="eyebrow mb-6 inline-flex items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2">
-            <SakuraIcon className="h-3.5 w-3.5 shrink-0 text-[#C9362B]" />
+            <img src="/assets/brand/catalyst-mark-128.webp" alt="" aria-hidden="true" width={22} height={22} decoding="async" draggable={false} className="h-[22px] w-[22px] shrink-0 select-none object-contain" />
             <span
               className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-[#252321] sm:text-xs sm:tracking-[0.24em]"
               style={{ fontFamily: GALLERY_CONFIG.fonts.label }}
@@ -829,7 +829,7 @@ export const DemoVariant1 = ({ active = true }: { active?: boolean }) => {
             {/* Title panel */}
             <div className="gallery-title w-[min(86vw,620px)] shrink-0">
               <div className="mb-5 inline-flex items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2">
-                <SakuraIcon className="h-3.5 w-3.5 shrink-0 text-[#C9362B]" />
+                <img src="/assets/brand/catalyst-mark-128.webp" alt="" aria-hidden="true" width={22} height={22} decoding="async" draggable={false} className="h-[22px] w-[22px] shrink-0 select-none object-contain" />
                 <span
                   className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-[#252321] sm:text-xs sm:tracking-[0.24em]"
                   style={{ fontFamily: GALLERY_CONFIG.fonts.label }}

@@ -23,7 +23,7 @@ export const MerchCollection: React.FC = () => {
             <span className="w-1.5 h-1.5 rounded-full bg-[#C9362B]" />
           </div>
 
-          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl font-extrabold uppercase tracking-tight text-[#252321] mb-3">
+          <h2 className="font-['Jansina','Bison',sans-serif] brush-heading text-4xl sm:text-6xl md:text-7xl uppercase tracking-wide text-[#252321] mb-3">
             THE COLLECTION
           </h2>
 

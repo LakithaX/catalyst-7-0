@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, ShoppingBag, ChevronDown } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { SakuraPetals } from './SakuraPetals';
+import { CatalystMark } from './brand/CatalystMark';
 
 // Assets in public/assets/hero-section-assets/
 // NOTE: foreground-landscape is a .PNG in your folder (not .webp) – that was the broken image.
@@ -312,7 +313,19 @@ export const JapaneseParallaxHero: React.FC = () => {
 
       {/* Center: logo + CTAs */}
       <div className="absolute inset-0 flex flex-col items-center justify-center z-30 pointer-events-none select-none px-4 sm:px-6">
-        <div ref={logoRef} className="flex flex-col items-center justify-center will-change-transform">
+        <div ref={logoRef} className="relative flex flex-col items-center justify-center will-change-transform">
+          {/* Faint symbolic mark watermark behind hero headline */}
+          <div
+            aria-hidden="true"
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-[58%] -z-20 pointer-events-none select-none opacity-[0.08] sm:opacity-[0.07]"
+          >
+            <CatalystMark
+              size={360}
+              priority
+              className="w-[280px] sm:w-[360px] md:w-[420px] h-auto"
+            />
+          </div>
+
           <div className="relative -translate-y-2 sm:-translate-y-4">
             {/* Soft cream glow so the black brush logo stays readable over the mountains */}
             <div
@@ -332,7 +345,7 @@ export const JapaneseParallaxHero: React.FC = () => {
           <div className="pointer-events-auto flex items-center justify-center gap-2 sm:gap-3.5 mt-2.5 sm:mt-4">
             <Link
               to="/register"
-              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#B51E23] hover:bg-[#9E171C] text-white font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_6px_22px_rgba(181,30,35,0.38)] hover:shadow-[0_10px_28px_rgba(181,30,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
+              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#B51E23] hover:bg-[#9E171C] text-white font-[family-name:var(--font-label)] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_6px_22px_rgba(181,30,35,0.38)] hover:shadow-[0_10px_28px_rgba(181,30,35,0.5)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer"
             >
               <span>REGISTER NOW</span>
               <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
@@ -340,7 +353,7 @@ export const JapaneseParallaxHero: React.FC = () => {
 
             <Link
               to="/merch"
-              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#FAF6EE]/90 hover:bg-[#252321] text-[#252321] hover:text-[#FAF6EE] border border-[#252321]/30 hover:border-[#252321] font-['Montserrat',sans-serif] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_4px_16px_rgba(37,35,33,0.06)] hover:shadow-[0_8px_24px_rgba(37,35,33,0.15)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer backdrop-blur-sm"
+              className="group inline-flex items-center justify-center gap-2 px-3.5 sm:px-6 py-2.5 sm:py-3 rounded-full bg-[#FAF6EE]/90 hover:bg-[#252321] text-[#252321] hover:text-[#FAF6EE] border border-[#252321]/30 hover:border-[#252321] font-[family-name:var(--font-label)] text-[10px] sm:text-xs font-bold tracking-[0.16em] sm:tracking-[0.2em] uppercase shadow-[0_4px_16px_rgba(37,35,33,0.06)] hover:shadow-[0_8px_24px_rgba(37,35,33,0.15)] hover:-translate-y-0.5 active:translate-y-0 transition-all duration-300 cursor-pointer backdrop-blur-sm"
             >
               <ShoppingBag size={14} className="text-[#C9362B] group-hover:text-[#FAF6EE] transition-colors" />
               <span>SHOP MERCH</span>
@@ -348,7 +361,7 @@ export const JapaneseParallaxHero: React.FC = () => {
           </div>
 
           {/* Moved here from the left side – it was colliding with the sakura branch */}
-          <div className="hidden sm:flex flex-col items-center mt-4 text-center font-['Montserrat',sans-serif] text-[#0e1118] [text-shadow:0_0_10px_rgba(248,243,233,0.95),0_0_20px_rgba(248,243,233,0.8)]">
+          <div className="hidden sm:flex flex-col items-center mt-4 text-center font-[family-name:var(--font-body)] text-[#0e1118] [text-shadow:0_0_10px_rgba(248,243,233,0.95),0_0_20px_rgba(248,243,233,0.8)]">
             <p className="text-sm font-semibold">{EVENT_TAGLINE}</p>
             {EVENT_DETAILS && <p className="text-xs font-bold tracking-wide mt-1">{EVENT_DETAILS}</p>}
           </div>
@@ -360,7 +373,7 @@ export const JapaneseParallaxHero: React.FC = () => {
         className="hidden lg:block absolute bottom-8 left-1/2 -translate-x-1/2 z-30 pointer-events-none text-center"
         style={aboveBrowserBar('2rem')}
       >
-        <span className="font-['Bison',sans-serif] text-[2.6rem] font-black tracking-[0.22em] text-[#FAF6EE] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] leading-none">
+        <span className="font-[family-name:var(--font-display)] text-[2.4rem] font-bold tracking-[0.2em] text-[#FAF6EE] whitespace-nowrap uppercase drop-shadow-[0_2px_12px_rgba(0,0,0,0.65)] leading-none">
           DARE BEYOND DEFINITION
         </span>
       </div>
@@ -372,10 +385,10 @@ export const JapaneseParallaxHero: React.FC = () => {
         style={aboveBrowserBar('0.85rem')}
       >
         <div className="flex items-center justify-center gap-1.5">
-          <span className="font-['Bison',sans-serif] text-xl font-black text-[#FAF6EE] leading-none drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)]">7.0</span>
+          <span className="font-[family-name:var(--font-display)] text-xl font-bold text-[#FAF6EE] leading-none drop-shadow-[0_1px_6px_rgba(0,0,0,0.75)]">7.0</span>
           <span className="text-[9px] font-bold text-[#FAF6EE] uppercase tracking-wider leading-none drop-shadow-[0_1px_4px_rgba(0,0,0,0.75)]">Leadership Seminar</span>
         </div>
-        <span className="font-['Bison',sans-serif] text-[clamp(0.7rem,3.6vw,1rem)] font-black tracking-[0.16em] text-[#FAF6EE] uppercase mt-0.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] whitespace-nowrap">
+        <span className="font-[family-name:var(--font-display)] text-[clamp(0.7rem,3.6vw,1rem)] font-bold tracking-[0.16em] text-[#FAF6EE] uppercase mt-0.5 drop-shadow-[0_1px_6px_rgba(0,0,0,0.8)] whitespace-nowrap">
           DARE BEYOND DEFINITION
         </span>
       </div>
@@ -383,7 +396,7 @@ export const JapaneseParallaxHero: React.FC = () => {
       {/* Scroll indicator */}
       <button
         onClick={scrollToNext}
-        className="group absolute bottom-5 right-5 sm:right-8 z-30 hidden sm:flex items-center gap-2 text-[#FAF6EE]/85 hover:text-white transition-colors font-mono text-[10px] uppercase tracking-[0.2em] font-bold cursor-pointer"
+        className="group absolute bottom-5 right-5 sm:right-8 z-30 hidden sm:flex items-center gap-2 text-[#FAF6EE]/85 hover:text-white transition-colors font-[family-name:var(--font-label)] text-[10px] uppercase tracking-[0.2em] font-bold cursor-pointer"
         style={aboveBrowserBar('1.25rem')}
         title="Scroll to Gallery"
       >
