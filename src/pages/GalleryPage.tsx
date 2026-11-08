@@ -392,7 +392,7 @@ export const GalleryPage: React.FC = () => {
       </div>
 
       {/* ── Editorial outro ── */}
-      <footer className="relative bg-[#B51E23] text-white text-center py-24 sm:py-36 px-6 overflow-hidden">
+      <section className="relative bg-[#B51E23] text-white text-center py-24 sm:py-36 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
           <img
             src="/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg"
@@ -451,7 +451,7 @@ export const GalleryPage: React.FC = () => {
             </Link>
           </div>
         </div>
-      </footer>
+      </section>
 
       <style>{`
         /* ---------- intro stage ---------- */

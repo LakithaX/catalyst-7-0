@@ -33,6 +33,7 @@ export const MerchPage: React.FC = () => {
       {/* Main Page Flow */}
       <main className="relative">
         {/* Section A: Hero */}
+        {comingSoon || loading || error || !products.length ? <ShopUnavailable /> : <>
         <MerchHero />
 
         {/* Section B: Grid of Pieces */}
@@ -42,6 +43,7 @@ export const MerchPage: React.FC = () => {
 
         {/* Section C: Brand Statement */}
         <MerchBrandStatement />
+        </>}
       </main>
 
       {/* Outro / Merch Footer (dark band for contrast) */}
@@ -100,8 +102,8 @@ export const MerchPage: React.FC = () => {
       </footer>
 
       {/* Shared Overlays */}
-      <CartDrawer />
-      <ClaimConfirmationModal />
+      {!comingSoon && !loading && !error && <CartDrawer />}
+      {!comingSoon && !loading && !error && <ClaimConfirmationModal />}
       <MerchToast />
       <MerchCartButton />
     </div>

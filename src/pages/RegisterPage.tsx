@@ -3,10 +3,10 @@ import { TagMark } from '../components/brand/CatalystTag';
 import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import '../styles/samurai-registration.css';
+import EmailSignIn from '../components/EmailSignIn';
+import { submitRegistration } from '../lib/booking';
+import { errorMessage } from '../lib/supabase';
 
-// Configurable endpoint: set to your Google Apps Script Web App URL or custom backend.
-// Leave empty for local demo mode.
-export const REGISTRATION_ENDPOINT = '';
 
 // ============================================================================
 // FORM CONTENT  (edit questions here. Everything else adapts automatically)
@@ -59,20 +59,6 @@ const CHAPTERS: ChapterDef[] = [
       alt: 'Traditional Japanese pagoda clan architecture - The Clan',
     },
     questions: [
-      {
-        id: 'clan',
-        q: 'Which clan do you call home?',
-        h: 'Your university or campus',
-        w: 1,
-        o: [
-          'SLIIT — Malabe Campus',
-          'SLIIT City Uni',
-          'Metropolitan Campus',
-          'CINEC Campus',
-          'William Angliss Institute @ SLIIT',
-          'Other*',
-        ],
-      },
       {
         id: 'year',
         q: 'Which chapter of your journey are you in?',
@@ -257,7 +243,8 @@ export default function RegisterPage() {
   const [cur, setCur] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [cvBase64, setCvBase64] = useState<string>('');
+  const submissionKey = useRef(crypto.randomUUID());
+  const [registrationReference, setRegistrationReference] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
@@ -542,13 +529,11 @@ export default function RegisterPage() {
     if (file.size > 5242880) {
       setErrors((prev) => ({ ...prev, cv: 'That file is over 5 MB. Choose a smaller one.' }));
       setCvFile(null);
-      setCvBase64('');
       return;
     }
     if (!/\.(pdf|docx?)$/i.test(file.name)) {
       setErrors((prev) => ({ ...prev, cv: 'Use a PDF or Word file.' }));
       setCvFile(null);
-      setCvBase64('');
       return;
     }
     setCvFile(file);
@@ -597,31 +582,15 @@ export default function RegisterPage() {
     setSubmitError('');
 
     try {
-      const payload = {
-        ...formData,
-        cvFileName: cvFile?.name || '',
-        cvMimeType: cvFile?.type || '',
-        cvBase64: cvBase64,
-      };
-
-      if (REGISTRATION_ENDPOINT) {
-        const res = await fetch(REGISTRATION_ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(payload),
-        });
-        if (!res.ok) throw new Error('Network error');
-      } else {
-        // Simulated submission in demo mode
-        await new Promise((r) => setTimeout(r, 800));
-      }
+      const result = await submitRegistration(submissionKey.current, formData, cvFile!);
+      setRegistrationReference(result.reference);
 
       try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       entryDelay.current = 0.1;
       setIsDone(true);
       window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch {
-      setSubmitError('We couldn’t send your registration. Check your connection and try again.');
+    } catch (error) {
+      setSubmitError(errorMessage(error));
     } finally {
       setSubmitting(false);
     }

@@ -6,6 +6,8 @@ import { gsap } from 'gsap';
 import { ArrowLeft, Trash2, ArrowRight, ShieldCheck, Heart, Plus } from 'lucide-react';
 import { useMerch } from '../context/MerchContext';
 import { getProductById } from '../data/merchProducts';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
 import { MerchToast } from '../components/merch/MerchToast';
@@ -67,7 +69,10 @@ export const CartPage: React.FC = () => {
   }, []);
 
   // empty <-> filled swaps different markup, so re-arm the effects when that changes
-  useMerchMotion(pageRef, [cartItems.length === 0, wishlist.length === 0]);
+  const { comingSoon, loading, error } = useCatalog();
+  const unavailable = comingSoon || loading || !!error;
+  useMerchMotion(pageRef, [cartItems.length === 0, wishlist.length === 0, unavailable]);
+  if (unavailable) return <><Navbar /><ShopUnavailable /></>;
 
   const totalPieces = cartItems.reduce((acc, item) => acc + item.quantity, 0);
   const totalLkr = cartItems.reduce((acc, i) => acc + (i.priceLkr || 0) * i.quantity, 0);

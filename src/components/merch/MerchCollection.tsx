@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MERCH_PRODUCTS, CATEGORIES, ProductCategory } from '../../data/merchProducts';
+import { CATEGORIES, ProductCategory } from '../../data/merchProducts';
+import { useCatalog } from '../../context/CatalogContext';
 import { MerchProductCard } from './MerchProductCard';
 
 export const MerchCollection: React.FC = () => {
+  const { products: MERCH_PRODUCTS } = useCatalog();
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory>('ALL');
 
   const filteredProducts = selectedCategory === 'ALL'

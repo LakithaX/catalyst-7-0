@@ -2,10 +2,13 @@ import React, { lazy, Suspense, useState, useEffect } from 'react';
 import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import GlobalLoader from './components/GlobalLoader';
+import SiteFooter from './components/SiteFooter';
+import { StickyFooter } from './components/ui/sticky-footer';
 import { BackgroundMusic } from './components/BackgroundMusic';
 import Layout from './components/Layout';
 import { initBoot } from './utils/navState';
 const HomePage = lazy(() => import('./pages/HomePage'));
+const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const OcPosterPage = lazy(() => import('./pages/OcPosterPage'));
@@ -97,6 +100,7 @@ export default function App() {
       <Suspense fallback={<GlobalLoader />}>
       <Routes>
         {/* GROUP A: No layout, footer comes from HomePage itself */}
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/" element={<HomePage />} />
 
         {/* GROUP B: No layout, no footer at all */}
@@ -119,6 +123,8 @@ export default function App() {
         {/* GROUP A (catch-all): Last route in the list */}
         <Route path="*" element={<HomePage />} />
       </Routes>
+      {/^\/(about(?:\/oc)?|oc|register|registration|gallery|merch(?:\/[^/]+)?|game)\/?$/.test(location.pathname) && <SiteFooter />}
+      {location.pathname.replace(/\/$/, '') === '/admin' && <StickyFooter />}
       </Suspense>
     </>
   );

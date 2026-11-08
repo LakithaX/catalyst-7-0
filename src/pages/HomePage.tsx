@@ -1,3 +1,4 @@
+import SiteFooter from '../components/SiteFooter';
 import React, { useEffect, useLayoutEffect, useRef, useState, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, useReducedMotion } from 'motion/react';
@@ -10,7 +11,6 @@ import AnimatedGalleryDemo from '../components/ui/animated-gallery-demo';
 import FullScreenScrollFXDemo from '../components/ui/full-screen-scroll-fx-demo';
 import CoverFlowCarouselDemo from '../components/ui/3-d-coverflow-carousel-demo';
 import JapaneseCursor from '../components/ui/japanese-cursor';
-import OutroFooter from '../components/ui/outro-footer';
 import PartnershipAnnouncement from '../components/ui/partnership-announcement';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -855,8 +855,7 @@ export default function HomePage() {
           <PartnershipAnnouncement active={isLockedToHero} />
         </div>
 
-        {/* Outro / Footer */}
-        <OutroFooter active={isLockedToHero} />
+        <SiteFooter />
       </div>
     </div>
   );
