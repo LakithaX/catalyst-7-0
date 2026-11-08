@@ -14,8 +14,10 @@ import {
   Check,
   ShoppingBag,
 } from 'lucide-react';
-import { getProductById, getRelatedProducts, MerchProduct } from '../data/merchProducts';
+import { MerchProduct } from '../data/merchProducts';
 import { useMerch } from '../context/MerchContext';
+import { useCatalog } from '../context/CatalogContext';
+import ShopUnavailable from '../components/merch/ShopUnavailable';
 import Navbar from '../components/Navbar';
 import { CartDrawer } from '../components/merch/CartDrawer';
 import { ClaimConfirmationModal } from '../components/merch/ClaimConfirmationModal';
@@ -27,8 +29,9 @@ export const ProductDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addToCart, isWishlisted, toggleWishlist, openCart } = useMerch();
 
-  const product: MerchProduct | undefined = productId ? getProductById(productId) : undefined;
-  const relatedProducts = productId ? getRelatedProducts(productId, 3) : [];
+  const { products, comingSoon, loading, error } = useCatalog();
+  const product: MerchProduct | undefined = products.find(p => p.id === productId);
+  const relatedProducts = products.filter(p => p.id !== productId).slice(0, 3);
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState<string | undefined>(undefined);
@@ -77,6 +80,7 @@ export const ProductDetailPage: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [nextImage, prevImage, isLightboxOpen]);
 
+  if (comingSoon || loading || error) return <><Navbar/><ShopUnavailable/></>;
   if (!product) {
     return (
       <div className="min-h-screen bg-[#F8F3E9] text-[#252321] flex flex-col">
