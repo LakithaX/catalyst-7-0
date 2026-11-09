@@ -424,7 +424,7 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
         scrollTrigger: {
           trigger: root,
           start: "top top",
-          end: () => "+=" + Math.round(totalUnits * (stage.offsetHeight || window.innerHeight)),
+          end: () => "+=" + Math.round(totalUnits * (window.innerHeight || stage.offsetHeight)),
           pin: true,
           pinSpacing: true,
           anticipatePin: 1,
@@ -742,11 +742,23 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           .fx {
             position: relative;
             width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            min-height: 100vh;
+            min-height: 100dvh;
             background: var(--fx-stage-bg);
             color: #000;
             font-family: var(--fx-font);
             text-transform: uppercase;
             letter-spacing: -0.02em;
+          }
+
+          /* When pinned by GSAP ScrollTrigger on mobile, fill the dynamic viewport completely */
+          .fx[style*="position: fixed"] {
+            height: 100vh !important;
+            height: 100dvh !important;
+            min-height: 100% !important;
+            bottom: 0 !important;
           }
 
           .fx-debug {
@@ -757,8 +769,10 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
           .fx-stage {
             position: relative;
             width: 100%;
+            height: 100%;
             height: 100vh;
-            height: 100svh;
+            height: 100dvh;
+            min-height: 100%;
             overflow: hidden;
             background: var(--fx-stage-bg);
             isolation: isolate;
@@ -983,28 +997,55 @@ export const FullScreenScrollFX = forwardRef<HTMLDivElement, FullScreenFXProps>(
 
           @media (max-width: 900px) {
             .fx-header {
-              padding-top: calc(10svh + env(safe-area-inset-top, 0px));
-              font-size: clamp(1.9rem, 9vw, 3.4rem);
-              line-height: 1.05;
+              padding-top: calc(5svh + env(safe-area-inset-top, 0px));
+              font-size: clamp(1.45rem, 6.5vw, 2.4rem);
+              line-height: 1.08;
+            }
+            .fx-brush {
+              width: clamp(120px, 20vw, 220px);
+              margin: 0.4rem auto 0;
             }
             .fx-vertical { display: none; }
-            .fx-hanko { top: calc(2.5svh + env(safe-area-inset-top, 0px)); right: 4.5vw; }
-            .fx-frame .tl, .fx-frame .tr { top: calc(1.4svh + env(safe-area-inset-top, 0px)); }
+            .fx-hanko {
+              top: calc(1.2rem + env(safe-area-inset-top, 0px));
+              right: 1.2rem;
+            }
+            .fx-frame {
+              inset: calc(0.6rem + env(safe-area-inset-top, 0px)) 0.75rem calc(0.6rem + env(safe-area-inset-bottom, 0px)) 0.75rem;
+            }
+            .fx-frame .tl, .fx-frame .tr { top: 0; }
+            .fx-frame .bl, .fx-frame .br { bottom: 0; }
             .fx-content {
               grid-template-columns: 1fr;
               place-items: center;
-              padding: 0 1.25rem;
+              padding: 0 1rem;
             }
             .fx-left, .fx-right { display: none !important; }
-            .fx-center { height: 40svh; width: 100%; }
-            .fx-featured-title {
-              font-size: clamp(2.2rem, 11.5vw, 3.8rem);
-              white-space: normal;
-              word-break: break-word;
-              padding: 0 0.5rem;
+            .fx-center {
+              height: 38svh;
+              height: 38dvh;
+              width: 100%;
             }
-            .fx-footer { padding-bottom: calc(6svh + env(safe-area-inset-bottom, 0px)); }
-            .fx-progress { width: min(62vw, 240px); }
+            .fx-featured-title {
+              font-size: clamp(1.75rem, 8.2vw, 3.2rem);
+              white-space: nowrap;
+              word-break: keep-all;
+              overflow-wrap: normal;
+              letter-spacing: 0.04em;
+              max-width: 94vw;
+              padding: 0 0.25rem;
+              text-align: center;
+            }
+            .fx-word {
+              white-space: nowrap;
+              word-break: keep-all;
+            }
+            .fx-footer {
+              padding-bottom: calc(4svh + env(safe-area-inset-bottom, 0px));
+            }
+            .fx-progress {
+              width: min(65vw, 250px);
+            }
           }
 
           @media (max-height: 560px) and (min-width: 901px) {

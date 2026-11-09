@@ -841,7 +841,7 @@ export default function HomePage() {
         </div>
 
         {/* SECTION 4: FULL SCREEN SCROLL FX (GSAP ScrollTrigger Slideshow) */}
-        <div className="catalyst-section-isolate">
+        <div className="catalyst-section-isolate bg-[#141210]">
           <FullScreenScrollFXDemo active={isLockedToHero} />
         </div>
 
