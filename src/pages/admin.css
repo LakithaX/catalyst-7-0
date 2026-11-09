@@ -138,3 +138,19 @@ body:has(.admin-root){overscroll-behavior-y:none}
   .admin-hero-footer strong span { font-size: 10px; }
   .admin-detail-overlay { padding: 8px; }
 }
+
+/* Keep the control room footer in the dashboard flow, without a public-site reveal. */
+.admin-main { display: flex; flex-direction: column; }
+.admin-footer {
+  margin-top: auto;
+  padding: 28px 0 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.admin-footer > span:last-child { display: flex; align-items: center; gap: 6px; }
+.admin-footer svg { flex-shrink: 0; }
+@media (max-width: 760px) {
+  .admin-footer { align-items: flex-start; flex-direction: column; gap: 6px; padding-top: 24px; }
+}
