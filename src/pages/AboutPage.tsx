@@ -136,7 +136,7 @@ const EVENTS = [
     title: 'And Many More',
     kanji: '無限',
     subtitle: 'Traditions, campfires & roll calls',
-    image: '/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg',
+    image: '/assets/catalyst-gallery/catalyst-dj.jpg',
     description:
       'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
   },

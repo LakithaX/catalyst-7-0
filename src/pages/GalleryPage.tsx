@@ -10,6 +10,7 @@ const GALLERY_IMAGES = [
   "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg",
   "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.jpg",
   "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.jpg",
+  "/assets/catalyst-gallery/catalyst-dj.jpg",
   "/assets/catalyst-gallery/obt-beach.jpg",
   "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg",
   "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.jpg",
