@@ -14,17 +14,9 @@ import { SakuraPetals } from '../components/SakuraPetals'
 //   EB -> components/EbRoster.tsx   (one slide per member + group photo)
 // This file only holds the tab titles and blurbs.
 // ============================================================================
-type TeamKey = 'oc' | 'eb'
+type TeamKey = 'eb' | 'oc'
 
 const TEAMS: Record<TeamKey, { tabLabel: string; kanji: string; title: string; words: [string, string]; jp: string; blurb: string }> = {
-  oc: {
-    tabLabel: 'CO FACI',
-    kanji: '組',
-    title: 'Organizing Committee',
-    words: ['Organizing', 'Committee'],
-    jp: '実行委員会',
-    blurb: 'The leaders forging the Catalyst 7.0 crucible.',
-  },
   eb: {
     tabLabel: 'FACI',
     kanji: '理',
@@ -32,6 +24,14 @@ const TEAMS: Record<TeamKey, { tabLabel: string; kanji: string; title: string; w
     words: ['Executive', 'Board'],
     jp: '理事会',
     blurb: 'Stewards of youth leadership and governance across AIESEC in SLIIT.',
+  },
+  oc: {
+    tabLabel: 'CO FACI',
+    kanji: '組',
+    title: 'Organizing Committee',
+    words: ['Organizing', 'Committee'],
+    jp: '実行委員会',
+    blurb: 'The leaders forging the Catalyst 7.0 crucible.',
   },
 }
 
@@ -76,7 +76,7 @@ export default function ConferenceTeamPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const reduce = useReducedMotion()
 
-  const [tab, setTab] = useState<TeamKey>(searchParams.get('team') === 'eb' ? 'eb' : 'oc')
+  const [tab, setTab] = useState<TeamKey>(searchParams.get('team') === 'oc' ? 'oc' : 'eb')
   const team = TEAMS[tab]
   const other: TeamKey = tab === 'oc' ? 'eb' : 'oc'
 
