@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { TagMark } from '../components/brand/CatalystTag';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react'
-import { ArrowRight, ArrowUpRight } from 'lucide-react'
+import { ArrowRight, ArrowUpRight, ArrowUp } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { OcRoster } from '../components/OcRoster'
 import { EbRoster } from '../components/EbRoster'
@@ -36,6 +36,7 @@ const TEAMS: Record<TeamKey, { tabLabel: string; kanji: string; title: string; w
 }
 
 const LINKS = [
+  { to: '/about', kanji: '触', title: 'About Catalyst 7.0', body: 'The story, the pillars and the journey.' },
   { to: '/gallery', kanji: '記', title: 'Moments & Legacy', body: 'Faces and stories from past editions.' },
   { to: '/merch', kanji: '品', title: 'Official Merchandise', body: 'Delegate apparel, hats and collectibles.' },
   { to: '/register', kanji: '参', title: 'Register Now', body: 'Secure your place at Catalyst 7.0.' },
@@ -51,13 +52,6 @@ const SEIGAIHA = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/s
 // ============================================================================
 // ICONS
 // ============================================================================
-const SakuraIcon = ({ className = 'w-4 h-4' }: { className?: string }) => (
-  <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
-    <path d="M12 2 C13.5 5 15.5 6 18.5 4.5 C17.5 7.5 18 9.5 21 10.5 C18.5 12 17.5 14 19 17 C16 16.5 14 17.5 13 20.5 C12 18 10 17 7 18.5 C8 15.5 7.5 13.5 4.5 12.5 C7 11 8 9 6.5 6 C9.5 6.5 11.5 5.5 12 2 Z" />
-    <circle cx="12" cy="12" r="2.2" fill="#E9B9A5" />
-  </svg>
-)
-
 const BrushUnderline = ({ className = '' }: { className?: string }) => (
   <svg viewBox="0 0 420 28" fill="none" className={className} aria-hidden="true" preserveAspectRatio="none">
     <path
@@ -84,10 +78,19 @@ export default function ConferenceTeamPage() {
 
   const [tab, setTab] = useState<TeamKey>(searchParams.get('team') === 'eb' ? 'eb' : 'oc')
   const team = TEAMS[tab]
+  const other: TeamKey = tab === 'oc' ? 'eb' : 'oc'
 
   const switchTab = (next: TeamKey) => {
     setTab(next)
     setSearchParams({ team: next }, { replace: true })
+  }
+
+  // hero cards: pick a team, then glide down to the directory
+  const jumpTo = (next: TeamKey) => {
+    switchTab(next)
+    requestAnimationFrame(() =>
+      document.getElementById('team-directory')?.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }),
+    )
   }
 
   return (
@@ -120,22 +123,34 @@ export default function ConferenceTeamPage() {
       )}
 
       <main className="relative z-20 flex-1">
-        {/* HERO: text on the left, samurai illustration on the right */}
+        {/* HERO: headline + samurai in the sun */}
         <section className="mx-auto max-w-6xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-10">
-          <div className="grid items-center gap-8 lg:grid-cols-[1.15fr_1fr] lg:gap-10">
+          <div className="grid items-center gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6">
             <div className="text-center lg:text-left">
               <motion.div
                 initial={{ opacity: 0, y: -12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, ease: EASE }}
-                className="mb-6 inline-flex max-w-full items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 px-4 py-1.5 sm:px-5 sm:py-2"
+                className="mb-5 inline-flex max-w-full items-center gap-2.5 rounded-full border border-[#252321]/30 bg-[#F8F3E9]/95 py-1.5 pl-2 pr-4 sm:pr-5"
               >
-                <SakuraIcon className="h-3.5 w-3.5 shrink-0 text-[#C9362B]" />
+                <TagMark />
                 <span
                   className="text-[9.5px] font-bold uppercase tracking-[0.2em] text-[#252321] sm:text-xs sm:tracking-[0.24em]"
                   style={{ fontFamily: LABEL_FONT }}
                 >
                   AIESEC in SLIIT · The Team
+                </span>
+              </motion.div>
+
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mb-3 flex items-center justify-center gap-3 lg:justify-start"
+              >
+                <span className="h-px w-10 bg-[#C9362B]/60" />
+                <span className="pl-[0.4em] text-xs font-bold tracking-[0.45em] text-[#C9362B] sm:text-sm" style={{ fontFamily: KANJI_FONT }}>
+                  人 々
                 </span>
               </motion.div>
 
@@ -147,30 +162,18 @@ export default function ConferenceTeamPage() {
                 className="brush-heading tracking-[0.03em]"
                 style={{ fontFamily: HEADING_FONT }}
               >
-                <span className="block text-[clamp(1.25rem,3.4vw,2.2rem)] text-[#252321]">THE PEOPLE BEHIND</span>
-                <span className="relative mt-1 inline-block max-w-full text-[clamp(2.6rem,11.5vw,4.6rem)] text-[#C9362B] lg:text-[clamp(3.2rem,5.2vw,5rem)]">
+                <span className="block text-[clamp(1.4rem,3.8vw,2.6rem)] text-[#252321]">THE PEOPLE BEHIND</span>
+                <span className="relative mt-1 inline-block max-w-full text-[clamp(2.9rem,12vw,5.2rem)] leading-[1.02] text-[#C9362B] lg:text-[clamp(3.4rem,6vw,5.8rem)]">
                   CATALYST 7.0
-                  <BrushUnderline className="mt-[-2px] block h-3 w-full sm:h-4" />
+                  <BrushUnderline className="mt-[-2px] block h-3 w-full sm:h-5" />
                 </span>
               </motion.h1>
-
-              <motion.div
-                initial={{ opacity: 0, scaleX: 0.4 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ duration: 0.7, delay: 0.2, ease: EASE }}
-                aria-hidden="true"
-                className="mx-auto my-5 flex w-48 items-center gap-2.5 lg:mx-0"
-              >
-                <span className="h-px flex-1 bg-[#252321]/25" />
-                <span className="h-2 w-2 rounded-full bg-[#C9362B]" />
-                <span className="h-px flex-1 bg-[#252321]/25" />
-              </motion.div>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.7, delay: 0.25, ease: EASE }}
-                className="mx-auto max-w-xl text-base leading-[1.7] text-[#252321]/85 sm:text-lg lg:mx-0"
+                className="mx-auto mt-6 max-w-xl text-base leading-[1.7] text-[#252321]/85 sm:text-lg lg:mx-0"
               >
                 Catalyst 7.0 is the flagship leadership seminar of AIESEC in SLIIT, forged in the discipline of the
                 samurai and the audacity of modern innovation. Meet the people who make it happen.
@@ -190,35 +193,37 @@ export default function ConferenceTeamPage() {
                   <ArrowRight size={15} className="transition-transform group-hover:translate-x-1" />
                 </Link>
                 <Link
-                  to="/gallery"
+                  to="/about"
                   className="inline-flex min-h-[46px] cursor-pointer items-center justify-center rounded-full border border-[#252321]/80 px-8 py-3.5 text-xs font-bold uppercase tracking-[0.2em] text-[#252321] transition-all duration-300 hover:bg-[#252321] hover:text-[#F8F3E9] sm:px-9 sm:text-sm"
                 >
-                  View gallery
+                  About Catalyst
                 </Link>
               </motion.div>
             </div>
 
-            {/* illustration: samurai in the rising sun, with a hanko stamp */}
+            {/* samurai in front of a rising sun (static: no looping animation, so it costs nothing while you scroll) */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.85, rotate: -4 }}
-              animate={{ opacity: 1, scale: 1, rotate: 0 }}
-              transition={{ duration: 1.1, delay: 0.2, ease: EASE }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: EASE }}
               aria-hidden="true"
-              className="relative mx-auto w-fit"
+              className="relative mx-auto aspect-square w-[min(78vw,430px)]"
             >
-              <motion.div
-                animate={reduce ? undefined : { y: [0, -12, 0] }}
-                transition={{ duration: 5, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <img
-                  src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
-                  alt=""
-                  draggable={false}
-                  className="mx-auto block h-auto w-auto max-w-full select-none max-h-[340px] drop-shadow-[0_24px_40px_rgba(120,10,25,0.22)] sm:max-h-[440px] lg:max-h-[min(72vh,680px)]"
-                />
-              </motion.div>
+              <div
+                className="absolute inset-[8%] rounded-full"
+                style={{ background: 'radial-gradient(circle at 38% 32%, #FF8A6E 0%, #E0452F 46%, #B51E23 100%)', boxShadow: '0 26px 50px rgba(150,20,30,0.22)' }}
+              />
+              <div className="absolute inset-[2%] rounded-full border border-[#C9362B]/35" />
+              <div className="absolute -inset-[4%] rounded-full border border-[#C9362B]/15" />
+              <img
+                src="/assets/illustrations/benkageyama-samurai-5135974_1920.png"
+                alt=""
+                draggable={false}
+                decoding="async"
+                className="absolute inset-x-0 bottom-[-3%] mx-auto h-[106%] w-auto max-w-[118%] select-none object-contain drop-shadow-[0_20px_28px_rgba(60,5,15,0.35)]"
+              />
               <span
-                className="absolute bottom-[6%] right-[4%] flex h-12 w-12 rotate-6 items-center justify-center rounded-md bg-[#C9362B] text-2xl font-bold text-white shadow-[0_6px_14px_rgba(120,10,25,0.3)] sm:h-14 sm:w-14 sm:text-3xl lg:h-16 lg:w-16 lg:text-4xl"
+                className="absolute bottom-[8%] right-[3%] flex h-14 w-14 rotate-6 items-center justify-center rounded-md bg-[#C9362B] text-3xl font-bold text-white shadow-[0_6px_14px_rgba(120,10,25,0.3)] lg:h-16 lg:w-16 lg:text-4xl"
                 style={{ fontFamily: KANJI_FONT }}
               >
                 士
@@ -230,7 +235,7 @@ export default function ConferenceTeamPage() {
         <Divider />
 
         {/* TEAM DIRECTORY */}
-        <section className="relative overflow-x-clip bg-[#F4ECE0]/70 pb-16 pt-16 sm:pb-24 sm:pt-24">
+        <section id="team-directory" className="relative scroll-mt-2 overflow-x-clip bg-[#F4ECE0]/70 pb-16 pt-16 sm:pb-24 sm:pt-24">
           {/* sunrise glow + faint concentric rings behind the heading (kept very light so the title stays crisp) */}
           <div
             aria-hidden="true"
@@ -387,6 +392,36 @@ export default function ConferenceTeamPage() {
               {tab === 'oc' ? <OcRoster /> : <EbRoster />}
             </motion.div>
           </AnimatePresence>
+
+          {/* slim hand-off to the other team (replaces the big cards that used to sit in the hero) */}
+          <div className="relative mx-auto mt-10 max-w-4xl px-4 sm:mt-14 sm:px-6">
+            <div className="flex flex-col items-center gap-4 border-y border-[#252321]/15 py-5 text-center sm:flex-row sm:justify-between sm:text-left">
+              <div className="flex items-center gap-3.5">
+                <span
+                  aria-hidden="true"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-[4px] bg-[#C9362B] text-lg font-bold text-white"
+                  style={{ fontFamily: KANJI_FONT }}
+                >
+                  {TEAMS[other].kanji}
+                </span>
+                <p className="text-sm leading-snug text-[#252321]/80 sm:text-base">
+                  <span className="block text-[10px] font-bold uppercase tracking-[0.28em] text-[#C9362B]" style={{ fontFamily: LABEL_FONT }}>
+                    Also on the team
+                  </span>
+                  Meet the {TEAMS[other].title}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => jumpTo(other)}
+                className="group inline-flex min-h-[44px] cursor-pointer items-center gap-2.5 rounded-full border border-[#252321]/80 px-6 text-xs font-bold uppercase tracking-[0.2em] text-[#252321] transition-colors duration-300 hover:bg-[#252321] hover:text-[#F8F3E9]"
+                style={{ fontFamily: LABEL_FONT }}
+              >
+                {TEAMS[other].tabLabel}
+                <ArrowUp size={15} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
+              </button>
+            </div>
+          </div>
         </section>
 
         <Divider />
@@ -407,7 +442,7 @@ export default function ConferenceTeamPage() {
             <span className="h-px flex-1 bg-[#252321]/20" />
           </div>
 
-          <div className="grid gap-5 md:grid-cols-3">
+          <div className="grid gap-5 sm:grid-cols-2">
             {LINKS.map((l) => (
               <Link
                 key={l.to}

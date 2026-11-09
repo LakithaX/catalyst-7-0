@@ -1,157 +1,154 @@
-import React from 'react';
-import { motion, useReducedMotion } from 'motion/react';
-import { Link } from 'react-router-dom';
-import {
-  ArrowRight,
-  Sparkles,
-  Compass,
-  Users,
-  Award,
-  Flame,
-  Zap,
-  Calendar,
-  MapPin,
-  ShieldCheck,
-  CheckCircle2,
-  Heart,
-  ChevronRight,
-} from 'lucide-react';
-import { Navbar } from '../components/Navbar';
-import { TagMark } from '../components/brand/CatalystTag';
-import { SakuraPetals } from '../components/SakuraPetals';
+import React, { useState } from 'react'
+import { motion, useReducedMotion } from 'motion/react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, ArrowUpRight, Compass, Award, Flame, Users } from 'lucide-react'
+import { Navbar } from '../components/Navbar'
+import { TagMark } from '../components/brand/CatalystTag'
+import { SakuraPetals } from '../components/SakuraPetals'
 
 // ============================================================================
-// STYLES & ASSETS
+// ABOUT PAGE (route: /about)
+//
+// Sections, top to bottom (each is one <section>, easy to reorder or delete):
+//   1 HERO        headline + samurai in the rising sun
+//   2 STATS       crimson ribbon
+//   3 PILLARS     dark wine section, four virtues
+//   4 EVENTS      bento grid of the six experiences
+//   5 JOURNEY     the two delegate days
+//   6 TEAM CTA    links to /conference-team
+//   7 REGISTER    final call to action
+//
+// Everything you will want to edit is in the DATA block right below.
+//
+// PERFORMANCE NOTES (the rest of the site is smooth, so this page stays light):
+//   - no fixed full-screen layers (the petals are clipped to the hero only)
+//   - no backdrop-blur, no continuous animations
+//   - all motion is transform / opacity, and plays once when scrolled into view
 // ============================================================================
-const HEADING_FONT = "'Jansina', 'Brusher', 'Shippori Mincho', serif";
-const KANJI_FONT = "'Noto Serif JP', 'Shippori Mincho', serif";
-const LABEL_FONT = "'Noto Sans JP', 'Montserrat', sans-serif";
-const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
-const SEIGAIHA = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%23F4ECE0' stroke='%23C9362B' stroke-width='1.4'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`;
+const HEADING_FONT = "'Jansina', 'Brusher', 'Shippori Mincho', serif"
+const KANJI_FONT = "'Noto Serif JP', 'Shippori Mincho', serif"
+const LABEL_FONT = "'Noto Sans JP', 'Montserrat', sans-serif"
+const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1]
+
+const RED = '#C9362B'
+const INK = '#252321'
+const WINE = '#2A0310'
+const GOLD = '#E8C27A'
+
+const SEIGAIHA = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%23F4ECE0' stroke='%23C9362B' stroke-width='1.4'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`
 
 const ART = {
-  torii: '/assets/hero-section-assets/torii-gate.webp',
-  pagoda: '/assets/hero-section-assets/pagoda.webp',
-  branch: '/assets/hero-section-assets/sakura-branch.webp',
-  sun: '/assets/hero-section-assets/red-enso-sun.webp',
-  mist: '/assets/hero-section-assets/atmospheric-mist.webp',
-  bonsai: '/assets/illustrations/gdj-bonsai-tree-8143900.svg',
-  building: '/assets/illustrations/gdj-building-8171699.svg',
-  tree: '/assets/illustrations/susannp4-tree-1586365_1920.webp',
-  koi: '/assets/illustrations/kacsoeszti-koi-1184783_1920.png',
-  fan: '/assets/illustrations/jakeloris-fan-7039967.png',
-  mask: '/assets/illustrations/alessandro_hrdz-mask-6976331.png',
-  samurai: '/assets/samurai/samurai-guardian.webp',
-};
+  // tried in order: the first one that loads is used
+  samurai: ['/assets/samurai/samurai-guardian.webp', '/assets/illustrations/benkageyama-samurai-5135974_1920.png'],
+  torii: ['/assets/hero-section-assets/torii-gate.webp'],
+  pagoda: ['/assets/hero-section-assets/pagoda.webp'],
+  branch: ['/assets/hero-section-assets/sakura-branch.webp'],
+}
 
 // ============================================================================
-// DATA: SPECIAL EVENTS (FROM USER BRIEF)
+// DATA
 // ============================================================================
-const SPECIAL_EVENTS = [
-  {
-    title: 'CONFERENCE SESSIONS',
-    kanji: '総会',
-    subtitle: 'Visionary Plenaries & Keynotes',
-    image: '/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg',
-    description:
-      'Immersive stage plenaries, inspiring keynotes from thought leaders, and leadership forums designed to reshape perspectives.',
-    accent: '#C9362B',
-  },
-  {
-    title: 'OUTBOUND TRAININGS',
-    kanji: '野外研修',
-    subtitle: 'Experiential Team Challenges',
-    image: '/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg',
-    description:
-      'Adrenaline-pumping outdoor simulations and coastal team tasks that push physical grit, test endurance, and build unbreakable trust.',
-    accent: '#B51E23',
-  },
-  {
-    title: 'WORKSHOPS',
-    kanji: '研鑽',
-    subtitle: 'Hands-on Skill Masterclasses',
-    image: '/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg',
-    description:
-      'Practical problem-solving sprints, project innovation labs, and collaborative workshops giving you real skills for real-world impact.',
-    accent: '#8C0B26',
-  },
-  {
-    title: 'INTERACTIVE SESSIONS',
-    kanji: '対話',
-    subtitle: 'Vulnerability & Deep Connection',
-    image: '/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg',
-    description:
-      'Peer-to-peer dialogues, honest self-reflection circles, and shared stories that turn strangers into comrades for life.',
-    accent: '#C9362B',
-  },
-  {
-    title: 'THEME PARTY',
-    kanji: '祝祭夜',
-    subtitle: 'The Signature Evening Gala',
-    image: '/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg',
-    description:
-      'The legendary conference night! Music, themed apparel, dazzling stage lights, and pure celebration of youth and togetherness.',
-    accent: '#E0452F',
-  },
-  {
-    title: 'AND MANY MORE',
-    kanji: '無限',
-    subtitle: 'Traditions, Awards & Roll Calls',
-    image: '/assets/catalyst-gallery/616938786_1268082458699001_1398486345666317073_n.jpg',
-    description:
-      'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
-    accent: '#252321',
-  },
-];
+const STATS = [
+  { num: '100+', label: 'Delegates', sub: 'From top universities' },
+  { num: '02', label: 'Days', sub: 'Intensive immersion' },
+  { num: '06', label: 'Experiences', sub: 'Keynotes to the gala' },
+  { num: '7th', label: 'Edition', sub: 'Excellence in leadership' },
+]
 
-// ============================================================================
-// DATA: 4 PILLARS OF CATALYST
-// ============================================================================
 const PILLARS = [
   {
     num: '01',
     kanji: '超越',
-    title: 'DARE BEYOND DEFINITION',
-    subtitle: 'Transcend Conventional Limits',
+    title: 'Dare Beyond Definition',
+    subtitle: 'Transcend conventional limits',
     desc: 'Catalyst 7.0 is not merely a conference; it is a crucible of courage. We dismantle comfort zones and ignite the audacity to innovate, lead without title, and shatter perceived boundaries.',
     icon: Flame,
   },
   {
     num: '02',
     kanji: '団結',
-    title: 'UNYIELDING BROTHERHOOD',
-    subtitle: 'Forged in Shared Struggle',
+    title: 'Unyielding Brotherhood',
+    subtitle: 'Forged in shared struggle',
     desc: 'Like samurais bound by unbreakable fidelity, Catalyst leaders stand shoulder-to-shoulder. We cultivate authentic camaraderie where vulnerability meets strength and collective victory is our singular creed.',
     icon: Users,
   },
   {
     num: '03',
     kanji: '使命',
-    title: 'PURPOSE & IMPACT',
-    subtitle: 'Actions with Lasting Resonance',
+    title: 'Purpose & Impact',
+    subtitle: 'Actions with lasting resonance',
     desc: 'Leadership without purpose is empty posturing. Every workshop, key challenge, and delegate session is designed to kindle sustainable social impact that ripples across university halls and nationwide industries.',
     icon: Compass,
   },
   {
     num: '04',
     kanji: '洗練',
-    title: 'EXCELLENCE & DISCIPLINE',
-    subtitle: 'Precision in Every Detail',
+    title: 'Excellence & Discipline',
+    subtitle: 'Precision in every detail',
     desc: 'From our meticulous logistics grid to the poetic elegance of our Sumi-e visual legacy, Catalyst 7.0 demands relentless dedication to craftsmanship, continuous self-mastery, and timeless quality.',
     icon: Award,
   },
-];
+]
 
-// ============================================================================
-// DATA: 3-DAY JOURNEY
-// ============================================================================
-const JOURNEY_DAYS = [
+const EVENTS = [
   {
-    day: 'DAY 01',
+    title: 'Conference Sessions',
+    kanji: '総会',
+    subtitle: 'Visionary plenaries & keynotes',
+    image: '/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg',
+    description:
+      'Immersive stage plenaries, inspiring keynotes from thought leaders, and leadership forums designed to reshape perspectives.',
+  },
+  {
+    title: 'Outbound Trainings',
+    kanji: '野外研修',
+    subtitle: 'Experiential team challenges',
+    image: '/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg',
+    description:
+      'Adrenaline-pumping outdoor simulations and coastal team tasks that push physical grit, test endurance, and build unbreakable trust.',
+  },
+  {
+    title: 'Workshops',
+    kanji: '研鑽',
+    subtitle: 'Hands-on skill masterclasses',
+    image: '/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg',
+    description:
+      'Practical problem-solving sprints, project innovation labs, and collaborative workshops giving you real skills for real-world impact.',
+  },
+  {
+    title: 'Interactive Sessions',
+    kanji: '対話',
+    subtitle: 'Vulnerability & deep connection',
+    image: '/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg',
+    description:
+      'Peer-to-peer dialogues, honest self-reflection circles, and shared stories that turn strangers into comrades for life.',
+  },
+  {
+    title: 'Theme Party',
+    kanji: '祝祭夜',
+    subtitle: 'The signature evening gala',
+    image: '/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg',
+    description:
+      'The legendary conference night! Music, themed apparel, dazzling stage lights, and pure celebration of youth and togetherness.',
+  },
+  {
+    title: 'And Many More',
+    kanji: '無限',
+    subtitle: 'Traditions, awards & roll calls',
+    image: '/assets/catalyst-gallery/616938786_1268082458699001_1398486345666317073_n.jpg',
+    description:
+      'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
+  },
+]
+
+const DAYS = [
+  {
+    day: 'Day 01',
     kanji: '覚醒',
-    title: 'THE AWAKENING & FORGE',
-    theme: 'Arrival · Outbound Challenges · The Gala',
+    title: 'The Awakening & Forge',
+    theme: 'Arrival · Outbound challenges · The gala',
+    tone: RED,
     points: [
       'Welcome ceremony & traditional delegate check-in',
       'High-energy outbound physical & strategic simulations',
@@ -160,10 +157,11 @@ const JOURNEY_DAYS = [
     ],
   },
   {
-    day: 'DAY 02',
+    day: 'Day 02',
     kanji: '昇華',
-    title: 'THE ASCENT & LEGACY',
-    theme: 'Hands-on Labs · Roadmap · Passing the Torch',
+    title: 'The Ascent & Legacy',
+    theme: 'Hands-on labs · Roadmap · Passing the torch',
+    tone: INK,
     points: [
       'Interactive skill labs and problem-solving masterclasses',
       'Inspiring plenary keynote sessions by industry leaders',
@@ -171,522 +169,564 @@ const JOURNEY_DAYS = [
       'Awards, roll call finale, and graduation into brotherhood',
     ],
   },
-];
+]
 
 // ============================================================================
-// REUSABLE ORNAMENTS
+// SMALL PARTS
 // ============================================================================
-const Hanko = ({ char = '結', size = 36 }: { char?: string; size?: number }) => (
+
+// scroll-in reveal: plays once, transform + opacity only
+const Reveal = ({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) => {
+  const reduce = useReducedMotion()
+  return (
+    <motion.div
+      className={className}
+      initial={reduce ? false : { opacity: 0, y: 28 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-70px' }}
+      transition={{ duration: 0.7, delay, ease: EASE }}
+    >
+      {children}
+    </motion.div>
+  )
+}
+
+// decorative image: tries each source in turn, and renders nothing if none load (so a wrong path never shows a broken icon)
+const Art = ({ srcs, className = '', style }: { srcs: string[]; className?: string; style?: React.CSSProperties }) => {
+  const [i, setI] = useState(0)
+  if (i >= srcs.length) return null
+  return (
+    <img
+      src={srcs[i]}
+      alt=""
+      aria-hidden="true"
+      draggable={false}
+      loading="lazy"
+      decoding="async"
+      onError={() => setI((n) => n + 1)}
+      className={className}
+      style={style}
+    />
+  )
+}
+
+const Hanko = ({ char, size = 36, bg = RED }: { char: string; size?: number; bg?: string }) => (
   <span
     aria-hidden="true"
-    className="inline-flex shrink-0 items-center justify-center font-bold text-white shadow-sm"
-    style={{
-      width: size,
-      height: size,
-      borderRadius: Math.round(size * 0.2),
-      background: '#C9362B',
-      fontFamily: KANJI_FONT,
-      fontSize: Math.round(size * 0.55),
-      lineHeight: 1,
-    }}
+    className="inline-flex shrink-0 items-center justify-center font-bold text-white"
+    style={{ width: size, height: size, borderRadius: Math.round(size * 0.2), background: bg, fontFamily: KANJI_FONT, fontSize: Math.round(size * 0.58), lineHeight: 1 }}
   >
     {char}
   </span>
-);
+)
 
-const BrushLine = ({ className = '' }: { className?: string }) => (
+const BrushUnderline = ({ className = '', color = RED }: { className?: string; color?: string }) => (
   <svg viewBox="0 0 420 28" fill="none" className={className} aria-hidden="true" preserveAspectRatio="none">
     <path
       d="M6 16 C45 10, 95 8, 150 9 C220 10, 290 8, 350 12 C385 14, 405 16, 416 13 C405 20, 370 21, 320 20 C240 18, 160 21, 90 20 C50 19, 20 20, 6 16 Z"
-      fill="#C9362B"
+      fill={color}
     />
   </svg>
-);
+)
 
-const WaveDivider = () => (
-  <div
-    aria-hidden="true"
-    className="h-5 w-full select-none"
-    style={{ backgroundImage: SEIGAIHA, backgroundSize: '40px 20px', backgroundRepeat: 'repeat-x' }}
-  />
-);
+// seigaiha edge; `bg` is the colour BEHIND the waves (use the colour of the section it sits on)
+const Waves = ({ bg }: { bg?: string }) => (
+  <div aria-hidden="true" className="h-5 w-full select-none" style={{ backgroundColor: bg, backgroundImage: SEIGAIHA, backgroundSize: '40px 20px', backgroundRepeat: 'repeat-x' }} />
+)
+
+const Eyebrow = ({ kanji, label, light = false }: { kanji: string; label: string; light?: boolean }) => (
+  <div className="inline-flex items-center gap-3">
+    <Hanko char={kanji} size={30} bg={light ? GOLD : RED} />
+    <span
+      className="text-xs font-bold uppercase tracking-[0.3em]"
+      style={{ fontFamily: LABEL_FONT, color: light ? GOLD : RED }}
+    >
+      {label}
+    </span>
+  </div>
+)
 
 // ============================================================================
-// MAIN ABOUT PAGE COMPONENT
+// PAGE
 // ============================================================================
 export default function AboutPage() {
-  const reduce = useReducedMotion();
-
   return (
     <div className="relative min-h-screen overflow-x-clip bg-[#F8F3E9] font-sans text-[#252321] selection:bg-[#C9362B] selection:text-white">
       <Navbar />
 
-      {/* Floating Petals */}
-      <div className="pointer-events-none fixed inset-0 z-10 opacity-50">
-        <SakuraPetals enabled={true} />
-      </div>
+      <main>
+        {/* ====================================================================
+            1 · HERO
+           ==================================================================== */}
+        <section className="relative overflow-hidden px-4 pb-14 pt-10 sm:px-6 sm:pb-20 sm:pt-14 lg:px-8">
+          {/* petals live only inside the hero (paint containment also traps a fixed canvas in here) */}
+          <div className="pointer-events-none absolute inset-0 opacity-60" style={{ contain: 'paint' }} aria-hidden="true">
+            <SakuraPetals enabled={true} />
+          </div>
 
-      {/* Subtle Background Watermark Layer */}
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-        <div className="absolute -right-[6%] top-[10%] w-[380px] select-none opacity-[0.035] sm:w-[560px]">
-          <img src={ART.building} alt="" className="h-auto w-full object-contain grayscale" />
-        </div>
-        <div className="absolute -left-[8%] top-[45%] w-[340px] select-none opacity-[0.035] sm:w-[500px]">
-          <img src={ART.tree} alt="" className="h-auto w-full object-contain grayscale" />
-        </div>
-        <div
-          className="absolute right-[-4%] top-[16%] select-none text-[20vw] font-black leading-none text-[#252321]/[0.02]"
-          style={{ fontFamily: KANJI_FONT }}
-        >
-          触媒
-        </div>
-      </div>
+          {/* giant faint kanji + pagoda */}
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -right-[3%] top-[4%] select-none text-[34vw] font-black leading-none text-[#252321]/[0.025] lg:text-[26vw]"
+            style={{ fontFamily: KANJI_FONT }}
+          >
+            触媒
+          </span>
+          <Art srcs={ART.pagoda} className="pointer-events-none absolute -left-10 bottom-0 hidden w-[340px] select-none opacity-[0.07] grayscale lg:block" />
 
-      <main className="relative z-10">
-        {/* =========================================================================
-            HERO SECTION
-           ========================================================================= */}
-        <section className="relative px-4 pb-16 pt-28 sm:px-6 sm:pt-36 lg:px-8 lg:pb-24">
-          <div className="mx-auto max-w-6xl">
-            {/* Top Eyebrow Pill */}
-            <div className="flex justify-center">
+          <div className="relative mx-auto grid max-w-6xl items-center gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:gap-6">
+            {/* text */}
+            <div className="text-center lg:text-left">
               <motion.div
                 initial={{ opacity: 0, y: -12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, ease: EASE }}
-                className="inline-flex items-center gap-2.5 rounded-full border border-[#252321]/20 bg-[#FAF6EE] py-1.5 pl-2 pr-4 shadow-[0_4px_16px_rgba(37,35,33,0.06)]"
+                className="inline-flex max-w-full items-center gap-2.5 rounded-full border border-[#252321]/20 bg-[#FAF6EE] py-1.5 pl-2 pr-4 shadow-[0_4px_16px_rgba(37,35,33,0.06)]"
               >
                 <TagMark />
-                <span
-                  className="text-[10px] font-bold uppercase tracking-[0.24em] text-[#252321] sm:text-xs"
-                  style={{ fontFamily: LABEL_FONT }}
-                >
-                  AIESEC IN SLIIT · ABOUT CATALYST 7.0
+                <span className="text-[10px] font-bold uppercase tracking-[0.22em] sm:text-xs" style={{ fontFamily: LABEL_FONT }}>
+                  AIESEC in SLIIT · About Catalyst 7.0
                 </span>
               </motion.div>
-            </div>
 
-            {/* Main Title & Calligraphy */}
-            <div className="mt-8 text-center">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, delay: 0.1, ease: EASE }}
-                className="mb-3 flex items-center justify-center gap-3"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mt-7 flex items-center justify-center gap-3 lg:justify-start"
               >
-                <span className="h-px w-8 bg-[#C9362B]/50 sm:w-16" />
-                <span
-                  className="pl-[0.4em] text-xs font-bold tracking-[0.45em] text-[#C9362B] sm:text-sm"
-                  style={{ fontFamily: KANJI_FONT }}
-                >
-                  変 革 の 起 点
+                <span className="h-px w-10 bg-[#C9362B]/60" />
+                <span className="pl-[0.4em] text-xs font-bold tracking-[0.45em] text-[#C9362B] sm:text-sm" style={{ fontFamily: KANJI_FONT }}>
+                  変革の起点
                 </span>
-                <span className="h-px w-8 bg-[#C9362B]/50 sm:w-16" />
               </motion.div>
 
               <motion.h1
-                initial={{ opacity: 0, y: 24 }}
+                initial={{ opacity: 0, y: 26 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, delay: 0.15, ease: EASE }}
-                className="tracking-[0.02em]"
+                transition={{ duration: 0.8, delay: 0.12, ease: EASE }}
+                className="brush-heading mt-3 tracking-[0.02em]"
                 style={{ fontFamily: HEADING_FONT }}
               >
-                <span className="block text-[clamp(2.5rem,8vw,5.5rem)] uppercase leading-[1.05] text-[#252321]">
-                  WHERE LEADERS ARE FORGED
-                </span>
-                <span className="block text-[clamp(2.8rem,9vw,6.5rem)] uppercase leading-[1.02] text-[#C9362B]">
-                  CATALYST 7.0
+                <span className="block text-[clamp(2.1rem,6.4vw,4.4rem)] uppercase leading-[1.05] text-[#252321]">Where leaders</span>
+                <span className="block text-[clamp(2.1rem,6.4vw,4.4rem)] uppercase leading-[1.05] text-[#252321]">are forged</span>
+                <span className="relative mt-1 inline-block max-w-full text-[clamp(3rem,10.5vw,6.6rem)] uppercase leading-[1.02] text-[#C9362B]">
+                  Catalyst 7.0
+                  <BrushUnderline className="mt-[-2px] block h-3 w-full sm:h-5" />
                 </span>
               </motion.h1>
-
-              <motion.div
-                initial={{ scaleX: 0, opacity: 0 }}
-                animate={{ scaleX: 1, opacity: 1 }}
-                transition={{ duration: 0.8, delay: 0.35, ease: EASE }}
-                className="mx-auto mt-2 w-[min(540px,85%)]"
-              >
-                <BrushLine className="block h-4 w-full sm:h-6" />
-              </motion.div>
 
               <motion.p
                 initial={{ opacity: 0, y: 16 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.4, ease: EASE }}
-                className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#3D3833] sm:text-lg sm:leading-relaxed"
+                transition={{ duration: 0.7, delay: 0.28, ease: EASE }}
+                className="mx-auto mt-6 max-w-xl text-base leading-[1.75] text-[#3D3833] sm:text-lg lg:mx-0"
               >
                 Catalyst 7.0 is the premier national youth leadership conference organized by{' '}
                 <strong className="font-semibold text-[#252321]">AIESEC in SLIIT</strong>. Rooted in the ancient warrior code of{' '}
-                <strong className="font-semibold text-[#C9362B]">Bushido</strong>, this 2-day immersive journey challenges undergraduates
-                to shatter comfort zones, discover relentless purpose, and forge lifelong brotherhood.
+                <strong className="font-semibold text-[#C9362B]">Bushido</strong>, this 2-day immersive journey challenges undergraduates to
+                shatter comfort zones, discover relentless purpose, and forge lifelong brotherhood.
               </motion.p>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.38, ease: EASE }}
+                className="mt-8 flex flex-wrap items-center justify-center gap-3 sm:gap-4 lg:justify-start"
+              >
+                <Link
+                  to="/register"
+                  className="group inline-flex min-h-[48px] items-center gap-2.5 rounded-full bg-[#C9362B] px-8 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[0_8px_22px_rgba(201,54,43,0.35)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#A8261E] sm:text-sm"
+                >
+                  Register now
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </Link>
+                <Link
+                  to="/conference-team"
+                  className="inline-flex min-h-[48px] items-center rounded-full border border-[#252321]/80 px-8 text-xs font-bold uppercase tracking-[0.2em] transition-colors duration-300 hover:bg-[#252321] hover:text-[#F8F3E9] sm:text-sm"
+                >
+                  Meet the team
+                </Link>
+              </motion.div>
             </div>
 
-            {/* Quick Metrics Strip */}
+            {/* visual: samurai in front of a rising sun */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5, ease: EASE }}
-              className="mt-12 grid grid-cols-2 gap-4 rounded-2xl border border-[#252321]/15 bg-white/70 p-4 shadow-[0_8px_30px_rgba(37,35,33,0.06)] backdrop-blur-xs sm:grid-cols-4 sm:p-6"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: EASE }}
+              aria-hidden="true"
+              className="relative mx-auto aspect-square w-[min(86vw,470px)]"
             >
-              {[
-                { num: '100+', label: 'Delegates', sub: 'From Top Universities' },
-                { num: '02', label: 'Unforgettable Days', sub: 'Intensive Immersion' },
-                { num: '06', label: 'Sessions', sub: 'Keynotes & Workshops' },
-                { num: '07th', label: 'Legacy Edition', sub: 'Excellence in Leadership' },
-              ].map((stat, i) => (
-                <div key={i} className="flex flex-col items-center text-center">
-                  <span
-                    className="text-2xl font-black text-[#C9362B] sm:text-3xl lg:text-4xl"
-                    style={{ fontFamily: HEADING_FONT }}
-                  >
-                    {stat.num}
-                  </span>
-                  <span className="mt-1 text-xs font-bold uppercase tracking-wider text-[#252321]">{stat.label}</span>
-                  <span className="text-[11px] text-[#736B63]">{stat.sub}</span>
-                </div>
-              ))}
+              {/* sun + rings */}
+              <div
+                className="absolute inset-[7%] rounded-full"
+                style={{ background: 'radial-gradient(circle at 38% 32%, #FF8A6E 0%, #E0452F 46%, #B51E23 100%)', boxShadow: '0 30px 60px rgba(150,20,30,0.25)' }}
+              />
+              <div className="absolute inset-[1%] rounded-full border border-[#C9362B]/35" />
+              <div className="absolute -inset-[5%] rounded-full border border-[#C9362B]/15" />
+              <Art
+                srcs={ART.samurai}
+                className="absolute inset-x-0 bottom-[-4%] mx-auto h-[108%] w-auto max-w-[118%] select-none object-contain drop-shadow-[0_22px_30px_rgba(60,5,15,0.35)]"
+              />
+              <span className="absolute bottom-[8%] right-[2%] rotate-6">
+                <Hanko char="士" size={64} />
+              </span>
+              <span
+                className="absolute left-[1%] top-[10%] text-sm tracking-[0.5em] text-[#252321]/70"
+                style={{ writingMode: 'vertical-rl', fontFamily: KANJI_FONT }}
+              >
+                第七回触媒
+              </span>
             </motion.div>
           </div>
         </section>
 
-        <WaveDivider />
+        {/* ====================================================================
+            2 · STATS RIBBON
+           ==================================================================== */}
+        <section className="relative px-4 sm:px-6 lg:px-8">
+          <Reveal>
+            <div
+              className="relative mx-auto grid max-w-6xl grid-cols-2 overflow-hidden rounded-3xl border-2 border-[#252321] text-white shadow-[8px_8px_0_#252321] sm:grid-cols-4"
+              style={{ background: `radial-gradient(120% 140% at 0% 0%, #D94A38 0%, ${RED} 45%, #A8261E 100%)` }}
+            >
+              {STATS.map((s, i) => (
+                <div
+                  key={s.label}
+                  className={`flex flex-col items-center px-3 py-7 text-center sm:py-9 ${i % 2 === 1 ? 'border-l' : ''} ${i >= 2 ? 'border-t sm:border-t-0' : ''} ${i === 2 ? 'sm:border-l' : ''} border-white/20`}
+                >
+                  <span className="text-4xl leading-none sm:text-5xl" style={{ fontFamily: HEADING_FONT }}>
+                    {s.num}
+                  </span>
+                  <span className="mt-3 text-xs font-bold uppercase tracking-[0.22em]" style={{ fontFamily: LABEL_FONT }}>
+                    {s.label}
+                  </span>
+                  <span className="mt-1 text-[11px] text-white/75">{s.sub}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+        </section>
 
-        {/* =========================================================================
-            SECTION 1: THE FOUR PILLARS
-           ========================================================================= */}
-        <section className="relative px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            {/* Section Header */}
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-[#C9362B]">
-                <Hanko char="志" size={26} />
-                <span style={{ fontFamily: LABEL_FONT }}>THE CRUCIBLE CODE</span>
-              </div>
+        <div className="mt-16 sm:mt-24">
+          <Waves />
+        </div>
+
+        {/* ====================================================================
+            3 · FOUR PILLARS (dark wine)
+           ==================================================================== */}
+        <section className="relative overflow-hidden px-4 py-16 sm:px-6 sm:py-24 lg:px-8" style={{ background: WINE }}>
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-x-0 top-0 h-[480px]"
+            style={{ background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(201,54,43,0.35), rgba(201,54,43,0) 70%)' }}
+          />
+          <span
+            aria-hidden="true"
+            className="pointer-events-none absolute -left-4 bottom-[-6%] select-none text-[30vw] font-black leading-none text-white/[0.03]"
+            style={{ fontFamily: KANJI_FONT }}
+          >
+            武士道
+          </span>
+
+          <div className="relative mx-auto max-w-6xl">
+            <Reveal className="text-center">
+              <Eyebrow kanji="志" label="The Crucible Code" light />
               <h2
-                className="mt-3 text-[clamp(2.2rem,5.5vw,3.8rem)] uppercase leading-tight text-[#252321]"
+                className="brush-heading mt-4 text-[clamp(2.2rem,6vw,4.4rem)] uppercase leading-[1.05] text-[#FFF3E3]"
                 style={{ fontFamily: HEADING_FONT }}
               >
-                FOUR PILLARS OF CATALYST 7.0
+                Four pillars of <span style={{ color: GOLD }}>Catalyst 7.0</span>
               </h2>
-              <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-[#59524C] sm:text-base">
+              <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#FFF3E3]/70 sm:text-base">
                 Every keynote, physical challenge, and late-night discussion is anchored by these four fundamental virtues.
               </p>
-            </div>
+            </Reveal>
 
-            {/* 4 Pillars Grid */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:gap-8">
-              {PILLARS.map((pillar) => {
-                const Icon = pillar.icon;
+            <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {PILLARS.map((p, i) => {
+                const Icon = p.icon
                 return (
-                  <div
-                    key={pillar.num}
-                    className="group relative flex flex-col justify-between overflow-hidden rounded-2xl border border-[#252321]/15 bg-white/85 p-6 shadow-[0_6px_24px_rgba(37,35,33,0.05)] transition-all duration-300 hover:-translate-y-1 hover:border-[#C9362B]/40 hover:shadow-[0_12px_32px_rgba(201,54,43,0.12)] sm:p-8"
-                  >
-                    {/* Watermark Kanji */}
-                    <span
-                      aria-hidden="true"
-                      className="pointer-events-none absolute -bottom-4 -right-2 select-none text-8xl font-black text-[#252321]/[0.035] transition-transform duration-500 group-hover:scale-110 group-hover:text-[#C9362B]/[0.08]"
-                      style={{ fontFamily: KANJI_FONT }}
-                    >
-                      {pillar.kanji}
-                    </span>
+                  <Reveal key={p.num} delay={i * 0.08} className="h-full">
+                    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8C27A]/25 bg-white/[0.04] p-6 transition-[transform,border-color] duration-300 hover:-translate-y-1.5 hover:border-[#E8C27A]/70">
+                      {/* vertical kanji */}
+                      <span
+                        aria-hidden="true"
+                        className="absolute right-4 top-5 text-2xl tracking-[0.3em] text-[#E8C27A]/45"
+                        style={{ writingMode: 'vertical-rl', fontFamily: KANJI_FONT }}
+                      >
+                        {p.kanji}
+                      </span>
 
-                    <div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#C9362B]/10 text-[#C9362B] transition-colors duration-300 group-hover:bg-[#C9362B] group-hover:text-white">
-                          <Icon className="h-6 w-6" />
-                        </div>
-                        <span
-                          className="text-2xl font-bold text-[#C9362B]/60"
-                          style={{ fontFamily: HEADING_FONT }}
-                        >
-                          {pillar.num}
-                        </span>
+                      {/* outlined numeral */}
+                      <span
+                        aria-hidden="true"
+                        className="block text-[5.5rem] leading-none text-transparent"
+                        style={{ fontFamily: HEADING_FONT, WebkitTextStroke: '1.5px rgba(232,194,122,0.55)' }}
+                      >
+                        {p.num}
+                      </span>
+
+                      <div className="mt-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#E8C27A]/50 text-[#E8C27A] transition-colors duration-300 group-hover:bg-[#E8C27A] group-hover:text-[#2A0310]">
+                        <Icon className="h-5 w-5" />
                       </div>
 
-                      <div className="mt-6">
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-[#C9362B]" style={{ fontFamily: KANJI_FONT }}>
-                            {pillar.kanji}
-                          </span>
-                          <span className="text-[11px] font-semibold uppercase tracking-wider text-[#736B63]">
-                            {pillar.subtitle}
-                          </span>
-                        </div>
-                        <h3
-                          className="mt-1 text-xl font-bold tracking-wide text-[#252321] sm:text-2xl"
-                          style={{ fontFamily: HEADING_FONT }}
-                        >
-                          {pillar.title}
-                        </h3>
-                        <p className="mt-3 text-sm leading-relaxed text-[#4A4340] sm:text-[15px]">
-                          {pillar.desc}
+                      <h3 className="mt-5 text-2xl uppercase leading-tight text-[#FFF3E3]" style={{ fontFamily: HEADING_FONT }}>
+                        {p.title}
+                      </h3>
+                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD, fontFamily: LABEL_FONT }}>
+                        {p.subtitle}
+                      </p>
+                      <p className="mt-4 text-sm leading-relaxed text-[#FFF3E3]/72">{p.desc}</p>
+                    </article>
+                  </Reveal>
+                )
+              })}
+            </div>
+          </div>
+        </section>
+        <Waves bg={WINE} />
+
+        {/* ====================================================================
+            4 · EVENTS (bento grid)
+           ==================================================================== */}
+        <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+          <div className="mx-auto max-w-6xl">
+            <Reveal className="text-center">
+              <Eyebrow kanji="祭" label="What to expect" />
+              <h2 className="brush-heading mt-4 text-[clamp(2.3rem,6.4vw,4.8rem)] uppercase leading-[1.05]" style={{ fontFamily: HEADING_FONT }}>
+                Special events in <span className="text-[#C9362B]">Catalyst</span>
+              </h2>
+              <div className="mx-auto mt-1 w-[min(380px,72%)]">
+                <BrushUnderline className="block h-4 w-full sm:h-5" />
+              </div>
+              <p className="mx-auto mt-5 max-w-2xl text-sm leading-relaxed text-[#4A4340] sm:text-base">
+                An electrifying lineup of non-stop action, intellectual growth, physical camaraderie, and celebrations that will forge memories
+                to cherish forever.
+              </p>
+            </Reveal>
+
+            <div className="mt-14 grid auto-rows-[330px] gap-5 sm:grid-cols-2 lg:auto-rows-[290px] lg:grid-cols-3 lg:gap-6">
+              {EVENTS.map((e, i) => {
+                const big = i === 0
+                return (
+                  <Reveal key={e.title} delay={(i % 3) * 0.08} className={big ? 'sm:col-span-2 lg:row-span-2' : ''}>
+                    <article className="group relative h-full overflow-hidden rounded-2xl border-2 border-[#252321] bg-[#252321] shadow-[5px_5px_0_#252321] transition-[transform,box-shadow] duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0_#C9362B]">
+                      <img
+                        src={e.image}
+                        alt={e.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#1B0209] via-[#1B0209]/45 to-transparent" />
+
+                      <span
+                        className="absolute left-4 top-4 rounded-md bg-[#C9362B] px-2.5 py-1 text-xs font-bold text-white"
+                        style={{ fontFamily: KANJI_FONT }}
+                      >
+                        {e.kanji}
+                      </span>
+                      <span className="absolute right-4 top-4 text-sm font-bold tracking-widest text-white/60" style={{ fontFamily: HEADING_FONT }}>
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+
+                      <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6">
+                        <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#E8C27A]" style={{ fontFamily: LABEL_FONT }}>
+                          {e.subtitle}
                         </p>
+                        <h3
+                          className={`mt-1 uppercase leading-none text-white ${big ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'}`}
+                          style={{ fontFamily: HEADING_FONT }}
+                        >
+                          {e.title}
+                        </h3>
+                        <p className={`mt-3 max-w-xl text-sm leading-relaxed text-white/80 ${big ? '' : 'line-clamp-3'}`}>{e.description}</p>
                       </div>
-                    </div>
-                  </div>
-                );
+                    </article>
+                  </Reveal>
+                )
               })}
             </div>
           </div>
         </section>
 
-        <WaveDivider />
+        <Waves />
 
-        {/* =========================================================================
-            SECTION 2: SPECIAL EVENTS IN CATALYST (USER REQUEST IMAGE)
-           ========================================================================= */}
-        <section className="relative px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            {/* Header matching the user's banner */}
-            <div className="flex flex-col items-center text-center">
-              <div className="inline-flex items-center gap-2.5 rounded-full border border-[#C9362B]/30 bg-[#C9362B]/10 px-4 py-1.5 text-xs font-bold uppercase tracking-[0.22em] text-[#C9362B]">
-                <Sparkles className="h-3.5 w-3.5" />
-                <span>WHAT TO EXPECT</span>
-              </div>
+        {/* ====================================================================
+            5 · THE JOURNEY (2 days)
+           ==================================================================== */}
+        <section className="relative overflow-hidden bg-[#F4ECE0]/70 px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+          {[520, 800].map((d, i) => (
+            <div
+              key={d}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 rounded-full border border-[#C9362B]"
+              style={{ width: d, height: d, top: -d / 2, marginLeft: -d / 2, opacity: 0.16 - i * 0.06 }}
+            />
+          ))}
 
-              <h2
-                className="mt-4 text-[clamp(2.3rem,6vw,4.5rem)] uppercase leading-none tracking-tight text-[#252321]"
-                style={{ fontFamily: HEADING_FONT }}
-              >
-                SPECIAL EVENTS IN CATALYST
+          <div className="relative mx-auto max-w-6xl">
+            <Reveal className="text-center">
+              <Eyebrow kanji="旅" label="The expedition" />
+              <h2 className="brush-heading mt-4 text-[clamp(2.2rem,5.6vw,4.2rem)] uppercase leading-[1.05]" style={{ fontFamily: HEADING_FONT }}>
+                The <span className="text-[#C9362B]">2-day</span> delegate journey
               </h2>
-
-              <div className="mx-auto mt-2 w-[min(380px,75%)]">
-                <BrushLine className="block h-3.5 w-full sm:h-5" />
-              </div>
-
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#4A4340] sm:text-base">
-                An electrifying lineup of non-stop action, intellectual growth, physical camaraderie, and celebrations that
-                will forge memories to cherish forever.
-              </p>
-            </div>
-
-            {/* 6 Special Events Grid matching the user's screenshot layout */}
-            <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 lg:gap-8">
-              {SPECIAL_EVENTS.map((event, idx) => (
-                <div
-                  key={idx}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-[#252321] bg-white shadow-[6px_6px_0_#252321] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[10px_10px_0_#C9362B]"
-                >
-                  {/* Photo Frame */}
-                  <div className="relative aspect-16/10 w-full overflow-hidden bg-[#252321]">
-                    <img
-                      src={event.image}
-                      alt={event.title}
-                      loading="lazy"
-                      className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80" />
-
-                    {/* Kanji Tag */}
-                    <span
-                      className="absolute right-3 top-3 rounded-md bg-black/60 px-2 py-1 text-xs font-bold text-white/90 backdrop-blur-xs"
-                      style={{ fontFamily: KANJI_FONT }}
-                    >
-                      {event.kanji}
-                    </span>
-                  </div>
-
-                  {/* Ribbon Label */}
-                  <div className="relative -mt-4 mx-3 rounded-lg bg-[#C9362B] px-4 py-2.5 text-center shadow-md">
-                    <h3
-                      className="text-base font-bold uppercase tracking-wider text-white sm:text-lg"
-                      style={{ fontFamily: HEADING_FONT }}
-                    >
-                      {event.title}
-                    </h3>
-                  </div>
-
-                  {/* Description Box */}
-                  <div className="flex flex-1 flex-col justify-between p-5 pt-3 text-center sm:p-6 sm:pt-4">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-[#C9362B]">
-                      {event.subtitle}
-                    </p>
-                    <p className="mt-2 text-xs leading-relaxed text-[#4A4340] sm:text-sm">
-                      {event.description}
-                    </p>
-                    <div className="mt-4 flex items-center justify-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#252321]/70 group-hover:text-[#C9362B] transition-colors">
-                      <span>Experience It</span>
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <WaveDivider />
-
-        {/* =========================================================================
-            SECTION 3: THE 2-DAY DELEGATE JOURNEY
-           ========================================================================= */}
-        <section className="relative px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="mx-auto max-w-6xl">
-            <div className="text-center">
-              <div className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.25em] text-[#C9362B]">
-                <Calendar className="h-4 w-4" />
-                <span style={{ fontFamily: LABEL_FONT }}>THE EXPEDITION</span>
-              </div>
-              <h2
-                className="mt-3 text-[clamp(2.2rem,5vw,3.6rem)] uppercase leading-tight text-[#252321]"
-                style={{ fontFamily: HEADING_FONT }}
-              >
-                THE 3-DAY DELEGATE JOURNEY
-              </h2>
-              <p className="mx-auto mt-2 max-w-lg text-sm text-[#59524C] sm:text-base">
+              <p className="mx-auto mt-4 max-w-lg text-sm text-[#59524C] sm:text-base">
                 From the moment you step foot at the venue to the final roll call, every hour is crafted for transformation.
               </p>
-            </div>
+            </Reveal>
 
-            {/* Timeline Cards */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-4xl mx-auto lg:gap-8">
-              {JOURNEY_DAYS.map((d, i) => (
-                <div
-                  key={i}
-                  className="relative flex flex-col rounded-2xl border border-[#252321]/15 bg-white/90 p-6 shadow-[0_8px_24px_rgba(37,35,33,0.06)] sm:p-7"
-                >
-                  <div className="flex items-center justify-between border-b border-[#252321]/10 pb-4">
-                    <div>
-                      <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#C9362B]">
+            <div className="mt-14 grid gap-8 lg:grid-cols-2 lg:gap-10">
+              {DAYS.map((d, i) => (
+                <Reveal key={d.day} delay={i * 0.12} className="h-full">
+                  <article className="flex h-full flex-col overflow-hidden rounded-3xl border-2 border-[#252321] bg-[#FAF6EE] shadow-[8px_8px_0_#252321]">
+                    {/* header band */}
+                    <div className="relative overflow-hidden px-6 py-6 text-white sm:px-8" style={{ background: d.tone }}>
+                      <span
+                        aria-hidden="true"
+                        className="pointer-events-none absolute -right-2 -top-6 select-none text-[8rem] font-black leading-none text-white/15"
+                        style={{ fontFamily: KANJI_FONT }}
+                      >
+                        {d.kanji}
+                      </span>
+                      <span className="relative text-xs font-bold uppercase tracking-[0.3em] text-[#E8C27A]" style={{ fontFamily: LABEL_FONT }}>
                         {d.day}
                       </span>
-                      <h3 className="mt-1 text-xl font-bold uppercase tracking-wide text-[#252321]" style={{ fontFamily: HEADING_FONT }}>
+                      <h3 className="relative mt-2 text-3xl uppercase leading-tight sm:text-4xl" style={{ fontFamily: HEADING_FONT }}>
                         {d.title}
                       </h3>
+                      <p className="relative mt-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-white/80">{d.theme}</p>
                     </div>
-                    <span className="text-3xl font-black text-[#C9362B]/30" style={{ fontFamily: KANJI_FONT }}>
-                      {d.kanji}
-                    </span>
-                  </div>
 
-                  <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-[#736B63]">
-                    {d.theme}
-                  </p>
-
-                  <ul className="mt-5 space-y-3">
-                    {d.points.map((pt, idx) => (
-                      <li key={idx} className="flex items-start gap-2.5 text-xs text-[#3D3833] sm:text-sm">
-                        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-[#C9362B]" />
-                        <span>{pt}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                    {/* steps with a connecting thread */}
+                    <ol className="relative flex-1 px-6 py-7 sm:px-8">
+                      <span aria-hidden="true" className="absolute bottom-10 left-[2.65rem] top-10 w-px bg-[#252321]/20 sm:left-[3.15rem]" />
+                      {d.points.map((pt, idx) => (
+                        <li key={pt} className="relative flex items-start gap-4 pb-6 last:pb-0">
+                          <span
+                            className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-[#252321] bg-[#FAF6EE] text-sm font-bold"
+                            style={{ fontFamily: HEADING_FONT, color: d.tone }}
+                          >
+                            {idx + 1}
+                          </span>
+                          <span className="pt-1.5 text-sm leading-relaxed text-[#3D3833] sm:text-[15px]">{pt}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  </article>
+                </Reveal>
               ))}
             </div>
           </div>
         </section>
 
-        <WaveDivider />
+        <Waves />
 
-        {/* =========================================================================
-            SECTION 4: MEET THE CONFERENCE TEAM CTA
-           ========================================================================= */}
-        <section className="relative px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
-          <div className="mx-auto max-w-5xl overflow-hidden rounded-3xl border-2 border-[#252321] bg-gradient-to-br from-[#FAF6EE] via-[#F8F3E9] to-[#F1E5D5] p-8 shadow-[8px_8px_0_#252321] sm:p-12 lg:p-14">
-            <div className="grid items-center gap-8 lg:grid-cols-[1.2fr_auto_1fr]">
-              <div>
-                <div className="inline-flex items-center gap-2 rounded-full border border-[#C9362B]/30 bg-[#C9362B]/10 px-3.5 py-1 text-xs font-bold uppercase tracking-[0.2em] text-[#C9362B]">
-                  <Hanko char="組" size={20} />
-                  <span>BEHIND THE SCENES</span>
-                </div>
+        {/* ====================================================================
+            6 · MEET THE TEAM
+           ==================================================================== */}
+        <section className="px-4 py-16 sm:px-6 sm:py-24 lg:px-8">
+          <Reveal>
+            <div
+              className="relative mx-auto max-w-6xl overflow-hidden rounded-3xl border-2 border-[#252321] p-8 shadow-[8px_8px_0_#C9362B] sm:p-12 lg:p-16"
+              style={{ background: `linear-gradient(135deg, ${WINE} 0%, #4A0A1C 100%)` }}
+            >
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -bottom-10 right-[18%] select-none text-[16rem] font-black leading-none text-white/[0.04]"
+                style={{ fontFamily: KANJI_FONT }}
+              >
+                組
+              </span>
 
-                <h3
-                  className="mt-4 text-[clamp(2rem,5vw,3.2rem)] uppercase leading-tight text-[#252321]"
-                  style={{ fontFamily: HEADING_FONT }}
-                >
-                  MEET THE LEADERS FORGING CATALYST 7.0
-                </h3>
-
-                <p className="mt-4 text-sm leading-relaxed text-[#4A4340] sm:text-base">
-                  A powerhouse coalition of Executive Board facilitators (FACI) and Organizing Committee co-facilitators (CO FACI) working relentlessly
-                  around the clock to deliver Sri Lanka&apos;s ultimate youth summit.
-                </p>
-
-                <div className="mt-8 flex flex-wrap gap-4">
-                  <Link
-                    to="/conference-team"
-                    className="inline-flex min-h-[48px] items-center gap-2.5 rounded-full bg-[#C9362B] px-8 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[0_8px_20px_rgba(201,54,43,0.35)] transition-all hover:-translate-y-0.5 hover:bg-[#A8261E]"
+              <div className="relative grid items-center gap-10 lg:grid-cols-[1.3fr_1fr]">
+                <div>
+                  <Eyebrow kanji="組" label="Behind the scenes" light />
+                  <h3
+                    className="brush-heading mt-5 text-[clamp(2rem,5vw,3.6rem)] uppercase leading-[1.05] text-[#FFF3E3]"
+                    style={{ fontFamily: HEADING_FONT }}
                   >
-                    <span>Meet the Conference Team</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Link>
-                  <Link
-                    to="/conference-team?team=eb"
-                    className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-[#252321] px-6 text-xs font-bold uppercase tracking-[0.18em] text-[#252321] transition-colors hover:bg-[#252321] hover:text-[#FAF6EE]"
-                  >
-                    <span>View Executive Board</span>
-                  </Link>
-                </div>
-              </div>
-
-              {/* Decorative Divider */}
-              <div className="hidden h-40 w-px bg-[#252321]/20 lg:block" />
-
-              {/* Decorative Torii illustration */}
-              <div className="flex justify-center">
-                <div className="relative">
-                  <img
-                    src={ART.torii}
-                    alt=""
-                    aria-hidden="true"
-                    className="w-48 sm:w-56 lg:w-64 drop-shadow-[0_12px_24px_rgba(201,54,43,0.2)]"
-                  />
-                  <div
-                    className="absolute -bottom-2 -right-2 text-5xl font-black text-[#C9362B]/20"
-                    style={{ fontFamily: KANJI_FONT }}
-                  >
-                    理事会
+                    Meet the leaders forging <span style={{ color: GOLD }}>Catalyst 7.0</span>
+                  </h3>
+                  <p className="mt-5 max-w-xl text-sm leading-relaxed text-[#FFF3E3]/75 sm:text-base">
+                    A powerhouse coalition of Executive Board facilitators (FACI) and Organizing Committee co-facilitators (CO FACI) working
+                    relentlessly around the clock to deliver Sri Lanka&apos;s ultimate youth summit.
+                  </p>
+                  <div className="mt-8 flex flex-wrap gap-4">
+                    <Link
+                      to="/conference-team"
+                      className="group inline-flex min-h-[48px] items-center gap-2.5 rounded-full bg-[#C9362B] px-8 text-xs font-bold uppercase tracking-[0.2em] text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-[#E0452F]"
+                    >
+                      Meet the conference team
+                      <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                    </Link>
+                    <Link
+                      to="/conference-team?team=eb"
+                      className="inline-flex min-h-[48px] items-center gap-2 rounded-full border border-[#E8C27A]/70 px-7 text-xs font-bold uppercase tracking-[0.18em] text-[#E8C27A] transition-colors duration-300 hover:bg-[#E8C27A] hover:text-[#2A0310]"
+                    >
+                      Executive board
+                      <ArrowUpRight size={15} />
+                    </Link>
                   </div>
                 </div>
+
+                <div className="relative flex justify-center">
+                  <div className="absolute inset-[8%] rounded-full" style={{ background: 'radial-gradient(circle, rgba(232,194,122,0.22), rgba(232,194,122,0) 70%)' }} />
+                  <Art srcs={ART.torii} className="relative w-56 select-none drop-shadow-[0_16px_28px_rgba(0,0,0,0.4)] sm:w-64 lg:w-72" />
+                </div>
               </div>
             </div>
-          </div>
+          </Reveal>
         </section>
 
-        {/* =========================================================================
-            SECTION 5: REGISTRATION PRE-FOOTER CTA
-           ========================================================================= */}
-        <section className="relative px-4 pb-20 pt-8 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            <div className="mb-4 flex items-center justify-center gap-4" aria-hidden="true">
-              <span className="h-px w-12 bg-[#252321]/30 sm:w-20" />
-              <Hanko char="命" size={38} />
-              <span className="h-px w-12 bg-[#252321]/30 sm:w-20" />
+        {/* ====================================================================
+            7 · REGISTER
+           ==================================================================== */}
+        <section className="relative overflow-hidden text-white" style={{ background: `linear-gradient(180deg, ${RED}, #A8261E)` }}>
+          <Waves bg={RED} />
+          {[420, 700].map((d, i) => (
+            <div
+              key={d}
+              aria-hidden="true"
+              className="pointer-events-none absolute left-1/2 top-1/2 rounded-full border border-white"
+              style={{ width: d, height: d, marginLeft: -d / 2, marginTop: -d / 2, opacity: 0.2 - i * 0.08 }}
+            />
+          ))}
+          <Art srcs={ART.branch} className="pointer-events-none absolute -right-10 -top-4 hidden w-[360px] select-none opacity-90 md:block" />
+
+          <Reveal className="relative mx-auto max-w-3xl px-4 pb-20 pt-14 text-center sm:px-6 sm:pb-28 sm:pt-20">
+            <div className="mb-5 flex items-center justify-center gap-4" aria-hidden="true">
+              <span className="h-px w-14 bg-white/40" />
+              <Hanko char="命" size={42} bg="#FAF6EE" />
+              <span className="h-px w-14 bg-white/40" />
             </div>
-
-            <h2
-              className="text-[clamp(2.4rem,6vw,4.2rem)] uppercase leading-none tracking-tight text-[#252321]"
-              style={{ fontFamily: HEADING_FONT }}
-            >
-              YOUR SQUAD AWAITS
+            <h2 className="brush-heading text-[clamp(2.6rem,7vw,5rem)] uppercase leading-none" style={{ fontFamily: HEADING_FONT }}>
+              Your squad awaits
             </h2>
-
-            <p className="mx-auto mt-4 max-w-lg text-sm text-[#4A4340] sm:text-base">
-              Seats at Catalyst 7.0 are limited to maintain our high-touch delegate experience. Claim your place today and
-              dare beyond definition.
+            <p className="mx-auto mt-5 max-w-lg text-sm leading-relaxed text-white/85 sm:text-base">
+              Seats at Catalyst 7.0 are limited to maintain our high-touch delegate experience. Claim your place today and dare beyond
+              definition.
             </p>
-
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link
                 to="/register"
-                className="inline-flex min-h-[50px] items-center gap-2.5 rounded-full bg-[#C9362B] px-9 text-xs font-bold uppercase tracking-[0.2em] text-white shadow-[0_10px_26px_rgba(201,54,43,0.4)] transition-all hover:-translate-y-0.5 hover:bg-[#A8261E]"
+                className="group inline-flex min-h-[52px] items-center gap-2.5 rounded-full bg-[#FAF6EE] px-9 text-xs font-bold uppercase tracking-[0.2em] text-[#C9362B] shadow-[0_10px_26px_rgba(0,0,0,0.25)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-white sm:text-sm"
               >
-                <span>Register for Catalyst 7.0</span>
-                <ArrowRight className="h-4 w-4" />
+                Register for Catalyst 7.0
+                <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <Link
                 to="/merch"
-                className="inline-flex min-h-[50px] items-center rounded-full border border-[#252321] px-8 text-xs font-bold uppercase tracking-[0.18em] text-[#252321] transition-colors hover:bg-[#252321] hover:text-[#FAF6EE]"
+                className="inline-flex min-h-[52px] items-center rounded-full border border-white/80 px-8 text-xs font-bold uppercase tracking-[0.18em] transition-colors duration-300 hover:bg-white hover:text-[#C9362B] sm:text-sm"
               >
-                <span>Explore Official Merch</span>
+                Explore official merch
               </Link>
             </div>
-          </div>
+          </Reveal>
         </section>
       </main>
     </div>
-  );
+  )
 }
