@@ -52,7 +52,7 @@ const ART = {
 const STATS = [
   { num: '100+', label: 'Delegates', sub: 'From top universities' },
   { num: '02', label: 'Days', sub: 'Intensive immersion' },
-  { num: '06', label: 'Experiences', sub: 'Keynotes to the gala' },
+  { num: '06', label: 'Experiences', sub: 'Keynotes to Alumni Night' },
   { num: '7th', label: 'Edition', sub: 'Excellence in leadership' },
 ]
 
@@ -125,9 +125,9 @@ const EVENTS = [
       'Peer-to-peer dialogues, honest self-reflection circles, and shared stories that turn strangers into comrades for life.',
   },
   {
-    title: 'Theme Party',
+    title: 'Alumni Night & DJ Party',
     kanji: '祝祭夜',
-    subtitle: 'The signature evening gala',
+    subtitle: 'The signature evening celebration',
     image: '/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg',
     description:
       'The legendary conference night! Music, themed apparel, dazzling stage lights, and pure celebration of youth and togetherness.',
@@ -135,7 +135,7 @@ const EVENTS = [
   {
     title: 'And Many More',
     kanji: '無限',
-    subtitle: 'Traditions, awards & roll calls',
+    subtitle: 'Traditions, campfires & roll calls',
     image: '/assets/catalyst-gallery/616938786_1268082458699001_1398486345666317073_n.jpg',
     description:
       'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
@@ -147,13 +147,13 @@ const DAYS = [
     day: 'Day 01',
     kanji: '覚醒',
     title: 'The Awakening & Forge',
-    theme: 'Arrival · Outbound challenges · The gala',
+    theme: 'Arrival · Outbound challenges · Alumni Night',
     tone: RED,
     points: [
       'Welcome ceremony & traditional delegate check-in',
       'High-energy outbound physical & strategic simulations',
       'Introspective vulnerability circles and leadership forums',
-      'The legendary Catalyst Theme Party and night festivities',
+      'The legendary Alumni Night, DJ party, and night festivities',
     ],
   },
   {
@@ -166,7 +166,7 @@ const DAYS = [
       'Interactive skill labs and problem-solving masterclasses',
       'Inspiring plenary keynote sessions by industry leaders',
       'Strategic action roadmaps for post-conference impact',
-      'Awards, roll call finale, and graduation into brotherhood',
+      'Roll call finale and graduation into brotherhood',
     ],
   },
 ]
