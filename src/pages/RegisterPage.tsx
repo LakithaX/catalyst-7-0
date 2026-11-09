@@ -187,7 +187,7 @@ const CHAPTERS: ChapterDef[] = [
       alt: 'Legendary Dragon Koi swimming through current - The Final Scroll',
     },
     questions: [
-      { id: 'cv', q: 'Present your warrior’s record.', t: 'file', h: 'Upload your updated CV.' },
+      { id: 'cv', q: 'Present your warrior’s record.', t: 'file', h: 'Upload your updated CV (optional).', opt: 1 },
       { id: 'ecName', q: 'Who should we call if your journey takes an unexpected turn?', h: 'Their full name', ac: 'off' },
       { id: 'ecPhone', q: 'Their contact number', t: 'tel', ac: 'off', v: 'phone' },
       {
@@ -203,7 +203,7 @@ const CHAPTERS: ChapterDef[] = [
 const READY_LIST = [
   'Your NIC number',
   'Your AIESEC and personal email addresses',
-  'Your updated CV (PDF or Word, up to 5 MB)',
+  'Your updated CV (optional — PDF or Word, up to 5 MB)',
   'An emergency contact’s name and number',
 ];
 
@@ -482,9 +482,11 @@ export default function RegisterPage() {
     }
 
     if (q.t === 'file') {
-      if (!cvFile) return 'Upload your CV to continue.';
-      if (cvFile.size > 5242880) return 'That file is over 5 MB. Choose a smaller one.';
-      if (!/\.(pdf|docx?)$/i.test(cvFile.name)) return 'Use a PDF or Word file.';
+      if (!cvFile && !q.opt) return 'Upload your CV to continue.';
+      if (cvFile) {
+        if (cvFile.size > 5242880) return 'That file is over 5 MB. Choose a smaller one.';
+        if (!/\.(pdf|docx?)$/i.test(cvFile.name)) return 'Use a PDF or Word file.';
+      }
       return '';
     }
 
@@ -584,7 +586,6 @@ export default function RegisterPage() {
 
     try {
       if (!session) throw new Error('Verify your registration email before submitting.');
-      if (!cvFile) throw new Error('Upload your CV before submitting.');
       const result = await submitRegistration(submissionKey.current, formData, cvFile);
       setRegistrationReference(result.reference);
       try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
@@ -831,7 +832,10 @@ export default function RegisterPage() {
                   if (q.t === 'file') {
                     return (
                       <div key={`${cur}-${q.id}`} className={`rg-q rg-f ${err ? 'bad' : ''}`} data-id={q.id}>
-                        <label htmlFor={q.id} className="rg-lab"><em>{num}</em>{q.q}</label>
+                        <label htmlFor={q.id} className="rg-lab">
+                          <em>{num}</em>{q.q}
+                          {q.opt ? <span className="rg-op">Optional</span> : null}
+                        </label>
                         {q.h && <p className="rg-h" id={`h-${q.id}`}>{q.h}</p>}
                         <div
                           className={`rg-drop ${dragOver ? 'over' : ''} ${cvFile ? 'has' : ''}`}
@@ -853,6 +857,33 @@ export default function RegisterPage() {
                             aria-describedby={`h-${q.id} e-${q.id}`}
                           />
                         </div>
+                        {cvFile && (
+                          <div className="rg-file-actions">
+                            <span className="rg-file-info">{cvFile.name} ({(cvFile.size / 1024).toFixed(0)} KB)</span>
+                            <button
+                              type="button"
+                              className="rg-clear-file"
+                              onClick={() => {
+                                setCvFile(null);
+                                clearError('cv');
+                              }}
+                            >
+                              Remove CV
+                            </button>
+                          </div>
+                        )}
+                        <label className="rg-consent">
+                          <input
+                            type="checkbox"
+                            name="cvConsent"
+                            id="cvConsent"
+                            checked={formData.cvConsent === 'true'}
+                            onChange={(e) => handleTextChange('cvConsent', e.target.checked ? 'true' : 'false')}
+                          />
+                          <span className="rg-consent-text">
+                            I give consent to the CV to be shared with the partners of AIESEC in SLIIT
+                          </span>
+                        </label>
                         {err && <p className="rg-err" id={`e-${q.id}`} role="alert"><i>!</i>{err}</p>}
                       </div>
                     );
