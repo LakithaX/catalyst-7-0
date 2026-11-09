@@ -25,7 +25,9 @@ export default function JapaneseCursor() {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+    // Some touch browsers report a fine pointer through an attached/stale input device,
+    // while still delivering no mousemove events. Require a real mouse/trackpad capability.
+    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches || navigator.maxTouchPoints > 0) return;
 
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const dot = dotRef.current!;
