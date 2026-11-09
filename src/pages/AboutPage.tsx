@@ -120,7 +120,7 @@ const EVENTS = [
     title: 'Interactive Sessions',
     kanji: '対話',
     subtitle: 'Vulnerability & deep connection',
-    image: '/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg',
+    image: '/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg',
     description:
       'Peer-to-peer dialogues, honest self-reflection circles, and shared stories that turn strangers into comrades for life.',
   },
@@ -128,7 +128,7 @@ const EVENTS = [
     title: 'Alumni Night & DJ Party',
     kanji: '祝祭夜',
     subtitle: 'The signature evening celebration',
-    image: '/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg',
+    image: '/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.jpg',
     description:
       'The legendary conference night! Music, themed apparel, dazzling stage lights, and pure celebration of youth and togetherness.',
   },
@@ -136,7 +136,7 @@ const EVENTS = [
     title: 'And Many More',
     kanji: '無限',
     subtitle: 'Traditions, campfires & roll calls',
-    image: '/assets/catalyst-gallery/616938786_1268082458699001_1398486345666317073_n.jpg',
+    image: '/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg',
     description:
       'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
   },
