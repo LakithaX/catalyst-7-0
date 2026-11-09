@@ -150,37 +150,25 @@ const JOURNEY_DAYS = [
   {
     day: 'DAY 01',
     kanji: '覚醒',
-    title: 'THE AWAKENING',
-    theme: 'Arrival · Breaking the Mold · Setting the Fire',
+    title: 'THE AWAKENING & FORGE',
+    theme: 'Arrival · Outbound Challenges · The Gala',
     points: [
       'Welcome ceremony & traditional delegate check-in',
-      'The Samurai Arena opening and theme reveal',
-      'Icebreakers & initial squad formations',
-      'First plenary keynote: Embracing your raw potential',
-    ],
-  },
-  {
-    day: 'DAY 02',
-    kanji: '鍛錬',
-    title: 'THE CRUCIBLE',
-    theme: 'Outbound Training · Deep Resilience · The Gala',
-    points: [
-      'High-energy outbound physical & strategic challenges',
-      'Hands-on skill labs and problem-solving workshops',
+      'High-energy outbound physical & strategic simulations',
       'Introspective vulnerability circles and leadership forums',
       'The legendary Catalyst Theme Party and night festivities',
     ],
   },
   {
-    day: 'DAY 03',
+    day: 'DAY 02',
     kanji: '昇華',
-    title: 'THE ASCENT',
-    theme: 'Synthesis · Action Roadmap · Lifelong Legacy',
+    title: 'THE ASCENT & LEGACY',
+    theme: 'Hands-on Labs · Roadmap · Passing the Torch',
     points: [
-      'Strategic roadmap workshops for post-conference impact',
-      'Inspiring final keynote and passing of the torch',
-      'Recognition awards, delegate honors, and roll call finale',
-      'Graduation into the lifelong Catalyst Alumni brotherhood',
+      'Interactive skill labs and problem-solving masterclasses',
+      'Inspiring plenary keynote sessions by industry leaders',
+      'Strategic action roadmaps for post-conference impact',
+      'Awards, roll call finale, and graduation into brotherhood',
     ],
   },
 ];
@@ -328,7 +316,7 @@ export default function AboutPage() {
               >
                 Catalyst 7.0 is the premier national youth leadership conference organized by{' '}
                 <strong className="font-semibold text-[#252321]">AIESEC in SLIIT</strong>. Rooted in the ancient warrior code of{' '}
-                <strong className="font-semibold text-[#C9362B]">Bushido</strong>, this 3-day immersive journey challenges undergraduates
+                <strong className="font-semibold text-[#C9362B]">Bushido</strong>, this 2-day immersive journey challenges undergraduates
                 to shatter comfort zones, discover relentless purpose, and forge lifelong brotherhood.
               </motion.p>
             </div>
@@ -341,9 +329,9 @@ export default function AboutPage() {
               className="mt-12 grid grid-cols-2 gap-4 rounded-2xl border border-[#252321]/15 bg-white/70 p-4 shadow-[0_8px_30px_rgba(37,35,33,0.06)] backdrop-blur-xs sm:grid-cols-4 sm:p-6"
             >
               {[
-                { num: '200+', label: 'Delegates', sub: 'From Top Universities' },
-                { num: '03', label: 'Unforgettable Days', sub: 'Intensive Immersion' },
-                { num: '15+', label: 'Sessions & Labs', sub: 'Workshops & Challenges' },
+                { num: '100+', label: 'Delegates', sub: 'From Top Universities' },
+                { num: '02', label: 'Unforgettable Days', sub: 'Intensive Immersion' },
+                { num: '06', label: 'Sessions', sub: 'Keynotes & Workshops' },
                 { num: '07th', label: 'Legacy Edition', sub: 'Excellence in Leadership' },
               ].map((stat, i) => (
                 <div key={i} className="flex flex-col items-center text-center">
@@ -532,7 +520,7 @@ export default function AboutPage() {
         <WaveDivider />
 
         {/* =========================================================================
-            SECTION 3: THE 3-DAY DELEGATE JOURNEY
+            SECTION 3: THE 2-DAY DELEGATE JOURNEY
            ========================================================================= */}
         <section className="relative px-4 py-16 sm:px-6 sm:py-20 lg:px-8">
           <div className="mx-auto max-w-6xl">
@@ -553,7 +541,7 @@ export default function AboutPage() {
             </div>
 
             {/* Timeline Cards */}
-            <div className="mt-12 grid gap-6 sm:grid-cols-3 lg:gap-8">
+            <div className="mt-12 grid gap-6 sm:grid-cols-2 max-w-4xl mx-auto lg:gap-8">
               {JOURNEY_DAYS.map((d, i) => (
                 <div
                   key={i}
