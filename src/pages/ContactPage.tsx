@@ -713,14 +713,6 @@ export default function ContactPage() {
         </div>
       </div>
 
-      <footer className="cx-foot relative z-20 text-center select-none">
-        <div className="cx-band" aria-hidden="true" />
-        <div className="px-4 sm:px-6 lg:px-8 pt-12 pb-10">
-          <div className="text-[#c9332a] text-sm tracking-[0.5em] font-bold mb-3" style={{ fontFamily: "'Noto Serif JP', serif" }}>武 士 道</div>
-          <h2 className="cx-brush cx-foot-ttl">DARE BEYOND DEFINITION</h2>
-        </div>
-      </footer>
-
       {/* floating WhatsApp button: always one tap away, opens the best match for the chosen topic */}
       <a
         href={waLink(best, previewMsg)} target="_blank" rel="noopener noreferrer" aria-label={`Chat with ${best.name} on WhatsApp`}
@@ -826,10 +818,6 @@ const CSS = `
 @media (min-width:1024px){.cx-deco{display:block}}
 .cx-tree{left:3%;top:-6px;width:150px}
 .cx-koi2{right:3%;top:-34px;width:150px}
-
-/* ---------- footer ---------- */
-.cx-foot{background:var(--cream)}
-.cx-foot-ttl{font-size:clamp(1.8rem,6vw,4.2rem);line-height:1;color:var(--ink)}
 
 @media (prefers-reduced-motion:reduce){.cx *{scroll-behavior:auto !important}}
 `;
