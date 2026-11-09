@@ -91,7 +91,7 @@ export default function App() {
 
   return (
     <>
-      <BackgroundMusic />
+      {!(location.pathname === '/admin' || location.pathname.startsWith('/admin/')) && <BackgroundMusic />}
       <AnimatePresence>
         {isLoading && <GlobalLoader />}
       </AnimatePresence>
