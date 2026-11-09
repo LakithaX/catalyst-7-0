@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useState, useEffect } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { AnimatePresence } from 'motion/react';
 import GlobalLoader from './components/GlobalLoader';
 import { BackgroundMusic } from './components/BackgroundMusic';
@@ -10,7 +10,6 @@ const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
 const ConferenceTeamPage = lazy(() => import('./pages/ConferenceTeamPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
-const OcPosterPage = lazy(() => import('./pages/OcPosterPage'));
 const GalleryPage = lazy(() => import('./pages/GalleryPage'));
 const MerchPage = lazy(() => import('./pages/MerchPage'));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
@@ -112,8 +111,8 @@ export default function App() {
           <Route path="/conference-team" element={<ConferenceTeamPage />} />
           <Route path="/team" element={<ConferenceTeamPage />} />
           <Route path="/about/team" element={<ConferenceTeamPage />} />
-          <Route path="/oc" element={<OcPosterPage />} />
-          <Route path="/about/oc" element={<OcPosterPage />} />
+          <Route path="/oc" element={<Navigate to="/team" replace />} />
+          <Route path="/about/oc" element={<Navigate to="/team" replace />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/merch" element={<MerchPage />} />
           <Route path="/merch/cart" element={<CartPage />} />

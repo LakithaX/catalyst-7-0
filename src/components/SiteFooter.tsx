@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 
 const links = [
   ['Home', '/'],
-  ['Conference Team', '/about'],
-  ['Organizing committee', '/about/oc'],
+  ['About', '/about'],
+  ['Conference Team', '/team'],
   ['Gallery', '/gallery'],
   ['Official merchandise', '/merch'],
   ['Play', '/game'],
