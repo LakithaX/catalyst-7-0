@@ -15,7 +15,7 @@ export interface NavbarProps {
 }
 
 export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }) => {
-  const {products: MERCH_PRODUCTS} = useCatalog();
+  const {products: MERCH_PRODUCTS, comingSoon} = useCatalog();
   const [merchOpen, setMerchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
@@ -257,7 +257,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
             {/* MERCH NAV ITEM WITH PRODUCT DROPDOWN */}
             <div
               className="relative shrink-0"
-              onMouseEnter={() => setMerchOpen(true)}
+              onMouseEnter={() => { if (!comingSoon) setMerchOpen(true); }}
               onMouseLeave={() => setMerchOpen(false)}
             >
               <Link
@@ -271,7 +271,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 <span>MERCH</span>
               </Link>
 
-              {merchOpen && (
+              {merchOpen && !comingSoon && (
                 <div className="absolute top-full -left-24 pt-3 w-72 z-50 animate-in fade-in duration-150">
                   <div className="bg-[#FAF6EE] text-[#252321] rounded-xl p-3.5 shadow-2xl border border-[#E5DDD0] font-sans">
                     <div className="text-[10px] font-['Montserrat',sans-serif] tracking-widest text-[#C9362B] uppercase font-bold mb-2 pb-1.5 border-b border-[#252321]/10 flex items-center justify-between">
@@ -424,7 +424,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               {/* MERCH NAV ITEM WITH PRODUCT DROPDOWN */}
               <div
                 className="relative shrink-0"
-                onMouseEnter={() => setMerchOpen(true)}
+                onMouseEnter={() => { if (!comingSoon) setMerchOpen(true); }}
                 onMouseLeave={() => setMerchOpen(false)}
               >
                 <Link
@@ -438,7 +438,7 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                   <span>MERCH</span>
                 </Link>
 
-                {merchOpen && (
+                {merchOpen && !comingSoon && (
                   <div className="absolute top-full -left-24 pt-3 w-72 z-50 animate-in fade-in duration-150">
                     <div className="bg-[#FAF6EE] text-[#252321] rounded-xl p-3.5 shadow-2xl border border-[#E5DDD0] font-sans">
                       <div className="text-[10px] font-['Montserrat',sans-serif] tracking-widest text-[#C9362B] uppercase font-bold mb-2 pb-1.5 border-b border-[#252321]/10 flex items-center justify-between">

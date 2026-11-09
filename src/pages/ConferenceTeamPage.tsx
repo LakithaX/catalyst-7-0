@@ -18,7 +18,7 @@ type TeamKey = 'eb' | 'oc'
 
 const TEAMS: Record<TeamKey, { tabLabel: string; kanji: string; title: string; words: [string, string]; jp: string; blurb: string }> = {
   eb: {
-    tabLabel: 'FACI',
+    tabLabel: 'FACIs',
     kanji: '理',
     title: 'Executive Board',
     words: ['Executive', 'Board'],
@@ -26,7 +26,7 @@ const TEAMS: Record<TeamKey, { tabLabel: string; kanji: string; title: string; w
     blurb: 'Stewards of youth leadership and governance across AIESEC in SLIIT.',
   },
   oc: {
-    tabLabel: 'CO FACI',
+    tabLabel: 'CO FACIs',
     kanji: '組',
     title: 'Organizing Committee',
     words: ['Organizing', 'Committee'],
