@@ -101,7 +101,7 @@ const CHAPTERS: ChapterDef[] = [
       {
         id: 'circle',
         q: 'Which inner circle do you serve?',
-        h: 'Your function',
+        h: 'Your Back Office',
         sp: 'Which function?',
         o: ['TM', 'EM', 'BD', 'PR', 'MKT', 'Other relevant function*'],
       },
