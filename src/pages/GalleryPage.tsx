@@ -10,6 +10,7 @@ const GALLERY_IMAGES = [
   "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg",
   "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.jpg",
   "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.jpg",
+  "/assets/catalyst-gallery/obt-beach.jpg",
   "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg",
   "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.jpg",
   "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg",
@@ -51,7 +52,7 @@ const INTRO_WORDS = [
 const CHAPTERS = [
   { name: "PLENARY", kanji: "総会", bg: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg" },
   { name: "WORKSHOPS", kanji: "研鑽", bg: "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg" },
-  { name: "TEAMBUILDING", kanji: "結束", bg: "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg" },
+  { name: "TEAMBUILDING", kanji: "結束", bg: "/assets/catalyst-gallery/obt-beach.jpg" },
   { name: "CELEBRATION", kanji: "祝祭", bg: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg" },
 ];
 

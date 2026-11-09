@@ -104,7 +104,7 @@ const EVENTS = [
     title: 'Outbound Trainings',
     kanji: '野外研修',
     subtitle: 'Experiential team challenges',
-    image: '/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg',
+    image: '/assets/catalyst-gallery/obt-beach.jpg',
     description:
       'Adrenaline-pumping outdoor simulations and coastal team tasks that push physical grit, test endurance, and build unbreakable trust.',
   },
