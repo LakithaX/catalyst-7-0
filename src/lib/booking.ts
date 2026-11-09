@@ -3,16 +3,16 @@ import type { CartItem } from '../context/MerchContext';
 
 export async function submitRegistration(key: string, answers: Record<string, string>, file: File | null) {
   const db = requireSupabase();
-  const { data: { user }, error: authError } = await db.auth.getUser();
-  if (authError || !user) throw new Error('Verify your email before submitting.');
-  // Recover an already-committed request before uploading again after a lost response.
-  const { data: existing, error: lookupError } = await db.from('registrations').select('id,reference').eq('user_id', user.id).maybeSingle();
-  if (lookupError) throw lookupError;
-  if (existing) return existing;
+  const { data: { user: existing } } = await db.auth.getUser();
+  let user = existing;
+  if (!user?.is_anonymous) {
+    const { data, error } = await db.auth.signInAnonymously();
+    if (error || !data.user) throw new Error(error?.message || 'Could not start registration. Please try again.');
+    user = data.user;
+  }
   let storageKey: string | null = null;
   if (file) {
     storageKey = `${user.id}/${key}/cv`;
-    // A retry may find a file from the original upload. Never overwrite it.
     const { data: files, error: listError } = await db.storage.from('delegate-cvs').list(`${user.id}/${key}`);
     if (listError) throw listError;
     if (!files?.some(f => f.name === 'cv')) {
@@ -21,7 +21,9 @@ export async function submitRegistration(key: string, answers: Record<string, st
     }
   }
   const p_file = file && storageKey ? { storage_key: storageKey, original_name: file.name } : null;
-  const { data, error } = await db.rpc('submit_registration', { p_key: key, p_answers: { ...answers, clan: 'SLIIT', 'clan-sp': null }, p_file });
+  const { data, error } = await db.rpc('submit_unverified_registration', {
+    p_user_id: user.id, p_key: key, p_answers: { ...answers, clan: 'SLIIT', 'clan-sp': null }, p_file,
+  });
   if (error) throw error;
   return data as { id: string; reference: string };
 }

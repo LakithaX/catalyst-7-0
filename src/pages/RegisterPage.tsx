@@ -4,7 +4,6 @@ import { Link } from 'react-router-dom';
 import { gsap } from 'gsap';
 import '../styles/samurai-registration.css';
 
-import EmailSignIn, { useSession } from '../components/EmailSignIn';
 import { submitRegistration } from '../lib/booking';
 import { errorMessage } from '../lib/supabase';
 
@@ -243,7 +242,6 @@ export default function RegisterPage() {
   const [cur, setCur] = useState(0);
   const [formData, setFormData] = useState<Record<string, string>>({});
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const { session } = useSession();
   const submissionKey = useRef(crypto.randomUUID());
   const [registrationReference, setRegistrationReference] = useState('');
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -585,7 +583,6 @@ export default function RegisterPage() {
     setSubmitError('');
 
     try {
-      if (!session) throw new Error('Verify your registration email before submitting.');
       const result = await submitRegistration(submissionKey.current, formData, cvFile);
       setRegistrationReference(result.reference);
       try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
@@ -742,7 +739,6 @@ export default function RegisterPage() {
                   </div>
                 </div>
 
-                {cur === CHAPTERS.length - 1 && <EmailSignIn initialEmail={formData.email || ''} />}
                 {ch.questions.map((q, qi) => {
                   const err = errors[q.id];
                   const hasSpecial = q.o?.some((opt) => opt.endsWith('*'));

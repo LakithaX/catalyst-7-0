@@ -3,9 +3,10 @@ import {readFile,readdir} from 'node:fs/promises';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 const db=new PGlite();
-await db.exec(`create role anon;create role authenticated;create schema auth;create schema storage;
+await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;
 create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
+create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),'')::jsonb,'{}'::jsonb)$$;
 create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
 create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text,name text,metadata jsonb);
 alter table storage.objects enable row level security;
@@ -21,7 +22,7 @@ const delegate='10000000-0000-4000-8000-000000000002';
 const other='10000000-0000-4000-8000-000000000003';
 const key='20000000-0000-4000-8000-000000000001';
 let checks=0;
-async function identity(id,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.exec(`set role ${role}`);}
+async function identity(id,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.query("select set_config('request.jwt.claims',$1,false)",[role==='anonymous'?'{}':JSON.stringify({is_anonymous:id===delegate})]);await db.exec(`set role ${role==='anonymous'?'anon':role}`);}
 async function denied(action,pattern){await assert.rejects(action,pattern);checks++;}
 await db.exec(`insert into auth.users values('${admin}','admin@example.test',now()),('${delegate}','delegate@example.test',now()),('${other}','other@example.test',now());insert into public.admin_memberships(user_id,role) values('${admin}','admin');`);
 await denied(()=>db.exec(`insert into public.admin_memberships(user_id,role) values('${other}','admin')`),/duplicate key/);
@@ -85,5 +86,29 @@ const stock=(await db.query('select stock_on_hand,stock_reserved from public.pro
 const summary=(await db.query('select public.admin_summary() data')).rows[0].data;assert.equal(summary.schema_version,7);checks++;assert.equal(summary.pending_registrations,1);assert.equal(summary.awaiting_collection,0);checks+=2;
 const unpaidAccess=(await db.query("select case when to_regprocedure('public.submit_preorder(uuid,jsonb,bigint)') is null then false else has_function_privilege('authenticated',to_regprocedure('public.submit_preorder(uuid,jsonb,bigint)'),'EXECUTE') end allowed")).rows[0].allowed;
 assert.equal(unpaidAccess,false);checks++;
+// Anonymous registration can submit only as its own anonymous Auth identity.
+const anonymous='10000000-0000-4000-8000-000000000004';
+const anonymousKey='20000000-0000-4000-8000-000000000004';
+await identity(null,'anon');
+await denied(()=>db.query('select public.submit_unverified_registration($1,$2,$3,null)',[anonymous,anonymousKey,JSON.stringify(answers)]),/permission denied/);
+await db.exec('reset role');
+await db.query('insert into auth.users values($1,$2,null)',[anonymous,'delegate@example.test']);
+await db.exec('reset role');
+await db.query("select set_config('request.jwt.claim.sub',$1,false)",[anonymous]);
+await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({is_anonymous:true})]);
+await db.exec('set role authenticated');
+const anonAnswers={...answers,email:'delegate@example.test',aiesecEmail:'delegate@example.test'};
+const anonRegistration=(await db.query('select public.submit_unverified_registration($1,$2,$3,null) result',[anonymous,anonymousKey,JSON.stringify(anonAnswers)])).rows[0].result;
+assert.ok(anonRegistration.reference.startsWith('CAT7-DEL-'));checks++;
+const retry=(await db.query('select public.submit_unverified_registration($1,$2,$3,null) result',[anonymous,anonymousKey,JSON.stringify(anonAnswers)])).rows[0].result;
+assert.equal(retry.id,anonRegistration.id);checks++;
+await denied(()=>db.query('select public.submit_unverified_registration($1,$2,$3,null)',[admin,anonymousKey,JSON.stringify(anonAnswers)]),/Start a new registration session/);
+await db.exec('reset role');
+assert.equal((await db.query('select email_confirmed_at from auth.users where id=$1',[anonymous])).rows[0].email_confirmed_at,null);checks++;
+await db.query('update auth.users set email_confirmed_at=now() where id=$1',[delegate]);
+await db.exec('reset role'); await db.query("select set_config('request.jwt.claim.sub',$1,false)",[delegate]); await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({is_anonymous:false})]); await db.exec('set role authenticated');
+assert.equal((await db.query('select public.link_registration_to_verified_email()')).rows[0]['link_registration_to_verified_email'],true);checks++;
+await db.exec('reset role');
+assert.equal((await db.query('select user_id from public.registrations where id=$1',[anonRegistration.id])).rows[0].user_id,delegate);checks++;
 console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, pre-order atomicity, pause, payment and collection).`);
 await db.close();

@@ -45,6 +45,10 @@ export default function EmailSignIn({ initialEmail = '', admin = false }: { init
       } else {
         const { error } = await supabase.auth.verifyOtp({ email: email.trim(), token: token.trim(), type: 'email' });
         if (error) throw error;
+        if (!admin) {
+          const linked = await supabase.rpc('link_registration_to_verified_email');
+          if (linked.error) throw linked.error;
+        }
       }
     } catch (error) { setMessage(errorMessage(error)); }
     finally { setBusy(false); }
