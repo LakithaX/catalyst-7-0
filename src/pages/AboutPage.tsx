@@ -50,7 +50,7 @@ const ART = {
 // DATA
 // ============================================================================
 const STATS = [
-  { num: '100+', label: 'Delegates', sub: 'From top universities' },
+  { num: '100+', label: 'Delegates', sub: 'AIESECers from SLIIT and CINEC' },
   { num: '02', label: 'Days', sub: 'Intensive immersion' },
   { num: '06', label: 'Experiences', sub: 'Keynotes to Alumni Night' },
   { num: '7th', label: 'Edition', sub: 'Excellence in leadership' },
