@@ -67,9 +67,6 @@ export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
         .gate-mask { left: clamp(0.75rem, 7vw, 9rem); top: clamp(1.25rem, 13vh, 8rem); width: clamp(64px, 11vw, 170px); --o: 0.95;
           filter: drop-shadow(0 12px 26px rgba(0,0,0,0.65));
           animation: gate-art-in 1.8s 0.4s ease-out forwards, gate-float 7s ease-in-out 2.2s infinite; }
-        .gate-koi { right: clamp(0.75rem, 7vw, 9rem); bottom: clamp(3rem, 20vh, 12rem); width: clamp(64px, 9.5vw, 150px); --o: 0.95;
-          filter: drop-shadow(0 12px 26px rgba(0,0,0,0.6));
-          animation: gate-art-in 1.8s 0.7s ease-out forwards, gate-float-2 8s ease-in-out 2.5s infinite; }
         .gate-luck { left: 50%; top: 50%; width: clamp(220px, 40vw, 540px); transform: translate(-50%, -52%); --o: 0.06;
           filter: grayscale(1) invert(1); animation-delay: 0.2s; }
         .gate-pagoda { left: clamp(-1rem, 2vw, 3rem); bottom: 0; width: clamp(110px, 20vw, 300px); --o: 0.13;
@@ -77,14 +74,12 @@ export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
         .gate-bonsai { right: clamp(-1rem, 2vw, 3rem); bottom: 0; width: clamp(90px, 16vw, 240px); --o: 0.13;
           filter: grayscale(1) invert(1); animation-delay: 0.7s; }
         @media (max-width: 640px) {
-          .gate-koi { bottom: auto; top: clamp(1.25rem, 6vh, 4rem); width: clamp(54px, 15vw, 90px); }
           .gate-mask { top: clamp(1.25rem, 6vh, 4rem); width: clamp(54px, 15vw, 90px); }
         }
         @keyframes gate-art-in { to { opacity: var(--o, 1); } }
         @keyframes gate-float { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-10px) rotate(2deg); } }
-        @keyframes gate-float-2 { 0%,100% { transform: translateY(0) rotate(5deg); } 50% { transform: translateY(-12px) rotate(-4deg); } }
         @keyframes gate-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(246,199,104,0.5); } 70% { box-shadow: 0 0 0 16px rgba(246,199,104,0); } }
-        @media (prefers-reduced-motion: reduce) { .gate-btn { animation: none; } .gate-mask, .gate-koi { animation: gate-art-in 0.01s forwards; } .gate { transition-duration: 0.01s; } }
+        @media (prefers-reduced-motion: reduce) { .gate-btn { animation: none; } .gate-mask { animation: gate-art-in 0.01s forwards; } .gate { transition-duration: 0.01s; } }
       `}</style>
       <div className={`gate ${visible ? '' : 'is-leaving'}`} role="dialog" aria-label="Enter Catalyst 7.0">
         <div className="gate-sun" />
@@ -94,7 +89,6 @@ export const EntryGate: React.FC<EntryGateProps> = ({ visible, onEnter }) => {
         <div className="gate-art gate-pagoda"><img src={`${ART}gdj-building-8171699.svg`} alt="" onError={hide} /></div>
         <div className="gate-art gate-bonsai"><img src={`${ART}gdj-bonsai-tree-8143900.svg`} alt="" onError={hide} /></div>
         <div className="gate-art gate-mask"><img src={`${ART}alessandro-hrdz-mask-6976331.png`} alt="" onError={hide} /></div>
-        <div className="gate-art gate-koi"><img src={`${ART}kacsoeszti-koi-1184783_1920.png`} alt="" onError={hide} /></div>
 
         <div className="relative mb-5 flex items-center justify-center">
           <div className="absolute w-28 h-28 rounded-full bg-[#f6c768]/15 blur-xl pointer-events-none" />
