@@ -7,32 +7,32 @@ import { scrollTopOrRestore } from '../utils/navState';
 
 // Authentic Catalyst 7.0 seminar photographs
 const GALLERY_IMAGES = [
-  "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg",
-  "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.jpg",
-  "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.jpg",
-  "/assets/catalyst-gallery/catalyst-dj.jpg",
-  "/assets/catalyst-gallery/obt-beach.jpg",
-  "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg",
-  "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.jpg",
-  "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg",
-  "/assets/catalyst-gallery/616463195_1268085945365316_7407533435333699472_n.jpg",
-  "/assets/catalyst-gallery/616492035_1268080355365875_606194234428780138_n.jpg",
-  "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg",
-  "/assets/catalyst-gallery/616849073_1268080215365889_1394999945882788592_n.jpg",
-  "/assets/catalyst-gallery/616852935_1268091818698062_1811121035233834010_n.jpg",
-  "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg",
-  "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg",
-  "/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.jpg",
-  "/assets/catalyst-gallery/617067996_1268080292032548_6936022336367251590_n.jpg",
-  "/assets/catalyst-gallery/617073686_1268080668699177_4597045561927655998_n.jpg",
-  "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg",
-  "/assets/catalyst-gallery/617463058_1268088075365103_8693645449087459401_n.jpg",
-  "/assets/catalyst-gallery/617690261_1268080958699148_3647200086711209687_n.jpg",
-  "/assets/catalyst-gallery/617989634_1268081025365808_4863939880060285824_n.jpg",
-  "/assets/catalyst-gallery/618023942_1268081702032407_3520266089466034488_n.jpg",
-  "/assets/catalyst-gallery/618493767_1268092525364658_3596371227146674634_n.jpg",
-  "/assets/catalyst-gallery/618825259_1268080638699180_784931987486560934_n.jpg",
-  "/assets/catalyst-gallery/619246052_1268080425365868_5507811270348967850_n.jpg",
+  "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.webp",
+  "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.webp",
+  "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.webp",
+  "/assets/catalyst-gallery/catalyst-dj.webp",
+  "/assets/catalyst-gallery/obt-beach.webp",
+  "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.webp",
+  "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.webp",
+  "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.webp",
+  "/assets/catalyst-gallery/616463195_1268085945365316_7407533435333699472_n.webp",
+  "/assets/catalyst-gallery/616492035_1268080355365875_606194234428780138_n.webp",
+  "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.webp",
+  "/assets/catalyst-gallery/616849073_1268080215365889_1394999945882788592_n.webp",
+  "/assets/catalyst-gallery/616852935_1268091818698062_1811121035233834010_n.webp",
+  "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.webp",
+  "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.webp",
+  "/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.webp",
+  "/assets/catalyst-gallery/617067996_1268080292032548_6936022336367251590_n.webp",
+  "/assets/catalyst-gallery/617073686_1268080668699177_4597045561927655998_n.webp",
+  "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.webp",
+  "/assets/catalyst-gallery/617463058_1268088075365103_8693645449087459401_n.webp",
+  "/assets/catalyst-gallery/617690261_1268080958699148_3647200086711209687_n.webp",
+  "/assets/catalyst-gallery/617989634_1268081025365808_4863939880060285824_n.webp",
+  "/assets/catalyst-gallery/618023942_1268081702032407_3520266089466034488_n.webp",
+  "/assets/catalyst-gallery/618493767_1268092525364658_3596371227146674634_n.webp",
+  "/assets/catalyst-gallery/618825259_1268080638699180_784931987486560934_n.webp",
+  "/assets/catalyst-gallery/619246052_1268080425365868_5507811270348967850_n.webp",
 ];
 
 const getImageSrc = (index: number) => GALLERY_IMAGES[index % GALLERY_IMAGES.length];
@@ -51,10 +51,10 @@ const INTRO_WORDS = [
 ];
 
 const CHAPTERS = [
-  { name: "PLENARY", kanji: "総会", bg: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg" },
-  { name: "WORKSHOPS", kanji: "研鑽", bg: "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg" },
-  { name: "TEAMBUILDING", kanji: "結束", bg: "/assets/catalyst-gallery/obt-beach.jpg" },
-  { name: "CELEBRATION", kanji: "祝祭", bg: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg" },
+  { name: "PLENARY", kanji: "総会", bg: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.webp" },
+  { name: "WORKSHOPS", kanji: "研鑽", bg: "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.webp" },
+  { name: "TEAMBUILDING", kanji: "結束", bg: "/assets/catalyst-gallery/obt-beach.webp" },
+  { name: "CELEBRATION", kanji: "祝祭", bg: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.webp" },
 ];
 
 const N = 10; // intro layers
@@ -397,7 +397,7 @@ export const GalleryPage: React.FC = () => {
       <footer className="relative bg-[#B51E23] text-white text-center py-24 sm:py-36 px-6 overflow-hidden">
         <div className="absolute inset-0 z-0 pointer-events-none select-none overflow-hidden">
           <img
-            src="/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg"
+            src="/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.webp"
             alt=""
             loading="lazy"
             decoding="async"

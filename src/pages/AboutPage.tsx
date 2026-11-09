@@ -96,7 +96,7 @@ const EVENTS = [
     title: 'Conference Sessions',
     kanji: '総会',
     subtitle: 'Visionary plenaries & keynotes',
-    image: '/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg',
+    image: '/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.webp',
     description:
       'Immersive stage plenaries, inspiring keynotes from thought leaders, and leadership forums designed to reshape perspectives.',
   },
@@ -104,7 +104,7 @@ const EVENTS = [
     title: 'Outbound Trainings',
     kanji: '野外研修',
     subtitle: 'Experiential team challenges',
-    image: '/assets/catalyst-gallery/obt-beach.jpg',
+    image: '/assets/catalyst-gallery/obt-beach.webp',
     description:
       'Adrenaline-pumping outdoor simulations and coastal team tasks that push physical grit, test endurance, and build unbreakable trust.',
   },
@@ -112,7 +112,7 @@ const EVENTS = [
     title: 'Workshops',
     kanji: '研鑽',
     subtitle: 'Hands-on skill masterclasses',
-    image: '/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg',
+    image: '/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.webp',
     description:
       'Practical problem-solving sprints, project innovation labs, and collaborative workshops giving you real skills for real-world impact.',
   },
@@ -120,7 +120,7 @@ const EVENTS = [
     title: 'Interactive Sessions',
     kanji: '対話',
     subtitle: 'Vulnerability & deep connection',
-    image: '/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg',
+    image: '/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.webp',
     description:
       'Peer-to-peer dialogues, honest self-reflection circles, and shared stories that turn strangers into comrades for life.',
   },
@@ -128,7 +128,7 @@ const EVENTS = [
     title: 'Alumni Night & DJ Party',
     kanji: '祝祭夜',
     subtitle: 'The signature evening celebration',
-    image: '/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.jpg',
+    image: '/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.webp',
     description:
       'The legendary conference night! Music, themed apparel, dazzling stage lights, and pure celebration of youth and togetherness.',
   },
@@ -136,7 +136,7 @@ const EVENTS = [
     title: 'And Many More',
     kanji: '無限',
     subtitle: 'Traditions, campfires & roll calls',
-    image: '/assets/catalyst-gallery/catalyst-dj.jpg',
+    image: '/assets/catalyst-gallery/catalyst-dj.webp',
     description:
       'Iconic roll calls, midnight campfires, cultural performances, delegate recognitions, and surprise moments etched in memory.',
   },

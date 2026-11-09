@@ -280,7 +280,7 @@ export const MerchHero: React.FC = () => {
           {/* Traditional Fan Watermark */}
           <div className="absolute -top-10 -left-8 w-40 sm:w-52 h-auto opacity-[0.06] pointer-events-none select-none z-0">
             <img
-              src="/assets/illustrations/jakeloris-fan-7039967.png"
+              src="/assets/illustrations/jakeloris-fan-7039967.webp"
               alt=""
               className="w-full h-auto object-contain"
             />

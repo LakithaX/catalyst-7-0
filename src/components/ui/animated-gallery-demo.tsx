@@ -79,99 +79,99 @@ export interface GalleryImageItem {
 
 const ALL_IMAGES: GalleryImageItem[] = [
   {
-    src: "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.jpg",
+    src: "/assets/catalyst-gallery/616083505_1268080465365864_3783241921869610059_n.webp",
     alt: "Delegates engaged in an interactive group discussion during a Catalyst seminar session",
   },
   {
-    src: "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.jpg",
+    src: "/assets/catalyst-gallery/616103586_1268087452031832_3118584779969684260_n.webp",
     alt: "AIESEC in SLIIT organizing committee and delegates gathered for a group photo celebration",
   },
   {
-    src: "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.jpg",
+    src: "/assets/catalyst-gallery/616116748_1268080568699187_3100398452053345518_n.webp",
     alt: "Attendees attentively listening during an engaging leadership development module",
   },
   {
-    src: "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.jpg",
+    src: "/assets/catalyst-gallery/616233471_1268080295365881_7557058301924341156_n.webp",
     alt: "Seminar delegates participating in a structured outdoor team reflection activity",
   },
   {
-    src: "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.jpg",
+    src: "/assets/catalyst-gallery/616368520_1268080855365825_4465401467840168462_n.webp",
     alt: "Delegates taking notes during a strategic leadership training module",
   },
   {
-    src: "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg",
+    src: "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.webp",
     alt: "Delegates taking part in an energetic icebreaker session at Catalyst",
   },
   {
-    src: "/assets/catalyst-gallery/616463195_1268085945365316_7407533435333699472_n.jpg",
+    src: "/assets/catalyst-gallery/616463195_1268085945365316_7407533435333699472_n.webp",
     alt: "Youth delegates collaborating on experiential learning tasks in a seminar circle",
   },
   {
-    src: "/assets/catalyst-gallery/616492035_1268080355365875_606194234428780138_n.jpg",
+    src: "/assets/catalyst-gallery/616492035_1268080355365875_606194234428780138_n.webp",
     alt: "Attendees sharing leadership perspectives during a roundtable conversation",
   },
   {
-    src: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg",
+    src: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.webp",
     alt: "AIESEC delegates cheering enthusiastically during a Catalyst plenary session",
   },
   {
-    src: "/assets/catalyst-gallery/616849073_1268080215365889_1394999945882788592_n.jpg",
+    src: "/assets/catalyst-gallery/616849073_1268080215365889_1394999945882788592_n.webp",
     alt: "Youth delegates collaborating on strategic problem-solving during a breakout session",
   },
   {
-    src: "/assets/catalyst-gallery/616852935_1268091818698062_1811121035233834010_n.jpg",
+    src: "/assets/catalyst-gallery/616852935_1268091818698062_1811121035233834010_n.webp",
     alt: "Delegates celebrating shared milestones during an evening seminar gathering",
   },
   {
-    src: "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.jpg",
+    src: "/assets/catalyst-gallery/616856062_1268081038699140_5408968865674764265_n.webp",
     alt: "Seminar attendees collaborating around a table during an interactive workshop",
   },
   {
-    src: "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg",
+    src: "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.webp",
     alt: "Delegates smiling and connecting during a Catalyst team-building exercise",
   },
   {
-    src: "/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.jpg",
+    src: "/assets/catalyst-gallery/617017153_1268086832031894_3502562285613882645_n.webp",
     alt: "Participants presenting their group leadership insights during a Catalyst debrief",
   },
   {
-    src: "/assets/catalyst-gallery/617067996_1268080292032548_6936022336367251590_n.jpg",
+    src: "/assets/catalyst-gallery/617067996_1268080292032548_6936022336367251590_n.webp",
     alt: "Young leaders listening attentively to fellow delegate presentations",
   },
   {
-    src: "/assets/catalyst-gallery/617073686_1268080668699177_4597045561927655998_n.jpg",
+    src: "/assets/catalyst-gallery/617073686_1268080668699177_4597045561927655998_n.webp",
     alt: "AIESEC in SLIIT delegates sharing personal growth takeaways during a workshop",
   },
   {
-    src: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg",
+    src: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.webp",
     alt: "Delegates celebrating with team spirit and enthusiasm during a Catalyst session",
   },
   {
-    src: "/assets/catalyst-gallery/617463058_1268088075365103_8693645449087459401_n.jpg",
+    src: "/assets/catalyst-gallery/617463058_1268088075365103_8693645449087459401_n.webp",
     alt: "Participants focused during an empowering leadership presentation",
   },
   {
-    src: "/assets/catalyst-gallery/617690261_1268080958699148_3647200086711209687_n.jpg",
+    src: "/assets/catalyst-gallery/617690261_1268080958699148_3647200086711209687_n.webp",
     alt: "Seminar delegates networking and building connections during a session transition",
   },
   {
-    src: "/assets/catalyst-gallery/617989634_1268081025365808_4863939880060285824_n.jpg",
+    src: "/assets/catalyst-gallery/617989634_1268081025365808_4863939880060285824_n.webp",
     alt: "Youth delegates participating in an experiential teamwork simulation",
   },
   {
-    src: "/assets/catalyst-gallery/618023942_1268081702032407_3520266089466034488_n.jpg",
+    src: "/assets/catalyst-gallery/618023942_1268081702032407_3520266089466034488_n.webp",
     alt: "Delegates taking notes during an interactive personal reflection module",
   },
   {
-    src: "/assets/catalyst-gallery/618493767_1268092525364658_3596371227146674634_n.jpg",
+    src: "/assets/catalyst-gallery/618493767_1268092525364658_3596371227146674634_n.webp",
     alt: "Delegates applauding peers during a team recognition moment at Catalyst",
   },
   {
-    src: "/assets/catalyst-gallery/618825259_1268080638699180_784931987486560934_n.jpg",
+    src: "/assets/catalyst-gallery/618825259_1268080638699180_784931987486560934_n.webp",
     alt: "AIESEC members engaged in a lively team debate during a leadership module",
   },
   {
-    src: "/assets/catalyst-gallery/619246052_1268080425365868_5507811270348967850_n.jpg",
+    src: "/assets/catalyst-gallery/619246052_1268080425365868_5507811270348967850_n.webp",
     alt: "Attendees sharing smiles during an inspiring closing seminar session",
   },
 ]

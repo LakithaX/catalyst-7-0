@@ -7,28 +7,28 @@ const sections = [
     kanji: "静",
     title: "Silence",
     rightLabel: "Silence",
-    background: "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.jpg",
+    background: "/assets/catalyst-gallery/616439277_1268082045365706_8706912413091711333_n.webp",
   },
   {
     leftLabel: "Essence",
     kanji: "心",
     title: "Stillness",
     rightLabel: "Essence",
-    background: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.jpg",
+    background: "/assets/catalyst-gallery/617331461_1268082458698998_896025517703704603_n.webp",
   },
   {
     leftLabel: "Rebirth",
     kanji: "生",
     title: "Growth",
     rightLabel: "Rebirth",
-    background: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.jpg",
+    background: "/assets/catalyst-gallery/616529329_1268081438699100_5464235221991506990_n.webp",
   },
   {
     leftLabel: "Change",
     kanji: "変",
     title: "Opportunity",
     rightLabel: "Change",
-    background: "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.jpg",
+    background: "/assets/catalyst-gallery/616938786_1268082428699001_1398486345666317073_n.webp",
   },
 ];
 
