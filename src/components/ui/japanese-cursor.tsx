@@ -157,11 +157,15 @@ export default function JapaneseCursor() {
     <>
       <style>{`
         html.jp-cursor-on, html.jp-cursor-on * { cursor: none !important; }
+        @media (hover: none), (pointer: coarse) {
+          .jp-cursor-layer { display: none !important; }
+          html.jp-cursor-on, html.jp-cursor-on * { cursor: auto !important; }
+        }
         html.jp-cursor-on.jp-cursor-text input, html.jp-cursor-on.jp-cursor-text textarea,
         html.jp-cursor-on.jp-cursor-text select, html.jp-cursor-on.jp-cursor-text [contenteditable='true'] { cursor: text !important; }
       `}</style>
 
-      <div aria-hidden="true" ref={petalsRef}>
+      <div aria-hidden="true" ref={petalsRef} className="jp-cursor-layer">
         {Array.from({ length: PETAL_COUNT }).map((_, i) => (
           <span key={i} style={{ ...layer, zIndex: 2147482999 }}>
             <svg viewBox="0 0 24 32" width="12" height="16" style={{ display: "block" }}>
@@ -174,6 +178,7 @@ export default function JapaneseCursor() {
       <div
         aria-hidden="true"
         ref={ringRef}
+        className="jp-cursor-layer"
         style={{
           ...layer,
           width: 38,
@@ -191,6 +196,7 @@ export default function JapaneseCursor() {
       <div
         aria-hidden="true"
         ref={dotRef}
+        className="jp-cursor-layer"
         style={{ ...layer, width: 9, height: 9, borderRadius: "50%", background: RED, boxShadow: "0 0 0 1.5px rgba(248,243,233,0.9)" }}
       />
     </>
