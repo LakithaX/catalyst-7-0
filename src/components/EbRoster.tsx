@@ -6,7 +6,7 @@ import { OcGroup, buildGroupRows, CSS, GCSS, playFor, photo } from './OcRoster'
 import type { GroupDef } from './OcRoster'
 
 // ============================================================================
-// EXECUTIVE BOARD: one full-width "slide" per member, then the "EB REVERENT" group photo.
+// EXECUTIVE BOARD: one full-width "slide" per member, then the "EB REVENANTS" group photo.
 //
 // Each slide: big position plaque (brush-stroke banner with a giant role code, e.g. "FnL"),
 // script first name over a bold surname, the person in front of a red sun with a brush
@@ -820,7 +820,7 @@ const EBFCSS = `
 .ebf-eye{display:inline-flex;align-items:center;gap:calc(1.6*var(--u));font-weight:500;font-size:max(9px,calc(1.8*var(--u)));letter-spacing:.42em;padding-left:.42em;text-transform:uppercase;color:var(--gold2)}
 .ebf-eye i{display:block;width:calc(4*var(--u));height:1px;background:linear-gradient(to right,transparent,var(--gold))}
 .ebf-eye i:last-child{background:linear-gradient(to left,transparent,var(--gold))}
-.ebf-ttl{margin:calc(1*var(--u)) 0 0;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;line-height:.94;letter-spacing:.05em;padding-left:.05em;text-transform:uppercase;font-size:calc(8.4*var(--u));
+.ebf-ttl{margin:calc(1*var(--u)) 0 0;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;line-height:.94;letter-spacing:.05em;padding-left:.05em;text-transform:uppercase;font-size:calc(7.6*var(--u));letter-spacing:.04em;
   filter:drop-shadow(0 calc(.5*var(--u)) calc(.9*var(--u)) rgba(120,20,20,.28))}
 .ebf-ttl span.l{display:block;white-space:nowrap}
 .ebf-ch{will-change:transform,opacity;display:inline-block;background:linear-gradient(#e24a35 0,#c9362b 50%,#8c0b26 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
@@ -835,7 +835,7 @@ const EBFCSS = `
   .ebf-photo{animation:none;width:calc(142*var(--u));margin:0 0 0 calc(142*var(--u)*-.5);bottom:calc(10*var(--u))}
   .ebf-moon{width:calc(76*var(--u));margin-left:calc(-38*var(--u));bottom:calc(20*var(--u))}
   .ebf-seal{left:calc(50% + min(calc(142*var(--u)*.31), 40cqw));bottom:calc(14*var(--u))}
-  .ebf-ttl{font-size:calc(9.2*var(--u))}
+  .ebf-ttl{font-size:calc(8.2*var(--u));letter-spacing:.03em}
   .ebf-eye{font-size:max(10px,calc(2.1*var(--u)))}
   /* lighter on phones: fewer stars, fireflies and petals, one cheap outline instead of six filters, no idle float */
   .ebf-star:nth-child(3n),.ebf-star:nth-child(3n+1){display:none}
@@ -865,7 +865,7 @@ const EBFCSS = `
 
 function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
   const secRef = useRef<HTMLElement>(null)
-  const lines = ['EB REVERENT']
+  const lines = ['EB REVENANTS']
 
   useLayoutEffect(() => {
     const root = secRef.current
@@ -926,7 +926,7 @@ function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
   }, [])
 
   return (
-    <section className="ebf" ref={secRef} aria-label="EB Reverent, group photo">
+    <section className="ebf" ref={secRef} aria-label="EB Revenants, group photo">
       <style>{EBFCSS}</style>
 
       {/* stars span the full width of the page */}
@@ -965,7 +965,7 @@ function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
 
         <div className="ebf-head">
           <div className="ebf-eye"><i /><TagMark /><span>AIESEC in SLIIT · Catalyst 7.0</span><i /></div>
-          <h2 className="ebf-ttl" aria-label="EB Reverent">
+          <h2 className="ebf-ttl" aria-label="EB Revenants">
             {lines.map((w) => (
               <span className="l" key={w} aria-hidden="true">
                 {w.split('').map((c, i) => <span className="ebf-ch" key={i}>{c === ' ' ? '\u00A0' : c}</span>)}
@@ -979,7 +979,7 @@ function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
         <div className="ebf-side b" aria-hidden="true">触媒七</div>
 
         <figure className="ebf-photo">
-          <img src={GROUP_PHOTO} alt="EB Reverent together" loading="lazy" decoding="async" draggable={false} onError={onMissing} />
+          <img src={GROUP_PHOTO} alt="EB Revenants together" loading="lazy" decoding="async" draggable={false} onError={onMissing} />
         </figure>
         <div className="ebf-seal" aria-hidden="true">理事</div>
 
@@ -992,7 +992,7 @@ function EbGroupPhoto({ onMissing }: { onMissing: () => void }) {
       </div>
 
       <div className="ebf-ground" aria-hidden="true" />
-      <div className="ebf-cap" aria-hidden="true"><span>EB Reverent</span></div>
+      <div className="ebf-cap" aria-hidden="true"><span>EB Revenants</span></div>
       <div className="ebf-glow" aria-hidden="true" />
     </section>
   )
@@ -1005,12 +1005,12 @@ function EbFinale() {
     return (
       <OcGroup
         rows={ROWS}
-        words={['EB', 'REVERENT']}
+        words={['EB', 'REVENANTS']}
         kanjiA="理事"
         kanjiB="理事会"
         seal="理事"
-        caption="EB Reverent"
-        label="EB Reverent"
+        caption="EB Revenants"
+        label="EB Revenants"
       />
     )
   }
