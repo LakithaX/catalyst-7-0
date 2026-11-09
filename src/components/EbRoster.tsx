@@ -92,7 +92,7 @@ const parseRole = (role: string) => {
   const code = m ? m[2].trim() : ''
   let tier = 'Executive Board'
   if (/^LCVP\s/.test(title)) {
-    tier = 'Vice President'
+    tier = 'LCVP'
     title = title.replace(/^LCVP\s+/, '')
   } else if (/President/i.test(title)) {
     tier = 'President'
@@ -419,8 +419,8 @@ const EBCSS = `
   clip-path:polygon(0 0,100% 0,calc(100% - 2*var(--u)) 50%,100% 100%,0 100%)}
 .ebm-brush{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;mix-blend-mode:multiply;opacity:.5;pointer-events:none}
 .ebm-shine{position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(105deg,transparent 38%,rgba(255,255,255,.5) 50%,transparent 62%);pointer-events:none}
-.ebm-tier{position:relative;display:flex;align-items:center;gap:.9em;font-family:'Oswald',sans-serif;font-weight:500;font-size:max(10px,calc(1.2*var(--u)));letter-spacing:.32em;text-transform:uppercase;color:#ffd98a}
-.ebm-tier::before{content:'';flex:none;width:max(6px,calc(.9*var(--u)));height:max(6px,calc(.9*var(--u)));background:#ffd98a;transform:rotate(45deg)}
+.ebm-tier{position:relative;display:flex;align-items:center;gap:.9em;font-family:'Oswald',sans-serif;font-weight:600;font-size:max(12px,calc(1.55*var(--u)));letter-spacing:.32em;text-transform:uppercase;color:#ffd98a}
+.ebm-tier::before{content:'';flex:none;width:max(7px,calc(1.1*var(--u)));height:max(7px,calc(1.1*var(--u)));background:#ffd98a;transform:rotate(45deg)}
 .ebm-code{position:relative;display:block;overflow:hidden;margin-top:calc(.5*var(--u));padding:.04em 0 .06em;white-space:nowrap;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;
   font-size:calc(var(--cf)*var(--u));line-height:1.05;letter-spacing:.03em;color:#fff1e4;text-shadow:0 calc(.35*var(--u)) 0 rgba(60,0,10,.55)}
 .ebm-cc{display:inline-block}
@@ -453,7 +453,7 @@ const EBCSS = `
   .ebm-rule{width:calc(10*var(--u))}
   .ebm-pos{max-width:calc(84*var(--u))}
   .ebm-posin{padding:calc(3*var(--u)) calc(7*var(--u)) calc(3.2*var(--u)) calc(4.4*var(--u));clip-path:polygon(0 0,100% 0,calc(100% - 3*var(--u)) 50%,100% 100%,0 100%)}
-  .ebm-tier{font-size:max(10px,calc(2.4*var(--u)))}
+  .ebm-tier{font-size:max(12px,calc(3*var(--u)))}
   .ebm-ptitle{font-size:max(11px,calc(3*var(--u)));margin-top:calc(1.2*var(--u))}
   .ebm-fret{width:calc(12*var(--u))}
   .ebm-glow{display:none}
