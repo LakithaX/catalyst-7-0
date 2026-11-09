@@ -339,7 +339,7 @@ export default function AboutPage() {
               <div
                 role="tablist"
                 aria-label="Choose a team"
-                className="mx-auto mt-10 flex w-[min(100%,360px)] rounded-full border border-[#252321]/30 bg-[#FAF6EE] p-1.5 shadow-[0_8px_24px_rgba(37,35,33,0.08)]"
+                className="mx-auto mt-10 flex w-[min(100%,390px)] rounded-full border border-[#252321]/30 bg-[#FAF6EE] p-1.5 shadow-[0_8px_24px_rgba(37,35,33,0.08)]"
               >
                 {(Object.keys(TEAMS) as TeamKey[]).map((key) => {
                   const active = key === tab
@@ -349,7 +349,7 @@ export default function AboutPage() {
                       role="tab"
                       aria-selected={active}
                       onClick={() => switchTab(key)}
-                      className={`relative flex min-h-[46px] flex-1 cursor-pointer items-center justify-center rounded-full py-3 text-sm font-bold uppercase tracking-[0.3em] transition-colors duration-300 ${
+                      className={`relative flex min-h-[46px] flex-1 cursor-pointer items-center justify-center rounded-full py-3 px-3 text-xs sm:text-sm font-bold uppercase tracking-[0.16em] sm:tracking-[0.22em] whitespace-nowrap transition-colors duration-300 ${
                         active ? 'text-white' : 'text-[#252321]/60 hover:text-[#252321]'
                       }`}
                       style={{ fontFamily: LABEL_FONT }}
