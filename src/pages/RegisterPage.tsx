@@ -96,7 +96,7 @@ const CHAPTERS: ChapterDef[] = [
       alt: 'Samurai Mengu warrior mask of discipline - The Code',
     },
     questions: [
-      { id: 'path', q: 'Which path do you walk?', h: 'Your AIESEC programme', o: ['oGV', 'oGT', 'iGV', 'iGT'] },
+      { id: 'path', q: 'Which path do you walk?', h: 'Your Front Office', o: ['oGV', 'oGT', 'iGV', 'iGT'] },
       { id: 'rank', q: 'What is your current rank?', o: ['Team Member', 'Team Leader', 'Specialist', 'Manager'] },
       {
         id: 'circle',
