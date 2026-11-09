@@ -601,7 +601,7 @@ export default function AboutPage() {
                 </h3>
 
                 <p className="mt-4 text-sm leading-relaxed text-[#4A4340] sm:text-base">
-                  A powerhouse coalition of Facilitators (FACI) and Executive Board stewards (CO FACI) working relentlessly
+                  A powerhouse coalition of Executive Board facilitators (FACI) and Organizing Committee co-facilitators (CO FACI) working relentlessly
                   around the clock to deliver Sri Lanka&apos;s ultimate youth summit.
                 </p>
 
