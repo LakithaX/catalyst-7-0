@@ -693,7 +693,7 @@ const FACE: Record<string, { keep?: number; pos?: string; top?: string }> = {
   'Nethuli Gunathilaka': { keep: 0.72, pos: '15% 0' },         // face was pushed off the left side
   'Gihansa Hasithmi': { keep: 1, pos: '25% 0' },               // close-up photo: show the whole face
   'Yehan De Silva': { keep: 0.36, pos: '12% 0', top: '14%' },  // head was clipped by the slanted frame top
-  'Monali Edirisinghe': { keep: 0.3 },
+  'Monali Edirisinghe': { keep: 0.78 },
   'Binushi Wikramarathne': { keep: 0.42 },
 }
 
