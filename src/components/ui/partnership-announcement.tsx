@@ -28,7 +28,7 @@ const PARTNER_CTA = { label: "Become a partner", href: "#contact" };
 const ART = {
   mask: "/assets/illustrations/alessandro_hrdz-mask-6976331.png",
   fan: "/assets/illustrations/jakeloris-fan-7039967.png",
-  tree: "/assets/illustrations/susannp4-tree-1586365_1920.webp",
+  torii: "/assets/hero-section-assets/torii-gate.webp",
   koi: "/assets/illustrations/kacsoeszti-koi-1184783_1920.png",
 };
 
@@ -286,7 +286,7 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
 
         {/* CTA with illustrations */}
         <div className="grid items-center gap-4 lg:grid-cols-[1fr_auto_1fr]">
-          <div className="hidden justify-end lg:flex"><Illus src={ART.tree} speed={20} className="w-[150px] xl:w-[190px]" /></div>
+          <div className="hidden justify-end lg:flex"><Illus src={ART.torii} speed={20} className="w-[180px] lg:w-[215px] xl:w-[260px]" /></div>
 
           <div data-g="cta" className="flex flex-col items-center text-center">
             <div className="mb-4 flex items-center gap-4" aria-hidden="true">
