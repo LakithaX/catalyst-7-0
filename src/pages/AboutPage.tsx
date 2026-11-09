@@ -147,13 +147,13 @@ const DAYS = [
     day: 'Day 01',
     kanji: '覚醒',
     title: 'The Awakening & Forge',
-    theme: 'Arrival · Outbound challenges · Alumni Night',
+    theme: 'Arrival · Outbound challenges · Alumni Night & DJ Party',
     tone: RED,
     points: [
       'Welcome ceremony & traditional delegate check-in',
       'High-energy outbound physical & strategic simulations',
       'Introspective vulnerability circles and leadership forums',
-      'The legendary Alumni Night, DJ party, and night festivities',
+      'The legendary Alumni Night, DJ Party, and night festivities',
     ],
   },
   {
@@ -166,7 +166,7 @@ const DAYS = [
       'Interactive skill labs and problem-solving masterclasses',
       'Inspiring plenary keynote sessions by industry leaders',
       'Strategic action roadmaps for post-conference impact',
-      'Roll call finale and graduation into brotherhood',
+      'Roll call finale, celebrations, and graduation into brotherhood',
     ],
   },
 ]
