@@ -916,8 +916,8 @@ const EB_DIR = '/assets/eb-pics/'
 const ILL = '/assets/illustrations/'
 
 const CM: { name: string; file: string; role: string; ph?: number; keep?: number }[] = [
-  { name: 'Senaya Jayasuriya', file: EB_DIR + 'senaya-jayasuriya.webp', role: 'Conference Manager' },
   { name: 'Savinda Sithum', file: EB_DIR + 'savinda-sithum.webp', role: 'Conference Manager' },
+  { name: 'Senaya Jayasuriya', file: EB_DIR + 'senaya-jayasuriya.webp', role: 'Conference Manager' },
   { name: 'Sabeelur Rashaad', file: EB_DIR + 'sabeelur-rashaad.webp', role: 'Conference Manager' },
 ]
 

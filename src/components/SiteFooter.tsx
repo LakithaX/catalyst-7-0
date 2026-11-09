@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const links = [
   ['Home', '/'],
-  ['About Catalyst', '/about'],
+  ['Conference Team', '/about'],
   ['Organizing committee', '/about/oc'],
   ['Gallery', '/gallery'],
   ['Official merchandise', '/merch'],

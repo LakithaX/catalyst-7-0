@@ -277,16 +277,10 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
         </article>
 
         {/* Tiers */}
-        <div className="mb-12">
-          <TierHeading kanji="協" en="Supporting partners" />
+        <div className="mb-14">
+          <TierHeading kanji="協" en="Current Partners" />
           <div data-g="slots" className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
             {SUPPORTING.map((p, i) => <Slot key={`s-${i}`} partner={p} />)}
-          </div>
-        </div>
-        <div className="mb-14">
-          <TierHeading kanji="地" en="Community partners" />
-          <div data-g="slots" className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-            {COMMUNITY.map((p, i) => <Slot key={`c-${i}`} partner={p} />)}
           </div>
         </div>
 
