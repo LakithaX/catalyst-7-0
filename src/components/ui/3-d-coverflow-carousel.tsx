@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { getProductById } from "../../data/merchProducts";
+import type { MerchProduct } from "../../data/merchProducts";
+import { useCatalog } from "../../context/CatalogContext";
 import { useMerch } from "../../context/MerchContext";
 
 if (typeof window !== "undefined") {
@@ -127,7 +128,7 @@ function computeDims(size: Size, panelH: number, stageW: number) {
 }
 
 export function CoverFlowCarousel({
-  items = defaultMerchItems,
+  items: itemsProp = defaultMerchItems,
   sectionLabel = "CATALYST 7.0 MERCHANDISE",
   chapterLabel = "第四章",
   active = false,
@@ -137,6 +138,29 @@ export function CoverFlowCarousel({
   onCtaClick,
 }: CoverFlowCarouselProps) {
   const navigate = useNavigate();
+  // Live shop status + published products (controlled from Admin > Merchandise)
+  const { comingSoon, loading: catalogLoading, error: catalogError, products: liveProducts } = useCatalog();
+  const liveById = useMemo(() => new Map(liveProducts.map((p) => [p.id, p])), [liveProducts]);
+  const lookup = (id?: string): MerchProduct | undefined => (id ? liveById.get(id) : undefined);
+  // Only published products are shown, with the live price and sizes. Products added in the admin that are not in the
+  // curated list at the top of this file are appended automatically.
+  const items = useMemo<CarouselItem[]>(() => {
+    const curated = itemsProp.filter((it) => !it.productId || liveById.has(it.productId));
+    const shown = new Set(curated.map((it) => it.productId).filter(Boolean));
+    const extra: CarouselItem[] = liveProducts
+      .filter((p) => !shown.has(p.id))
+      .map((p) => ({
+        tag: "#OfficialMerch",
+        titleLine1: p.name.toUpperCase(),
+        titleLine2: p.variant ? `– ${p.variant.toUpperCase()}` : undefined,
+        desc: p.description,
+        img: p.images[0],
+        ctaText: "Add to Cart",
+        ctaUrl: `/merch/${p.id}`,
+        productId: p.id,
+      }));
+    return [...curated, ...extra];
+  }, [itemsProp, liveProducts, liveById]);
   // Defensive: if this carousel is ever rendered outside <MerchProvider>, fall back to opening the product page.
   let merch: ReturnType<typeof useMerch> | null = null;
   try {
@@ -205,6 +229,10 @@ export function CoverFlowCarousel({
   useEffect(() => {
     idxRef.current = currentIndex;
   }, [currentIndex]);
+
+  useEffect(() => {
+    if (total > 0 && currentIndex >= total) setCurrentIndex(0);
+  }, [total, currentIndex]);
 
   const go = useCallback((idx: number, manual = true) => {
     setCurrentIndex(((idx % total) + total) % total);
@@ -285,12 +313,12 @@ export function CoverFlowCarousel({
   // Standard shop behaviour: items with no size choice go straight into the cart.
   // Items that need a size open the product page so the delegate can pick one first.
   const needsSize = (item: CarouselItem) => {
-    const p = item.productId ? getProductById(item.productId) : undefined;
+    const p = lookup(item.productId);
     return Boolean(p?.options?.sizes && p.options.sizes.length > 1);
   };
 
   const handleCta = (item: CarouselItem) => {
-    const p = item.productId ? getProductById(item.productId) : undefined;
+    const p = lookup(item.productId);
     if (!p || !merch) return open(item);
     let size: string | undefined = p.options?.sizes?.[0];
     if (needsSize(item)) {
@@ -307,7 +335,16 @@ export function CoverFlowCarousel({
     window.setTimeout(() => setAddedId((cur) => (cur === p.id ? null : cur)), 1600);
   };
 
-  if (!items || total === 0) return null;
+  const state: "open" | "soon" | "error" | "loading" = comingSoon
+    ? "soon"
+    : catalogError
+      ? "error"
+      : catalogLoading
+        ? "loading"
+        : total === 0
+          ? "soon"
+          : "open";
+  const closed = state !== "open";
   const d = computeDims(size, panelH, stageW);
   const compact = vh < 780;
   const dur = reduce ? "0ms" : "650ms";
@@ -373,7 +410,7 @@ export function CoverFlowCarousel({
           {!compact && (
           <p className="hidden sm:block" style={{ fontSize: 15, lineHeight: 1.5, color: "#3D3833", marginTop: 6 }}>
             <span style={{ fontFamily: BRUSH, fontSize: 19, color: RED_DARK, marginRight: 8 }}>公式グッズ</span>
-            Official gear for delegates. Pick a piece and add it to your cart.
+            {closed ? "Our official merchandise is almost ready." : "Official gear for delegates. Pick a piece and add it to your cart."}
           </p>
           )}
         </header>
@@ -413,6 +450,9 @@ export function CoverFlowCarousel({
               ].map((c) => (
                 <span key={c} aria-hidden="true" className={`pointer-events-none absolute z-10 h-5 w-5 border-[#C9362B] ${c}`} />
               ))}
+            {closed ? (
+              <ComingSoonPanel state={state as "soon" | "error" | "loading"} />
+            ) : (
             <div
               ref={groupRef}
               role="group"
@@ -426,7 +466,7 @@ export function CoverFlowCarousel({
               style={{ height: panelH > 0 ? panelH : d.h + 26, perspective: 1600, touchAction: "pan-y", overflow: "hidden" }}
             >
               <span className="sr-only" aria-live="polite">
-                {`Item ${currentIndex + 1} of ${total}: ${items[currentIndex].titleLine1} ${items[currentIndex].titleLine2 ?? ""}`}
+                {`Item ${currentIndex + 1} of ${total}: ${items[currentIndex]?.titleLine1 ?? ""} ${items[currentIndex]?.titleLine2 ?? ""}`}
               </span>
 
               {items.map((item, idx) => {
@@ -435,7 +475,7 @@ export function CoverFlowCarousel({
                 const isCenter = offset === 0;
                 const visible = Math.abs(offset) <= 1;
                 const sign = Math.sign(offset);
-                const product = item.productId ? getProductById(item.productId) : undefined;
+                const product = lookup(item.productId);
 
                 const transform = isCenter
                   ? "translate3d(0,0,0) scale(1) rotateY(0deg)"
@@ -676,10 +716,12 @@ export function CoverFlowCarousel({
                 );
               })}
             </div>
+            )}
 
             </div>
 
-            {/* ── Controls: tidy row below the stage ── */}
+            {/* ── Controls: tidy row below the stage (hidden while the shop is closed) ── */}
+            {!closed && (
             <div className="mt-3 flex shrink-0 items-center justify-center gap-4 sm:gap-6">
               <button type="button" onClick={() => prev()} aria-label="Previous merchandise item" style={ctrlStyle}>
                 <Chevron dir="l" />
@@ -718,10 +760,76 @@ export function CoverFlowCarousel({
                 <Chevron dir="r" />
               </button>
             </div>
+            )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+// Shown inside the beige stage box while the shop is switched to "Coming soon" in the admin panel,
+// while the status is loading, or if the status could not be loaded.
+function ComingSoonPanel({ state }: { state: "soon" | "error" | "loading" }) {
+  const copy =
+    state === "error"
+      ? { title: "BACK SOON", text: "The shop is taking a short break. Please check again in a moment." }
+      : { title: "COMING SOON", text: "The official Catalyst 7.0 merchandise is on its way. Check back soon." };
+
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      aria-busy={state === "loading"}
+      className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden px-6 text-center"
+    >
+      <style>{`@keyframes cfSoonIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}@keyframes cfSoonPulse{0%,100%{opacity:.45}50%{opacity:.9}}@media (prefers-reduced-motion:reduce){.cf-soon-in,.cf-soon-pulse{animation:none!important}}`}</style>
+
+      {/* faint ghost cards, so the box still reads as a collection that is not open yet */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 hidden items-center justify-center sm:flex">
+        <div className="absolute h-[62%] w-[22%] max-w-[230px] -translate-x-[170%] -rotate-6 rounded-2xl border-2 border-dashed border-[#252321]/15 bg-white/30" />
+        <div className="absolute h-[62%] w-[22%] max-w-[230px] translate-x-[170%] rotate-6 rounded-2xl border-2 border-dashed border-[#252321]/15 bg-white/30" />
+      </div>
+
+      {state === "loading" ? (
+        <p className="cf-soon-pulse relative text-sm font-bold uppercase tracking-[0.3em] text-[#736B63]" style={{ fontFamily: LABEL, animation: "cfSoonPulse 1.6s ease-in-out infinite" }}>
+          Loading the collection…
+        </p>
+      ) : (
+        <div className="cf-soon-in relative flex max-w-lg flex-col items-center" style={{ animation: "cfSoonIn .7s cubic-bezier(.22,1,.36,1) both" }}>
+          <span
+            aria-hidden="true"
+            className="mb-4 grid h-12 w-12 -rotate-3 place-items-center rounded-[4px] text-2xl text-white shadow-[0_6px_16px_rgba(201,54,43,0.35)]"
+            style={{ background: RED, fontFamily: "'Noto Serif JP', serif" }}
+          >
+            近
+          </span>
+
+          <h3
+            className="brush-heading"
+            style={{ margin: 0, fontFamily: JANSINA, fontWeight: 400, fontSize: "clamp(2.4rem, 7vw, 4.8rem)", letterSpacing: "0.03em", lineHeight: 1.05, color: INK }}
+          >
+            {copy.title}
+          </h3>
+
+          <svg viewBox="0 0 420 28" fill="none" aria-hidden="true" className="mt-1 h-4 w-44 sm:w-60">
+            <path d="M6 16 C45 10, 95 8, 150 9 C220 10, 290 8, 350 12 C385 14, 405 16, 416 13 C405 20, 370 21, 320 20 C240 18, 160 21, 90 20 C50 19, 20 20, 6 16 Z" fill={RED} />
+          </svg>
+
+          <div className="mt-4 flex items-center gap-3" aria-hidden="true">
+            <span className="h-px w-8 bg-[#C9362B]/60 sm:w-14" />
+            <span className="pl-[0.4em] text-sm font-bold tracking-[0.4em] text-[#C9362B] sm:text-base" style={{ fontFamily: "'Noto Serif JP', serif" }}>
+              近日公開
+            </span>
+            <span className="h-px w-8 bg-[#C9362B]/60 sm:w-14" />
+          </div>
+
+          <p className="mt-4 text-sm leading-relaxed text-[#3D3833] sm:text-base" style={{ fontFamily: BODY }}>
+            {copy.text}
+          </p>
+        </div>
+      )}
+    </div>
   );
 }
 
