@@ -8,6 +8,7 @@ import { initBoot } from './utils/navState';
 const HomePage = lazy(() => import('./pages/HomePage'));
 const AdminPage = lazy(() => import('./pages/AdminPage'));
 const AboutPage = lazy(() => import('./pages/AboutPage'));
+const ConferenceTeamPage = lazy(() => import('./pages/ConferenceTeamPage'));
 const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const OcPosterPage = lazy(() => import('./pages/OcPosterPage'));
 const GalleryPage = lazy(() => import('./pages/GalleryPage'));
@@ -108,6 +109,9 @@ export default function App() {
         {/* GROUP C: Wrapped in Layout to get the site OutroFooter */}
         <Route element={<Layout />}>
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/conference-team" element={<ConferenceTeamPage />} />
+          <Route path="/team" element={<ConferenceTeamPage />} />
+          <Route path="/about/team" element={<ConferenceTeamPage />} />
           <Route path="/oc" element={<OcPosterPage />} />
           <Route path="/about/oc" element={<OcPosterPage />} />
           <Route path="/gallery" element={<GalleryPage />} />

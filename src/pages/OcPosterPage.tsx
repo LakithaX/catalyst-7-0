@@ -615,7 +615,7 @@ export default function OcPosterPage() {
           </div>
           <p className="ocg-outro-kanji" aria-hidden="true">次は 執行部</p>
           <Link
-            to="/about?team=eb"
+            to="/conference-team?team=eb"
             className="group inline-flex items-center gap-3 rounded-full border border-[#29211D]/80 px-7 py-3 text-xs font-bold uppercase tracking-[0.2em] text-[#29211D] transition-all duration-300 hover:bg-[#B92D25] hover:text-[#FFF8ED]"
             style={{ fontFamily: SANS }}
           >

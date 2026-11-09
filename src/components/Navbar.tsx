@@ -25,7 +25,8 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
   const isCartActive = location.pathname.startsWith('/merch/cart') || isCartOpen;
 
   const isHome = location.pathname === '/' || location.pathname === '';
-  const isAbout = location.pathname.startsWith('/about') || location.pathname.startsWith('/oc');
+  const isAbout = location.pathname === '/about';
+  const isTeam = location.pathname.startsWith('/conference-team') || location.pathname.startsWith('/team') || location.pathname.startsWith('/oc') || location.pathname.startsWith('/about/oc');
   const isRegister = location.pathname.startsWith('/register') || location.pathname.startsWith('/registration');
   const isGallery = location.pathname.startsWith('/gallery');
   const isMerch = location.pathname.startsWith('/merch') && !location.pathname.startsWith('/merch/cart');
