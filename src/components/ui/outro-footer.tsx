@@ -24,10 +24,8 @@ const NAV = [
 
 // Replace "#" with your real profile URLs.
 const SOCIALS = [
-  { name: "Discord", href: "#", icon: "discord" },
   { name: "Instagram", href: "#", icon: "instagram" },
   { name: "YouTube", href: "#", icon: "youtube" },
-  { name: "X", href: "#", icon: "x" },
 ] as const;
 
 const LOGOS = {
