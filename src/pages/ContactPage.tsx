@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import { Navbar } from '../components/Navbar';
 import { SakuraPetals } from '../components/SakuraPetals';
 import { scrollTopOrRestore } from '../utils/navState';
+import { TagMark } from '../components/brand/CatalystTag';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
@@ -418,8 +419,8 @@ export default function ContactPage() {
             </div>
 
             <div className="order-1 lg:order-2 text-center lg:text-left">
-              <div className="cx-pill inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full border border-[#1f1a18]/25 bg-white/70 mb-6">
-                <span className="w-2 h-2 rounded-full bg-[#c9332a] animate-pulse" />
+              <div className="cx-pill inline-flex items-center gap-2.5 py-1.5 pl-2 pr-4 rounded-full border border-[#1f1a18]/25 bg-white/70 mb-6">
+                <TagMark />
                 <span className="text-[11px] sm:text-xs font-semibold tracking-[0.28em] text-[#1f1a18] uppercase">AIESEC IN SLIIT &bull; DELEGATE HELP DESK</span>
               </div>
 
