@@ -1,19 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { LayoutDashboard, Users, ShoppingBag, Package, ArrowUpRight, ArrowRight, Search, RefreshCw, LogOut, ShieldCheck, Check, ChevronRight, Sparkles, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Users, ShoppingBag, Package, Handshake, ArrowUpRight, ArrowRight, Search, RefreshCw, LogOut, ShieldCheck, Check, ChevronRight, Sparkles, Menu, X } from 'lucide-react';
 import { useSession } from '../components/EmailSignIn';
 import { supabase, errorMessage } from '../lib/supabase';
 import './admin.css';
 import AdminMerch from '../components/AdminMerch';
 import AdminDelegateDetails from '../components/AdminDelegateDetails';
 import AdminLogin from '../components/AdminLogin';
+import AdminPartnerships from '../components/AdminPartnerships';
 
 type Registration = { id: string; full_name: string; personal_email: string; university: string; reference: string; status: string; created_at: string; checked_in_at: string | null };
 type Order = { id: string; registration_id: string; registrations: {full_name:string;personal_email:string}|null; reference: string; status: string; payment_status: string; total_minor: number; created_at: string };
 type Variant = { id: string; sku: string; size: string; price_minor: number };
 type Summary = { registrations: number; checked_in: number; orders: number; collected: number; paid_minor: number; pending_registrations: number; awaiting_collection: number; registrations_by_status: Record<string,number> };
 const money = (n: number) => new Intl.NumberFormat('en-LK', { style: 'currency', currency: 'LKR', maximumFractionDigits: 0 }).format(n / 100);
-const tabs = [{ name: 'Overview', icon: LayoutDashboard }, { name: 'Registrations', icon: Users }, { name: 'Orders', icon: ShoppingBag }, { name: 'Merchandise', icon: Package }];
+const tabs = [{ name: 'Overview', icon: LayoutDashboard }, { name: 'Registrations', icon: Users }, { name: 'Orders', icon: ShoppingBag }, { name: 'Merchandise', icon: Package }, { name: 'Partnerships', icon: Handshake }];
 export default function AdminPage() {
   const { session, loading } = useSession();
   const currentUser = useRef(session?.user.id);
@@ -127,9 +128,26 @@ export default function AdminPage() {
       {tab === 'Orders' && <section className="admin-table-card"><div className="admin-section-heading"><div><h2>Merchandise orders</h2><p>From the first reservation to the final handover.</p></div><select aria-label="Filter orders" value={filter} onChange={e=>setFilter(e.target.value)}>{['all','reserved','ready_for_pickup','collected','cancelled'].map(s=><option key={s}>{s}</option>)}</select></div><SearchBox value={search} onChange={setSearch}/><div className="admin-table-scroll" role="region" aria-label="Scrollable records" tabIndex={0}><table><thead><tr><th>Delegate</th><th>Reference</th><th>Total</th><th>Payment</th><th>Status</th><th>Next action</th></tr></thead><tbody>{visibleOrders.map(o=><tr key={o.id}><td><button className="admin-delegate-link" onClick={()=>setSelectedDelegate(o.registration_id)}>{o.registrations?.full_name||'View delegate'}</button></td><td className="admin-reference"><button onClick={()=>setSelectedDelegate(o.registration_id)}>{o.reference}</button></td><td>{money(o.total_minor)}</td><td><span className={`admin-status ${o.payment_status === 'paid' ? 'approved' : 'pending'}`}>{o.payment_status}</span></td><td>{o.status === 'reserved' ? 'Pre-ordered' : o.status.replaceAll('_',' ')}</td><td><div className="admin-row-actions">{o.payment_status === 'unpaid' && o.status !== 'cancelled' && <button disabled={busy} onClick={()=>setSelectedDelegate(o.registration_id)}>Review payment</button>}{o.status === 'reserved' && <button disabled={busy} onClick={()=>void mutate('admin_order',{p_id:o.id,p_status:'ready_for_pickup'})}>Mark ready</button>}{o.status === 'ready_for_pickup' && o.payment_status === 'paid' && <button disabled={busy} onClick={()=>void mutate('admin_order',{p_id:o.id,p_status:'collected'})}>Mark collected</button>}</div></td></tr>)}</tbody></table>{!visibleOrders.length && <p className="admin-empty">No orders found.</p>}</div></section>}
       {tab === 'Orders' && <div className="admin-record-pagination"><span>Showing { orders.length } of {summary.orders}. Search filters the loaded records.</span>{ orders.length < summary.orders && <button disabled={busy} onClick={()=>void loadMore('orders')}>{busy?'Loading…':'Load more records'}</button>}</div>}
       {tab === 'Merchandise' && <AdminMerch onChanged={() => void load()} />}
-      <footer className="admin-footer" aria-label="Control room footer"><span>© {new Date().getFullYear()} AIESEC in SLIIT <b>✦</b> Catalyst 7.0</span><span><ShieldCheck size={14}/> Confidential · Authorized administrator only</span></footer>
+      {tab === 'Partnerships' && <AdminPartnerships />}
+      <footer className="admin-footer" aria-label="Control room footer">
+        <div className="admin-footer-logos">
+          <Link to="/" aria-label="Catalyst home"><img src="/assets/catalyst_7_logo.png" alt="Catalyst 7.0" /></Link>
+          <img src="/assets/aiesec-logo-blue.png" alt="AIESEC" />
+          <img src="/assets/aiesec-sliit-blue.png" alt="AIESEC in SLIIT" />
+        </div>
+        <div className="admin-footer-meta"><span>© {new Date().getFullYear()} AIESEC in SLIIT <b>✦</b> Catalyst 7.0</span><span><ShieldCheck size={14}/> Confidential · Authorized administrator only</span></div>
+      </footer>
     </main>
-    <aside className="admin-right-rail"><div className="admin-rail-heading"><h2>Event pulse</h2><span className="admin-live-dot"/></div><p className="admin-eyebrow">A LITTLE BIG PICTURE</p><div className="admin-ring" style={{'--progress': `${summary.registrations ? summary.checked_in/summary.registrations*100 : 0}%`} as React.CSSProperties}><div><strong>{summary.registrations ? Math.round(summary.checked_in/summary.registrations*100) : 0}%</strong><span>checked in</span></div></div><h3>Bring everyone together.</h3><p>Every check-in is the beginning of another connection.</p><div className="admin-rail-count"><span>Registered</span><strong>{summary.registrations}</strong></div><div className="admin-rail-count"><span>On the ground</span><strong>{summary.checked_in}</strong></div><div className="admin-rail-divider"/><h2>Quick access</h2>{tabs.slice(1).map(({name,icon:Icon})=><button className="admin-rail-link" key={name} onClick={()=>navigate(name)}><span><Icon size={17}/>{name}</span><ChevronRight size={15}/></button>)}<div className="admin-rail-note"><Sparkles size={24}/><h3>Small details.<br/>Unforgettable moments.</h3><p>Your backstage pass to a smoother Catalyst.</p><Link to="/">Visit the event site <ArrowUpRight size={15}/></Link></div></aside>
+    <aside className="admin-right-rail"><div className="admin-rail-heading"><h2>Event pulse</h2><span className="admin-live-dot"/></div><p className="admin-eyebrow">A LITTLE BIG PICTURE</p><div className="admin-ring" style={{'--progress': `${summary.registrations ? summary.checked_in/summary.registrations*100 : 0}%`} as React.CSSProperties}><div><strong>{summary.registrations ? Math.round(summary.checked_in/summary.registrations*100) : 0}%</strong><span>checked in</span></div></div><h3>Bring everyone together.</h3><p>Every check-in is the beginning of another connection.</p><div className="admin-rail-metrics">
+      <button className="admin-rail-metric registrations" onClick={() => navigate('Registrations')} aria-label={`${summary.registrations} registrations. View registrations`}>
+        <span className="admin-count-circle"><Users size={17} aria-hidden="true"/><strong>{summary.registrations.toLocaleString()}</strong></span>
+        <span>Registrations</span>
+      </button>
+      <button className="admin-rail-metric orders" onClick={() => navigate('Orders')} aria-label={`${summary.orders} merchandise orders. View orders`}>
+        <span className="admin-count-circle"><ShoppingBag size={17} aria-hidden="true"/><strong>{summary.orders.toLocaleString()}</strong></span>
+        <span>Merch orders</span>
+      </button>
+    </div><div className="admin-rail-count"><span>On the ground</span><strong>{summary.checked_in}</strong></div><div className="admin-rail-divider"/><h2>Quick access</h2>{tabs.slice(1).map(({name,icon:Icon})=><button className="admin-rail-link" key={name} onClick={()=>navigate(name)}><span><Icon size={17}/>{name}</span><ChevronRight size={15}/></button>)}<div className="admin-rail-note"><Sparkles size={24}/><h3>Small details.<br/>Unforgettable moments.</h3><p>Your backstage pass to a smoother Catalyst.</p><Link to="/">Visit the event site <ArrowUpRight size={15}/></Link></div></aside>
   </div></div>{selectedDelegate&&<AdminDelegateDetails key={selectedDelegate} id={selectedDelegate} onClose={()=>setSelectedDelegate(null)} onChanged={()=>void load()}/>}</>;
 }
 function SearchBox({ value, onChange }: { value: string; onChange: (s: string) => void }) { return <label className="admin-search"><Search size={17}/><input aria-label="Search records" placeholder="Search by name, reference or keyword…" value={value} onChange={e=>onChange(e.target.value)}/></label>; }

@@ -1,0 +1,32 @@
+.admin-partnerships{display:grid;gap:20px}
+.admin-partnerships-intro{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:2px 0 4px}
+.admin-partnerships-intro h2{margin:0 0 6px;font-size:20px;letter-spacing:-.04em}
+.admin-partnerships-intro>div>p:last-child,.admin-partnerships-panel-heading p{margin:0;color:#88786f;font-size:12px;line-height:1.55}
+.admin-partnerships-count{flex:none;border:1px solid #e8ded2;border-radius:999px;padding:7px 11px;color:#75665c;font-size:11px}
+.admin-partnerships-form{display:grid;gap:16px}
+.admin-partnerships-panel{min-width:0;border:1px solid #e8ded2;border-radius:16px;background:#fffdfa;padding:20px}
+.admin-partnerships-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px}
+.admin-partnerships-panel-heading h3{margin:0 0 5px;font-size:15px}
+.admin-partnerships-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.admin-partnerships-fields label{display:grid;align-content:start;gap:7px;color:#665951;font-size:11px;font-weight:600}
+.admin-partnerships-fields label>span{display:flex;align-items:center;gap:6px}
+.admin-partnerships-fields input,.admin-partnerships-fields textarea{width:100%;min-width:0;border:1px solid #e5dbd0;border-radius:10px;background:#fff;padding:11px 12px;color:#302b28;font:inherit;font-size:12px;font-weight:400}
+.admin-partnerships-fields textarea{resize:vertical;line-height:1.55}
+.admin-partnerships-fields input:focus,.admin-partnerships-fields textarea:focus{outline:2px solid #c9362b55;border-color:#c9362b}
+.admin-partnerships-fields .wide{grid-column:1/-1}
+.admin-partnerships-add,.admin-partnerships-remove{display:inline-flex;align-items:center;justify-content:center;gap:7px;border:1px solid #e7d8c7;border-radius:10px;background:#fff;color:#6e5347;padding:9px 12px;font:inherit;font-size:11px;font-weight:700}
+.admin-partnerships-add:disabled{opacity:.4;cursor:not-allowed}
+.admin-partnerships-empty,.admin-partnerships-loading{border:1px dashed #e8ded2;border-radius:12px;padding:22px;text-align:center;color:#8b7b70;font-size:12px}
+.admin-partner-card-list{display:grid;gap:12px}
+.admin-partner-editor{border:1px solid #eee5dc;border-radius:12px;background:#faf7f2;padding:15px}
+.admin-partner-editor-top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;color:#635149;font-size:12px}
+.admin-partnerships-remove{border-color:transparent;background:transparent;color:#a13b33;padding:5px 7px}
+.admin-partnerships-actions{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.admin-partnerships-actions>span{color:#897a70;font-size:10px}
+.admin-partnerships-actions code{border-radius:4px;background:#f1ece6;padding:2px 4px}
+.admin-partnerships-actions>button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;background:#c9362b;color:white;padding:12px 18px;font:inherit;font-size:12px;font-weight:700}
+.admin-partnerships-actions>button:disabled{opacity:.45;cursor:not-allowed}
+.admin-partnerships-message,.admin-partnerships-error{margin:0;border-radius:10px;padding:12px 14px;font-size:12px}
+.admin-partnerships-message{background:#edf5ee;color:#3b7053}
+.admin-partnerships-error{background:#fff0ed;color:#a42b21;overflow-wrap:anywhere}
+@media(max-width:620px){.admin-partnerships-intro{align-items:flex-start;flex-direction:column}.admin-partnerships-fields{grid-template-columns:minmax(0,1fr)}.admin-partnerships-fields .wide{grid-column:auto}.admin-partnerships-panel{padding:15px}.admin-partnerships-actions{align-items:stretch;flex-direction:column}.admin-partnerships-actions>button{width:100%}}

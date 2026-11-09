@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { supabase } from "../../lib/supabase";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -16,12 +17,26 @@ interface Partner {
   url?: string;
 }
 
-const PRESENTING: Partner & { blurb: string } = {
-  name: "TO BE ANNOUNCED",
-  blurb: "Our presenting partner stands beside Catalyst 7.0 from the first day to the last. Their name will be revealed soon.",
+interface PartnershipContent {
+  title: string;
+  intro: string;
+  presenting: Partner & { blurb: string };
+  partners: Partner[];
+  cta_label: string;
+  cta_url: string;
+}
+
+const DEFAULT_CONTENT: PartnershipContent = {
+  title: "PARTNERSHIP ANNOUNCEMENT",
+  intro: "The organisations walking with us towards Catalyst 7.0.",
+  presenting: {
+    name: "TO BE ANNOUNCED",
+    blurb: "Our presenting partner stands beside Catalyst 7.0 from the first day to the last. Their name will be revealed soon.",
+  },
+  partners: [],
+  cta_label: "Become a partner",
+  cta_url: "#contact",
 };
-const CURRENT_PARTNERS: Partner[] = [{ name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }];
-const PARTNER_CTA = { label: "Become a partner", href: "#contact" };
 
 // Illustrations from /public/assets/illustrations
 const ART = {
@@ -124,6 +139,35 @@ const TierHeading = ({ kanji, en }: { kanji: string; en: string }) => (
 
 export default function PartnershipAnnouncement({ active = false }: { active?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
+  const [content, setContent] = useState(DEFAULT_CONTENT);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!supabase) return;
+    void supabase.from("partnership_settings")
+      .select("content")
+      .eq("id", true)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled) return;
+        if (error) {
+          console.warn("[PartnershipAnnouncement] Could not load published content.", error.message);
+          return;
+        }
+        if (data?.content) {
+          const saved = data.content as Partial<PartnershipContent>;
+          setContent({
+            title: saved.title ?? DEFAULT_CONTENT.title,
+            intro: saved.intro ?? DEFAULT_CONTENT.intro,
+            presenting: { ...DEFAULT_CONTENT.presenting, ...saved.presenting },
+            partners: Array.isArray(saved.partners) ? saved.partners : DEFAULT_CONTENT.partners,
+            cta_label: saved.cta_label ?? DEFAULT_CONTENT.cta_label,
+            cta_url: saved.cta_url ?? DEFAULT_CONTENT.cta_url,
+          });
+        }
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // GSAP: only created once HomePage is locked to the hero, with refreshPriority -1.
   useEffect(() => {
@@ -236,14 +280,14 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
                 margin: 0,
               }}
             >
-              PARTNERSHIP ANNOUNCEMENT
+              {content.title}
             </h2>
             <svg viewBox="0 0 420 28" fill="none" aria-hidden="true" className="mt-1 h-4 w-48 sm:w-64">
               <path d="M6 16 C45 10, 95 8, 150 9 C220 10, 290 8, 350 12 C385 14, 405 16, 416 13 C405 20, 370 21, 320 20 C240 18, 160 21, 90 20 C50 19, 20 20, 6 16 Z" fill={RED} />
             </svg>
             <p style={{ fontSize: 16, lineHeight: 1.6, color: "#3D3833", marginTop: 10, maxWidth: "46ch" }}>
               <span style={{ fontFamily: BRUSH, fontSize: 20, color: RED_DARK, marginRight: 8 }}>共に歩む</span>
-              The organisations walking with us towards Catalyst 7.0.
+              {content.intro}
             </p>
           </header>
 
@@ -262,12 +306,12 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
           </div>
           <div className="grid min-w-0 flex-1 items-center gap-6 p-5 sm:p-8 md:grid-cols-2">
             <div data-g="cardbody-mark" className="flex min-h-[140px] items-center justify-center rounded-xl p-4" style={{ background: "#E6D9C0", border: `2px solid ${INK}` }}>
-              <PartnerMark partner={PRESENTING} large />
+              <PartnerMark partner={content.presenting} large />
             </div>
             <div data-g="cardbody">
               <p style={{ fontFamily: LABEL, fontWeight: 700, fontSize: 13, letterSpacing: "0.18em", color: RED_DARK, margin: 0 }}>PRESENTING PARTNER</p>
-              <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: "clamp(1.7rem, 3.2vw, 2.3rem)", letterSpacing: "0.03em", lineHeight: 1.1, margin: "6px 0 0" }}>{PRESENTING.name}</h3>
-              <p style={{ fontSize: 16, lineHeight: 1.65, color: "#3D3833", marginTop: 10 }}>{PRESENTING.blurb}</p>
+              <h3 style={{ fontFamily: DISPLAY, fontWeight: 700, fontSize: "clamp(1.7rem, 3.2vw, 2.3rem)", letterSpacing: "0.03em", lineHeight: 1.1, margin: "6px 0 0" }}>{content.presenting.name}</h3>
+              <p style={{ fontSize: 16, lineHeight: 1.65, color: "#3D3833", marginTop: 10 }}>{content.presenting.blurb}</p>
             </div>
           </div>
           <span data-g="stamp" aria-hidden="true" className="absolute -right-2 -top-4 sm:-right-4" style={{ transform: "rotate(8deg)" }}>
@@ -279,7 +323,9 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
         <div className="mb-14">
           <TierHeading kanji="協" en="Current Partners" />
           <div data-g="slots" className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-            {CURRENT_PARTNERS.map((p, i) => <Slot key={`cp-${i}`} partner={p} />)}
+            {content.partners.length
+              ? content.partners.map((partner, index) => <Slot key={`partner-${index}-${partner.name}`} partner={partner} />)
+              : <p className="col-span-full text-center text-sm text-[#75665C]">Partner announcements are coming soon.</p>}
           </div>
         </div>
 
@@ -295,11 +341,11 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
             </div>
             <p style={{ fontSize: 16, color: "#3D3833", marginBottom: 16, maxWidth: "34ch" }}>Want your name on this list? Let’s build Catalyst 7.0 together.</p>
             <a
-              href={PARTNER_CTA.href}
+              href={content.cta_url}
               className="inline-flex min-h-[48px] items-center justify-center whitespace-nowrap rounded-full px-9 text-sm font-bold uppercase tracking-[0.16em] text-white transition-transform duration-300 hover:-translate-y-0.5"
               style={{ background: RED_DARK, fontFamily: LABEL, boxShadow: "0 4px 14px rgba(181,30,35,0.30)" }}
             >
-              {PARTNER_CTA.label}
+              {content.cta_label}
             </a>
           </div>
 
