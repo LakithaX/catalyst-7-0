@@ -232,7 +232,18 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
               className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                 isAbout ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
               }`}
-            >CONFERENCE TEAM</Link>
+            >
+              ABOUT
+            </Link>
+            <Link
+              to="/conference-team"
+              aria-current={isTeam ? 'page' : undefined}
+              className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                isTeam ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+              }`}
+            >
+              CONFERENCE TEAM
+            </Link>
             <Link
               to="/gallery"
               aria-current={isGallery ? 'page' : undefined}
@@ -388,7 +399,18 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
                   isAbout ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
                 }`}
-              >CONFERENCE TEAM</Link>
+              >
+                ABOUT
+              </Link>
+              <Link
+                to="/conference-team"
+                aria-current={isTeam ? 'page' : undefined}
+                className={`transition-all cursor-pointer whitespace-nowrap py-1 ${
+                  isTeam ? 'text-[#b51e23]' : 'text-[#0e1118] hover:opacity-60'
+                }`}
+              >
+                CONFERENCE TEAM
+              </Link>
               <Link
                 to="/gallery"
                 aria-current={isGallery ? 'page' : undefined}
@@ -550,7 +572,18 @@ export const Navbar: React.FC<NavbarProps> = ({ isHero = false, className = '' }
                 className={`py-3 px-4 rounded-xl transition-all ${
                   isAbout ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5'
                 }`}
-              >CONFERENCE TEAM</Link>
+              >
+                ABOUT
+              </Link>
+              <Link
+                to="/conference-team"
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-3 px-4 rounded-xl transition-all ${
+                  isTeam ? 'text-[#B51E23] bg-[#B51E23]/10' : 'hover:bg-[#252321]/5'
+                }`}
+              >
+                CONFERENCE TEAM
+              </Link>
               <Link
                 to="/gallery"
                 onClick={() => setMobileMenuOpen(false)}

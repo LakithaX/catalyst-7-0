@@ -13,7 +13,8 @@ if (typeof window !== "undefined") {
 // ============================================================================
 const NAV = [
   { label: "Home", to: "/" },
-  { label: "Conference Team", to: "/about" },
+  { label: "About", to: "/about" },
+  { label: "Conference Team", to: "/conference-team" },
   { label: "Register", to: "/register" },
   { label: "Gallery", to: "/gallery" },
   { label: "Merch", to: "/merch" },

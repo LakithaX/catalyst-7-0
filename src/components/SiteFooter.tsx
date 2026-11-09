@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 const links = [
   ['Home', '/'],
   ['About', '/about'],
-  ['Conference Team', '/team'],
+  ['Conference Team', '/conference-team'],
   ['Gallery', '/gallery'],
   ['Official merchandise', '/merch'],
   ['Play', '/game'],
