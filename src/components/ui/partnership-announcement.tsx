@@ -20,8 +20,7 @@ const PRESENTING: Partner & { blurb: string } = {
   name: "TO BE ANNOUNCED",
   blurb: "Our presenting partner stands beside Catalyst 7.0 from the first day to the last. Their name will be revealed soon.",
 };
-const SUPPORTING: Partner[] = [{ name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }];
-const COMMUNITY: Partner[] = [{ name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }];
+const CURRENT_PARTNERS: Partner[] = [{ name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }, { name: "PARTNER NAME" }];
 const PARTNER_CTA = { label: "Become a partner", href: "#contact" };
 
 // Illustrations from /public/assets/illustrations
@@ -280,7 +279,7 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
         <div className="mb-14">
           <TierHeading kanji="協" en="Current Partners" />
           <div data-g="slots" className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-4">
-            {SUPPORTING.map((p, i) => <Slot key={`s-${i}`} partner={p} />)}
+            {CURRENT_PARTNERS.map((p, i) => <Slot key={`cp-${i}`} partner={p} />)}
           </div>
         </div>
 
