@@ -915,9 +915,9 @@ export function OcGroup({
 const EB_DIR = '/assets/eb-pics/'
 const ILL = '/assets/illustrations/'
 
-const CM: { name: string; file: string; role: string; ph?: number; keep?: number }[] = [
+const CM: { name: string; file: string; role: string; ph?: number; keep?: number; lift?: number }[] = [
   { name: 'Savinda Sithum', file: EB_DIR + 'savinda-sithum.webp', role: 'Conference Manager' },
-  { name: 'Senaya Jayasuriya', file: EB_DIR + 'senaya-jayasuriya.webp', role: 'Conference Manager' },
+  { name: 'Senaya Jayasuriya', file: EB_DIR + 'senaya-jayasuriya.webp', role: 'Conference Manager', lift: 3.8 },
   { name: 'Sabeelur Rashaad', file: EB_DIR + 'sabeelur-rashaad.webp', role: 'Conference Manager' },
 ]
 
@@ -1127,7 +1127,13 @@ const CMCSS = `
 const CmPerson = ({ p, i }: { p: (typeof CM)[number]; i: number }) => {
   const url = useCutout(photo(p.file), p.keep ?? 0.55)
   return (
-    <div className={`cm-ph cm-c${i}`} style={p.ph ? ({ '--ph': `calc(${p.ph}*var(--u))` } as React.CSSProperties) : undefined}>
+    <div
+      className={`cm-ph cm-c${i}`}
+      style={{
+        ...(p.ph ? { '--ph': `calc(${p.ph}*var(--u))` } : {}),
+        ...(p.lift ? { bottom: `calc(${21 + p.lift}*var(--u))` } : {}),
+      } as React.CSSProperties}
+    >
       {url && <img className="cm-pimg" src={url} alt={p.name} decoding="async" draggable={false} />}
     </div>
   )
