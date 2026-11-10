@@ -239,7 +239,7 @@ export const EB_MEMBERS: TeamMember[] = [
   {
     id: 'eb-chamindi',
     name: 'Chamindi Kaveesha',
-    role: 'Vice President – Outgoing Global Teacher & Talent (oGTe)',
+    role: 'Vice President – Outgoing Global Teacher',
     category: 'EB',
     department: 'Global Exchange',
     image: '/assets/eb-pics/chamindi-kaveesha.webp',
@@ -309,9 +309,9 @@ export const EB_MEMBERS: TeamMember[] = [
   {
     id: 'eb-senaya',
     name: 'Senaya Jayasuriya',
-    role: 'Vice President – Incoming Global Talent (iGT IR & M)',
+    role: 'Vice President – Product Strategy',
     category: 'EB',
-    department: 'Global Talent',
+    department: 'Product Strategy',
     image: '/assets/eb-pics/senaya-jayasuriya.webp',
     moniker: '国際 · Global Relations',
     quote: 'Connecting global youth to transformative corporate internships in Sri Lanka.',

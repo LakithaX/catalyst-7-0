@@ -62,10 +62,10 @@ const MEMBERS: EbPerson[] = [
   { name: 'Dinidi Senanayake', file: DIR + 'dinidi-senanayake.webp', role: 'LCVP Incoming Global Volunteer – International Relations & Matching (iGV IR & M)' },
   { name: 'Yenul Perera', file: DIR + 'yenul-perera.webp', role: 'LCVP Incoming Global Talent – Business to Business & Value Delivery (iGT B2B & VD)' },
   { name: 'Dahamya Ranasinghe', file: DIR + 'dahamya-ranasinghe.webp', role: 'LCVP Incoming Global Talent – International Relations & Matching (iGT IR & M)' },
-  { name: 'Senaya Jayasuriya', file: DIR + 'senaya-jayasuriya.webp', role: 'LCVP Outgoing Global Volunteer – Partner Support (oGV PS)' },
+  { name: 'Senaya Jayasuriya', file: DIR + 'senaya-jayasuriya.webp', role: 'LCVP Product Strategy' },
   { name: 'Nadali Hansani', file: DIR + 'nadali-hansani.webp', role: 'LCVP Outgoing Global Volunteer – Business to Customer (oGV B2C)' },
-  { name: 'Bawantha Jayanath', file: DIR + 'bawantha-jayanath.webp', role: 'LCVP Outgoing Global Talent – Academic (oGTa)' },
-  { name: 'Chamindi Kaveesha', file: DIR + 'chamindi-kaveesha.webp', role: 'LCVP Outgoing Global Talent – Enterprise (oGTe)' },
+  { name: 'Bawantha Jayanath', file: DIR + 'bawantha-jayanath.webp', role: 'LCVP Outgoing Global Talent' },
+  { name: 'Chamindi Kaveesha', file: DIR + 'chamindi-kaveesha.webp', role: 'LCVP Outgoing Global Teacher' },
 ]
 
 // 義理 justice, 勇気 courage, 仁愛 benevolence, 礼節 respect, 誠実 honesty, 名誉 honour, 忠義 loyalty
