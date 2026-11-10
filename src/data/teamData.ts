@@ -309,9 +309,9 @@ export const EB_MEMBERS: TeamMember[] = [
   {
     id: 'eb-senaya',
     name: 'Senaya Jayasuriya',
-    role: 'Vice President – Product Strategy',
+    role: 'Vice President – Outgoing Global Volunteer – Product Strategy (oGV PS)',
     category: 'EB',
-    department: 'Product Strategy',
+    department: 'Global Volunteering',
     image: '/assets/eb-pics/senaya-jayasuriya.webp',
     moniker: '国際 · Global Relations',
     quote: 'Connecting global youth to transformative corporate internships in Sri Lanka.',

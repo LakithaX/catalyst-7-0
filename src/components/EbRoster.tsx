@@ -62,7 +62,7 @@ const MEMBERS: EbPerson[] = [
   { name: 'Dinidi Senanayake', file: DIR + 'dinidi-senanayake.webp', role: 'LCVP Incoming Global Volunteer – International Relations & Matching (iGV IR & M)' },
   { name: 'Yenul Perera', file: DIR + 'yenul-perera.webp', role: 'LCVP Incoming Global Talent – Business to Business & Value Delivery (iGT B2B & VD)' },
   { name: 'Dahamya Ranasinghe', file: DIR + 'dahamya-ranasinghe.webp', role: 'LCVP Incoming Global Talent – International Relations & Matching (iGT IR & M)' },
-  { name: 'Senaya Jayasuriya', file: DIR + 'senaya-jayasuriya.webp', role: 'LCVP Product Strategy' },
+  { name: 'Senaya Jayasuriya', file: DIR + 'senaya-jayasuriya.webp', role: 'LCVP Outgoing Global Volunteer – Product Strategy (oGV PS)' },
   { name: 'Nadali Hansani', file: DIR + 'nadali-hansani.webp', role: 'LCVP Outgoing Global Volunteer – Business to Customer (oGV B2C)' },
   { name: 'Bawantha Jayanath', file: DIR + 'bawantha-jayanath.webp', role: 'LCVP Outgoing Global Talent' },
   { name: 'Chamindi Kaveesha', file: DIR + 'chamindi-kaveesha.webp', role: 'LCVP Outgoing Global Teacher' },
