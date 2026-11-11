@@ -202,7 +202,7 @@ const CHAPTERS: ChapterDef[] = [
 const READY_LIST = [
   'Your NIC number',
   'Your AIESEC and personal email addresses',
-  'Your updated CV (optional — PDF or Word, up to 5 MB)',
+  'Your updated CV (optional, PDF or Word, up to 5 MB)',
   'An emergency contact’s name and number',
 ];
 

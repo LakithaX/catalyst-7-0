@@ -17,7 +17,7 @@ if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 // ============================================================================
 // SETTINGS: everything you may want to change lives here
 // ============================================================================
-const SUPPORT_EMAIL = 'aiesecinsliit@gmail.com';
+const SUPPORT_EMAIL = 'aiesecinsliit26@gmail.com';
 const VENUE_NAME = 'SLIIT Malabe Campus';
 const VENUE_MAPS = 'https://www.google.com/maps/search/?api=1&query=SLIIT+Malabe+Campus';
 

@@ -20,7 +20,7 @@ export const MerchPage: React.FC = () => {
 
   useEffect(() => {
     scrollTopOrRestore();
-    document.title = 'Catalyst 7.0 — Official Merchandise Collection';
+    document.title = 'Catalyst 7.0 | Official Merchandise Collection';
   }, []);
 
   // scroll progress bar + any data-* effects used inside this page

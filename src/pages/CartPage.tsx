@@ -66,7 +66,7 @@ export const CartPage: React.FC = () => {
 
   useEffect(() => {
     scrollTopOrRestore();
-    document.title = 'Shopping Cart — Catalyst 7.0 Merch';
+    document.title = 'Shopping Cart | Catalyst 7.0 Merch';
   }, []);
 
   // empty <-> filled swaps different markup, so re-arm the effects when that changes

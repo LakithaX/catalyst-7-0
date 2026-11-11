@@ -352,35 +352,35 @@ export const ALL_LEADERS: TeamMember[] = [...OC_MEMBERS, ...EB_MEMBERS];
 
 export const CATALYST_PILLARS = [
   {
-    number: '01',
-    kanji: '超越',
-    title: 'DARE BEYOND DEFINITION',
-    subtitle: 'Transcend Conventional Limits',
+    number: "01",
+    kanji: "知",
+    title: "Know",
+    subtitle: "the why and Experience AIESEC",
     description:
-      'Catalyst 7.0 is not merely a conference; it is a crucible of courage. We dismantle comfort zones and ignite the audacity to innovate, lead without title, and shatter perceived boundaries.',
+      "Like finding your path before stepping through a torii gate, connect with the purpose behind AIESEC. Discover your role, live its values, and turn your leadership journey into meaningful impact.",
   },
   {
-    number: '02',
-    kanji: '団結',
-    title: 'UNYIELDING BROTHERHOOD',
-    subtitle: 'Forged in Shared Struggle',
+    number: "02",
+    kanji: "行",
+    title: "Act",
+    subtitle: "Like an owner, challenge your limits",
     description:
-      'Like samurais bound by unbreakable fidelity, Catalyst leaders stand shoulder-to-shoulder. We cultivate authentic camaraderie where vulnerability meets strength and collective victory is our singular creed.',
+      "Bring the discipline of the dojo to every responsibility. Take initiative, honour your commitments, and own the outcome. Step beyond your comfort zone, support others, and grow into the leader tomorrow needs.",
   },
   {
-    number: '03',
-    kanji: '使命',
-    title: 'PURPOSE & IMPACT',
-    subtitle: 'Actions with Lasting Resonance',
+    number: "03",
+    kanji: "磨",
+    title: "Best",
+    subtitle: "is the baseline, be the benchmark",
     description:
-      'Leadership without purpose is empty posturing. Every workshop, key challenge, and delegate session is designed to kindle sustainable social impact that ripples across university halls and nationwide industries.',
+      "Practise kaizen, the pursuit of continuous improvement. Build excellence through preparation, consistency, and ownership. Create results that last, and raise the standard until your work becomes the benchmark others measure themselves against.",
   },
   {
-    number: '04',
-    kanji: '洗練',
-    title: 'EXCELLENCE & DISCIPLINE',
-    subtitle: 'Precision in Every Detail',
+    number: "04",
+    kanji: "絆",
+    title: "One",
+    subtitle: "Entity, One Direction, One Legacy",
     description:
-      'From our meticulous logistics grid to the poetic elegance of our Sumi-e visual legacy, Catalyst 7.0 demands relentless dedication to craftsmanship, continuous self-mastery, and timeless quality.',
+      "Like strands woven into one fabric, unite around a shared purpose. Take pride in our LC, live its values, and place the collective above individual roles or terms. Protect its culture and resources, leaving a stronger legacy for those who follow.",
   },
 ];

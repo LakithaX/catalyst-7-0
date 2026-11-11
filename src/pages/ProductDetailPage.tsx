@@ -65,7 +65,7 @@ export const ProductDetailPage: React.FC = () => {
     scrollTopOrRestore();
 
     if (product) {
-      document.title = `${product.name} — ${product.variant} | Catalyst 7.0 Merch`;
+      document.title = `${product.name}: ${product.variant} | Catalyst 7.0 Merch`;
     }
   }, [productId, product?.id]);
 

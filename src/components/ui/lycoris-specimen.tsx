@@ -1195,7 +1195,7 @@ export default function LycorisSpecimen({
             {name}
           </div>
           <div {...sc(1, "rise", 0.7)} className="absolute" style={{ ...sans, ...hidden, left: "5cqw", bottom: "5cqh", fontSize: 9, letterSpacing: "0.3em", textTransform: "uppercase" }}>
-            <span style={{ color: crimson }}>02</span> — The crown, from above
+            <span style={{ color: crimson }}>02</span>. The crown, from above
           </div>
         </div>
 
@@ -1275,7 +1275,7 @@ export default function LycorisSpecimen({
               </div>
             ))}
             <div {...sc(4, "rise", 0.7)} style={{ ...sans, ...hidden, fontSize: 9, letterSpacing: "0.25em", marginTop: "3cqh", opacity: 0.7, textTransform: "uppercase" }}>
-              {name} — click the words, type your own
+              {name}: click the words, type your own
             </div>
           </div>
         </div>

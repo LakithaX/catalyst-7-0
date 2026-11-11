@@ -5,7 +5,7 @@ export default function FlowArtDefaultDemo() {
   return (
     <FlowArt aria-label="Présentation Flow Art">
       <FlowSection aria-label="Qui nous sommes" style={{ backgroundColor: '#fd5200', color: '#fff' }}>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]">01 — Who we are</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">01. Who we are</p>
         <hr className="my-[2vw] border-none border-t border-black opacity-100" />
         <div>
           <h1
@@ -21,12 +21,12 @@ export default function FlowArtDefaultDemo() {
         <hr className="my-[2vw] border-none border-t border-black opacity-100" />
         <p className="mt-auto max-w-[50ch] text-[clamp(1rem,2.5vw,2rem)] font-normal leading-relaxed">
           We believe every artist deserves a platform that puts creativity first. No algorithms, no
-          noise — just pure art and the people who make it.
+          noise, just pure art and the people who make it.
         </p>
       </FlowSection>
 
       <FlowSection aria-label="La mission" style={{ backgroundColor: '#000', color: '#fff' }}>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]">02 — The mission</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">02. The mission</p>
         <hr className="my-[2vw] border-none border-t border-white/60" />
         <div>
           <h2
@@ -89,12 +89,12 @@ export default function FlowArtDefaultDemo() {
         </div>
         <hr className="my-[2vw] border-none border-t border-white/60" />
         <p className="mt-auto ml-auto max-w-[50ch] text-right text-[clamp(1rem,2.5vw,2rem)] font-normal leading-relaxed">
-          Every feature we build starts with one question — does this serve the artist?
+          Every feature we build starts with one question: does this serve the artist?
         </p>
       </FlowSection>
 
       <FlowSection aria-label="Comment ça marche" style={{ backgroundColor: '#F5F0E8', color: '#000' }}>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]">03 — How it works</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">03. How it works</p>
         <hr className="my-[2vw] border-none border-t border-black/60" />
         <div>
           <h2
@@ -116,40 +116,40 @@ export default function FlowArtDefaultDemo() {
         <hr className="my-[2vw] border-none border-t border-black/60" />
         <div className="flex flex-wrap gap-[3vw]">
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">01 — Upload</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">01. Upload</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
               Drag, drop, done. Your portfolio goes live in seconds with full creative control.
             </p>
           </div>
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">02 — Connect</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">02. Connect</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
               Match with collectors, galleries, and brands actively looking for your style.
             </p>
           </div>
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">03 — Grow</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">03. Grow</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
-              Track engagement, manage commissions, and scale your practice — all in one place.
+              Track engagement, manage commissions, and scale your practice, all in one place.
             </p>
           </div>
         </div>
         <hr className="my-[2vw] border-none border-t border-black/60" />
         <div className="flex flex-wrap gap-[3vw]">
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">04 — Sell</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">04. Sell</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
               Set your prices, manage editions, handle licensing. Built-in commerce tools.
             </p>
           </div>
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">05 — Collaborate</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">05. Collaborate</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
               Find your people. Joint projects, split commissions, shared studios.
             </p>
           </div>
           <div className="min-w-[180px] flex-1">
-            <p className="mb-2 text-sm font-bold uppercase tracking-wider">06 — Evolve</p>
+            <p className="mb-2 text-sm font-bold uppercase tracking-wider">06. Evolve</p>
             <p className="text-[clamp(0.85rem,1.3vw,1.05rem)] leading-relaxed opacity-75">
               Your practice changes. Your platform should too. Flexible tools that adapt.
             </p>
@@ -158,7 +158,7 @@ export default function FlowArtDefaultDemo() {
       </FlowSection>
 
       <FlowSection aria-label="La vision" style={{ backgroundColor: '#1A3DE8', color: '#fff' }}>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]">04 — The vision</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">04. The vision</p>
         <hr className="my-[2vw] border-none border-t border-white/50" />
         <div>
           <h2
@@ -199,7 +199,7 @@ export default function FlowArtDefaultDemo() {
         <hr className="my-[2vw] border-none border-t border-white/50" />
         <p className="max-w-[50ch] text-[clamp(1rem,2.5vw,2rem)] font-normal leading-relaxed">
           The art world has been broken for decades. Galleries take 50%. Algorithms bury talent.
-          We&apos;re here to change that — permanently.
+          We&apos;re here to change that permanently.
         </p>
         <hr className="my-[2vw] border-none border-t border-white/50" />
         <div className="flex flex-wrap gap-[3vw]">
@@ -225,7 +225,7 @@ export default function FlowArtDefaultDemo() {
       </FlowSection>
 
       <FlowSection aria-label="Nous rejoindre" style={{ backgroundColor: '#000', color: '#fff' }}>
-        <p className="text-xs font-bold uppercase tracking-[0.2em]">05 — Join us</p>
+        <p className="text-xs font-bold uppercase tracking-[0.2em]">05. Join us</p>
         <hr className="my-[2vw] border-none border-t border-black/60" />
         <div>
           <h2

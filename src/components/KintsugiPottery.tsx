@@ -113,7 +113,7 @@ export default function KintsugiPottery() {
 
           <p className="text-sm text-neutral-300 font-serif leading-relaxed">
             In traditional Japanese aesthetics, broken ceramics are never discarded. Instead, artisans rejoin the fractures
-            with lacquer dusted in pure gold powder. Rather than hiding the damage, Kintsugi illuminates the scars—teaching
+            with lacquer dusted in pure gold powder. Rather than hiding the damage, Kintsugi illuminates the scars, teaching
             that fragility and resilience form true beauty.
           </p>
 

@@ -12,7 +12,7 @@ import { SakuraPetals } from '../components/SakuraPetals'
 // Sections, top to bottom (each is one <section>, easy to reorder or delete):
 //   1 HERO        headline + samurai in the rising sun
 //   2 STATS       crimson ribbon
-//   3 PILLARS     dark wine section, four virtues
+//   3 PILLARS     dark wine section, four conference objectives
 //   4 EVENTS      bento grid of the six experiences
 //   5 JOURNEY     the two delegate days
 //   6 TEAM CTA    links to /conference-team
@@ -58,36 +58,44 @@ const STATS = [
 
 const PILLARS = [
   {
-    num: '01',
-    kanji: '超越',
-    title: 'Dare Beyond Definition',
-    subtitle: 'Transcend conventional limits',
-    desc: 'Catalyst 7.0 is not merely a conference; it is a crucible of courage. We dismantle comfort zones and ignite the audacity to innovate, lead without title, and shatter perceived boundaries.',
-    icon: Flame,
-  },
-  {
-    num: '02',
-    kanji: '団結',
-    title: 'Unyielding Brotherhood',
-    subtitle: 'Forged in shared struggle',
-    desc: 'Like samurais bound by unbreakable fidelity, Catalyst leaders stand shoulder-to-shoulder. We cultivate authentic camaraderie where vulnerability meets strength and collective victory is our singular creed.',
-    icon: Users,
-  },
-  {
-    num: '03',
-    kanji: '使命',
-    title: 'Purpose & Impact',
-    subtitle: 'Actions with lasting resonance',
-    desc: 'Leadership without purpose is empty posturing. Every workshop, key challenge, and delegate session is designed to kindle sustainable social impact that ripples across university halls and nationwide industries.',
+    num: "01",
+    kanji: "知",
+    title: "Know",
+    color: '#347EEF',
+    background: 'linear-gradient(150deg, #2866BE, #17365F)',
+    subtitle: "the why and Experience AIESEC",
+    desc: "Like finding your path before stepping through a torii gate, connect with the purpose behind AIESEC. Discover your role, live its values, and turn your leadership journey into meaningful impact.",
     icon: Compass,
   },
   {
-    num: '04',
-    kanji: '洗練',
-    title: 'Excellence & Discipline',
-    subtitle: 'Precision in every detail',
-    desc: 'From our meticulous logistics grid to the poetic elegance of our Sumi-e visual legacy, Catalyst 7.0 demands relentless dedication to craftsmanship, continuous self-mastery, and timeless quality.',
+    num: "02",
+    kanji: "行",
+    title: "Act",
+    color: '#9B4D7D',
+    background: 'linear-gradient(150deg, #88436D, #48263F)',
+    subtitle: "Like an owner, challenge your limits",
+    desc: "Bring the discipline of the dojo to every responsibility. Take initiative, honour your commitments, and own the outcome. Step beyond your comfort zone, support others, and grow into the leader tomorrow needs.",
+    icon: Flame,
+  },
+  {
+    num: "03",
+    kanji: "磨",
+    title: "Best",
+    color: '#E99138',
+    background: 'linear-gradient(150deg, #A95316, #5B2C15)',
+    subtitle: "is the baseline, be the benchmark",
+    desc: "Practise kaizen, the pursuit of continuous improvement. Build excellence through preparation, consistency, and ownership. Create results that last, and raise the standard until your work becomes the benchmark others measure themselves against.",
     icon: Award,
+  },
+  {
+    num: "04",
+    kanji: "絆",
+    title: "One",
+    color: '#58A653',
+    background: 'linear-gradient(150deg, #387A35, #203F23)',
+    subtitle: "Entity, One Direction, One Legacy",
+    desc: "Like strands woven into one fabric, unite around a shared purpose. Take pride in our LC, live its values, and place the collective above individual roles or terms. Protect its culture and resources, leaving a stronger legacy for those who follow.",
+    icon: Users,
   },
 ]
 
@@ -432,7 +440,7 @@ export default function AboutPage() {
 
           <div className="relative mx-auto max-w-6xl">
             <Reveal className="text-center">
-              <Eyebrow kanji="志" label="The Crucible Code" light />
+              <Eyebrow kanji="志" label="Conference Objectives" light />
               <h2
                 className="brush-heading mt-4 text-[clamp(2.2rem,6vw,4.4rem)] uppercase leading-[1.05] text-[#FFF3E3]"
                 style={{ fontFamily: HEADING_FONT }}
@@ -440,7 +448,7 @@ export default function AboutPage() {
                 Four pillars of <span style={{ color: GOLD }}>Catalyst 7.0</span>
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-sm leading-relaxed text-[#FFF3E3]/70 sm:text-base">
-                Every keynote, physical challenge, and late-night discussion is anchored by these four fundamental virtues.
+                Know, Act, Best, and One guide our conference and the leaders we become.
               </p>
             </Reveal>
 
@@ -449,11 +457,15 @@ export default function AboutPage() {
                 const Icon = p.icon
                 return (
                   <Reveal key={p.num} delay={i * 0.08} className="h-full">
-                    <article className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-[#E8C27A]/25 bg-white/[0.04] p-6 transition-[transform,border-color] duration-300 hover:-translate-y-1.5 hover:border-[#E8C27A]/70">
+                    <article
+                      className="group relative flex h-full flex-col overflow-hidden rounded-2xl border p-6 shadow-lg transition-transform duration-300 hover:-translate-y-1.5"
+                      style={{ background: p.background, borderColor: p.color }}
+                    >
+                      <span aria-hidden="true" className="absolute inset-x-0 top-0 h-1" style={{ background: p.color }} />
                       {/* vertical kanji */}
                       <span
                         aria-hidden="true"
-                        className="absolute right-4 top-5 text-2xl tracking-[0.3em] text-[#E8C27A]/45"
+                        className="absolute right-4 top-5 text-2xl tracking-[0.3em] text-white/55"
                         style={{ writingMode: 'vertical-rl', fontFamily: KANJI_FONT }}
                       >
                         {p.kanji}
@@ -463,22 +475,22 @@ export default function AboutPage() {
                       <span
                         aria-hidden="true"
                         className="block text-[5.5rem] leading-none text-transparent"
-                        style={{ fontFamily: HEADING_FONT, WebkitTextStroke: '1.5px rgba(232,194,122,0.55)' }}
+                        style={{ fontFamily: HEADING_FONT, WebkitTextStroke: '1.5px rgba(255,255,255,0.65)' }}
                       >
                         {p.num}
                       </span>
 
-                      <div className="mt-4 flex h-11 w-11 items-center justify-center rounded-full border border-[#E8C27A]/50 text-[#E8C27A] transition-colors duration-300 group-hover:bg-[#E8C27A] group-hover:text-[#2A0310]">
+                      <div className="mt-4 flex h-11 w-11 items-center justify-center rounded-full border border-white/50 bg-white/10 text-white transition-colors duration-300 group-hover:bg-white/20">
                         <Icon className="h-5 w-5" />
                       </div>
 
                       <h3 className="mt-5 text-2xl uppercase leading-tight text-[#FFF3E3]" style={{ fontFamily: HEADING_FONT }}>
                         {p.title}
                       </h3>
-                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em]" style={{ color: GOLD, fontFamily: LABEL_FONT }}>
+                      <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.18em] text-white/90" style={{ fontFamily: LABEL_FONT }}>
                         {p.subtitle}
                       </p>
-                      <p className="mt-4 text-sm leading-relaxed text-[#FFF3E3]/72">{p.desc}</p>
+                      <p className="mt-4 text-sm leading-relaxed text-white/85">{p.desc}</p>
                     </article>
                   </Reveal>
                 )

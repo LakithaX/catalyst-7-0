@@ -38,16 +38,16 @@ const GALLERY_IMAGES = [
 const getImageSrc = (index: number) => GALLERY_IMAGES[index % GALLERY_IMAGES.length];
 
 const INTRO_WORDS = [
-  { word: "PURPOSE", sub: "01 — LEADERSHIP" },
-  { word: "CONNECTION", sub: "02 — BROTHERHOOD" },
-  { word: "COURAGE", sub: "03 — BUSHIDO SPIRIT" },
-  { word: "VISION", sub: "04 — PERSPECTIVE" },
-  { word: "GROWTH", sub: "05 — POTENTIAL" },
-  { word: "RESILIENCE", sub: "06 — INNER STRENGTH" },
-  { word: "IMPACT", sub: "07 — TRANSFORMATION" },
-  { word: "PASSION", sub: "08 — ENERGY & DRIVE" },
-  { word: "LEGACY", sub: "09 — HONOR & PRIDE" },
-  { word: "CATALYST", sub: "10 — DARE BEYOND" },
+  { word: "PURPOSE", sub: "01. LEADERSHIP" },
+  { word: "CONNECTION", sub: "02. BROTHERHOOD" },
+  { word: "COURAGE", sub: "03. BUSHIDO SPIRIT" },
+  { word: "VISION", sub: "04. PERSPECTIVE" },
+  { word: "GROWTH", sub: "05. POTENTIAL" },
+  { word: "RESILIENCE", sub: "06. INNER STRENGTH" },
+  { word: "IMPACT", sub: "07. TRANSFORMATION" },
+  { word: "PASSION", sub: "08. ENERGY & DRIVE" },
+  { word: "LEGACY", sub: "09. HONOR & PRIDE" },
+  { word: "CATALYST", sub: "10. DARE BEYOND" },
 ];
 
 const CHAPTERS = [

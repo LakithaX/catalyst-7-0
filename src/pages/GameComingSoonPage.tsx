@@ -9,7 +9,7 @@ import { scrollTopOrRestore } from '../utils/navState';
 export const GameComingSoonPage: React.FC = () => {
   useEffect(() => {
     scrollTopOrRestore();
-    document.title = 'Catalyst 7.0 — Coming Soon';
+    document.title = 'Catalyst 7.0 | Coming Soon';
   }, []);
 
   return (

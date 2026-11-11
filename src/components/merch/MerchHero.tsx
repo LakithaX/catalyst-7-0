@@ -10,7 +10,7 @@ const HERO_SLIDES = [
     name: 'CATALYST 7.0',
     titleSuffix: 'MERCH',
     tagline: 'WEAR THE MOVEMENT',
-    description: 'Premium merch from Catalyst 7.0 — crafted for dreamers, creators and change-makers.',
+    description: 'Premium merch from Catalyst 7.0, crafted for dreamers, creators and change-makers.',
     productName: 'DELEGATE TEE',
     productVariant: 'OBSIDIAN BLACK · BUSHIDO EDITION',
     image: '/assets/catalyst-merch/del-black-front.webp',
