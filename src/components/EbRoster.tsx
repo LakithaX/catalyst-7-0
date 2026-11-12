@@ -64,8 +64,8 @@ const MEMBERS: EbPerson[] = [
   { name: 'Dahamya Ranasinghe', file: DIR + 'dahamya-ranasinghe.webp', role: 'LCVP Incoming Global Talent – International Relations & Matching (iGT IR & M)' },
   { name: 'Senaya Jayasuriya', file: DIR + 'senaya-jayasuriya.webp', role: 'LCVP Outgoing Global Volunteer – Product Strategy (oGV PS)' },
   { name: 'Nadali Hansani', file: DIR + 'nadali-hansani.webp', role: 'LCVP Outgoing Global Volunteer – Business to Customer (oGV B2C)' },
-  { name: 'Bawantha Jayanath', file: DIR + 'bawantha-jayanath.webp', role: 'LCVP Outgoing Global Talent' },
-  { name: 'Chamindi Kaveesha', file: DIR + 'chamindi-kaveesha.webp', role: 'LCVP Outgoing Global Teacher' },
+  { name: 'Bawantha Jayanath', file: DIR + 'bawantha-jayanath.webp', role: 'LCVP Outgoing Global Talent (OGTa)' },
+  { name: 'Chamindi Kaveesha', file: DIR + 'chamindi-kaveesha.webp', role: 'LCVP Outgoing Global Teacher (OGTe)' },
 ]
 
 // 義理 justice, 勇気 courage, 仁愛 benevolence, 礼節 respect, 誠実 honesty, 名誉 honour, 忠義 loyalty
@@ -424,6 +424,7 @@ const EBCSS = `
 .ebm-code{position:relative;display:block;overflow:hidden;margin-top:calc(.5*var(--u));padding:.04em 0 .06em;white-space:nowrap;font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;
   font-size:calc(var(--cf)*var(--u));line-height:1.05;letter-spacing:.03em;color:#fff1e4;text-shadow:0 calc(.35*var(--u)) 0 rgba(60,0,10,.55)}
 .ebm-cc{display:inline-block}
+.ebm-pos-wide{width:100%}
 .ebm-ptitle{position:relative;display:block;margin-top:calc(.7*var(--u));font-family:'Oswald',sans-serif;font-weight:500;font-size:max(11px,calc(1.45*var(--u)));line-height:1.3;letter-spacing:.14em;text-transform:uppercase;color:#fff}
 
 /* dark slides get a GOLD plaque */
@@ -509,8 +510,9 @@ const EbMember = ({ m, i, total }: { m: EbPerson; i: number; total: number }) =>
   const kanji = m.kanji ?? VIRTUES[i % VIRTUES.length]
   const { tier, code, title } = parseRole(m.role ?? 'Executive Board')
   const cl = Math.max(code.length, 3)
-  const cfD = Math.min(8.5, Math.max(3.8, 36 / (cl * 0.62)))
-  const cfM = Math.min(14, Math.max(6.5, 62 / (cl * 0.62)))
+  const largeOutgoingCode = code === 'OGTe' || code === 'OGTa'
+  const cfD = largeOutgoingCode ? 10.5 : Math.min(8.5, Math.max(3.8, 36 / (cl * 0.62)))
+  const cfM = largeOutgoingCode ? 17 : Math.min(14, Math.max(6.5, 62 / (cl * 0.62)))
 
   useLayoutEffect(() => {
     const root = ref.current
@@ -657,7 +659,7 @@ const EbMember = ({ m, i, total }: { m: EbPerson; i: number; total: number }) =>
             <span>{m.jp ?? '理事会'}</span>
           </div>
 
-          <div className="ebm-pos">
+          <div className={`ebm-pos${largeOutgoingCode ? ' ebm-pos-wide' : ''}`}>
             <div className="ebm-posin">
               <Pic className="ebm-brush" src={HERO + 'brush-strokes.webp'} />
               <div className="ebm-shine" aria-hidden="true" />
