@@ -27,7 +27,7 @@ const INITIAL_CONTENT: PartnershipContent = {
   cta_url: "#contact",
 };
 
-export default function AdminPartnerships() {
+export default function AdminPartnerships({ readOnly = true }: { readOnly?: boolean }) {
   const [content, setContent] = useState(INITIAL_CONTENT);
   const [busy, setBusy] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -75,6 +75,7 @@ export default function AdminPartnerships() {
 
   const save = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (readOnly) return;
     setSaving(true);
     setMessage("");
     setError("");
@@ -105,6 +106,7 @@ export default function AdminPartnerships() {
 
       {busy ? <p className="admin-partnerships-loading" role="status">Loading announcement…</p> : (
         <form className="admin-partnerships-form" onSubmit={save}>
+          <fieldset disabled={readOnly} style={{border:0,padding:0,margin:0,minWidth:0,display:'contents'}}>
           <section className="admin-partnerships-panel">
             <div className="admin-partnerships-panel-heading">
               <div><h3>Section heading</h3><p>Set the title and supporting line above the cards.</p></div>
@@ -130,12 +132,12 @@ export default function AdminPartnerships() {
           <section className="admin-partnerships-panel">
             <div className="admin-partnerships-panel-heading">
               <div><h3>Partner cards</h3><p>Add up to 12 logos or names to the Current Partners grid.</p></div>
-              <button
+              {!readOnly && <button
                 className="admin-partnerships-add"
                 type="button"
                 disabled={content.partners.length >= 12}
                 onClick={() => setContent(current => ({ ...current, partners: [...current.partners, { name: "", logo: "", url: "" }] }))}
-              ><Plus size={16} /> Add card</button>
+              ><Plus size={16} /> Add card</button>}
             </div>
             {!content.partners.length && <p className="admin-partnerships-empty">No partner cards yet. Add a card to announce a partner on the homepage.</p>}
             <div className="admin-partner-card-list">
@@ -143,7 +145,7 @@ export default function AdminPartnerships() {
                 <article className="admin-partner-editor" key={index}>
                   <div className="admin-partner-editor-top">
                     <strong>Partner card {index + 1}</strong>
-                    <button type="button" className="admin-partnerships-remove" aria-label={`Remove partner card ${index + 1}`} onClick={() => setContent(current => ({ ...current, partners: current.partners.filter((_, i) => i !== index) }))}><Trash2 size={16} /> Remove</button>
+                    {!readOnly && <button type="button" className="admin-partnerships-remove" aria-label={`Remove partner card ${index + 1}`} onClick={() => setContent(current => ({ ...current, partners: current.partners.filter((_, i) => i !== index) }))}><Trash2 size={16} /> Remove</button>}
                   </div>
                   <div className="admin-partnerships-fields">
                     <label>Partner name<input required maxLength={120} value={partner.name} onChange={e => updatePartner(index, "name", e.target.value)} /></label>
@@ -165,10 +167,11 @@ export default function AdminPartnerships() {
             </div>
           </section>
 
-          <div className="admin-partnerships-actions">
+          </fieldset>
+          {!readOnly && <div className="admin-partnerships-actions">
             <span>Logo fields accept a public HTTPS image URL or a file in <code>/public/assets/</code>.</span>
             <button type="submit" disabled={saving || content.partners.some(partner => !partner.name.trim())}><Save size={16} />{saving ? "Saving…" : "Save and publish"}</button>
-          </div>
+          </div>}
         </form>
       )}
     </section>

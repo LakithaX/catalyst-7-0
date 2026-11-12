@@ -14,7 +14,15 @@ grant usage on schema public,auth,storage to anon,authenticated;
 grant select,insert on storage.objects to authenticated;
 create function storage.foldername(text) returns text[] language sql immutable as $$select string_to_array($1,'/')$$;`);
 const root=fileURLToPath(new URL('../supabase',import.meta.url));
-for(const name of (await readdir(root+'/migrations')).sort().filter(name=>!process.argv.includes('--skip-006')||!name.includes('006_defer_payments'))){await db.exec(await readFile(root+'/migrations/'+name,'utf8'));console.log('Applied',name);}
+if(process.argv.includes('--setup')){
+ await db.exec(await readFile(root+'/setup.sql','utf8'));console.log('Applied setup.sql');
+}else{
+ for(const name of (await readdir(root+'/migrations')).sort().filter(name=>!process.argv.includes('--skip-006')||!name.includes('006_defer_payments'))){
+ // Reproduce an existing helper from an earlier manually applied access script.
+ if(name.includes('002_viewer_access'))await db.exec('create function private.can_view_admin() returns boolean language sql as $$select false$$');
+ await db.exec(await readFile(root+'/migrations/'+name,'utf8'));console.log('Applied',name);
+}
+}
 await db.exec(await readFile(root+'/seed.sql','utf8'));
 console.log('Seed OK');
 const admin='10000000-0000-4000-8000-000000000001';
@@ -108,5 +116,121 @@ assert.equal((await db.query('select email_confirmed_at from auth.users where id
 // Registration is persisted before anonymous identity has an Auth email.
 await db.exec('reset role');
 assert.equal((await db.query('select email from auth.users where id=$1',[anonymous])).rows[0].email,null);checks++;
-console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, pre-order atomicity, pause, payment and collection).`);
+// Sheets export: worker-only payload, retries, and concurrent registration edits.
+await identity(other);
+await denied(()=>db.query('select public.admin_sheet_sync_status()'),/Not authorized/);
+await denied(()=>db.query('select public.admin_requeue_sheet_sync(true)'),/Not authorized/);
+await denied(()=>db.query('select public.sheet_sync_batch()'),/permission denied/);
+await denied(()=>db.query('select public.sheet_sync_ack($1,1)',[rid]),/permission denied/);
+await identity(null,'anon');
+await denied(()=>db.query('select public.admin_sheet_sync_status()'),/permission denied/);
+await identity(admin);
+let syncStatus=(await db.query('select public.admin_sheet_sync_status() s')).rows[0].s;
+assert.equal(syncStatus.total,2);assert.equal(syncStatus.pending,2);checks+=2;
+await db.exec('reset role');
+const batch=(await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs;
+const job=batch.find(j=>j.registration_id===rid);
+assert.equal(job.cells.length,27);assert.equal(job.cells[0],rid);
+assert.ok(!JSON.stringify(job).includes('Test allergy'));checks+=3;
+await db.query('select public.sheet_sync_ack($1,$2,$3)',[rid,job.version,'test write failure']);
+assert.ok(!(await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs.some(j=>j.registration_id===rid));checks++;
+await identity(admin);await db.query('select public.admin_requeue_sheet_sync(false)');
+await db.exec('reset role');
+const retryJob=(await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs.find(j=>j.registration_id===rid);
+await db.query("update public.registrations set status='approved' where id=$1",[rid]);
+await db.query('select public.sheet_sync_ack($1,$2)',[rid,retryJob.version]);
+const newerJob=(await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs.find(j=>j.registration_id===rid);
+assert.ok(newerJob.version>retryJob.version);assert.equal(newerJob.cells[24],'approved');checks+=2;
+await db.query('select public.sheet_sync_ack($1,$2)',[rid,newerJob.version]);
+assert.ok(!(await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs.some(j=>j.registration_id===rid));checks++;
+await identity(admin);await db.query('select public.admin_requeue_sheet_sync(true)');
+await db.exec('reset role');
+assert.ok((await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs.some(j=>j.registration_id===rid));checks++;
+// Viewer permissions: run against real RLS policies and RPCs, never the live project.
+const viewer='10000000-0000-4000-8000-000000000005';
+const viewer2='10000000-0000-4000-8000-000000000006';
+await db.exec('reset role');
+await db.query('insert into auth.users values($1,$2,now()),($3,$4,now())',[viewer,'eb@example.test',viewer2,'viewer2@example.test']);
+await db.query("insert into public.admin_memberships(user_id,role) values($1,'viewer'),($2,'viewer')",[viewer,viewer2]);
+await denied(()=>db.query("insert into public.admin_memberships(user_id,role) values($1,'admin')",[other]),/duplicate key/);
+await denied(()=>db.query("insert into public.admin_memberships(user_id,role) values($1,'owner')",[other]),/check constraint/);
+await db.query("insert into storage.objects(bucket_id,name) values('delegate-cvs',$1)",[delegate+'/orphan/cv']);
+const writeRpcs=(await db.query(`select p.proname, array(select format_type(t,null) from unnest(p.proargtypes::oid[]) t) argtypes
+ from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+ where n.nspname='public' and p.proname like 'admin_%'
+ and p.proname not in ('admin_summary','admin_sheet_sync_status')`)).rows;
+assert.ok(writeRpcs.length>=10);checks++;
+await identity(viewer);
+assert.equal((await db.query('select private.can_view_admin() allowed')).rows[0].allowed,true);checks++;
+// Even passing viewer to the mutation helper must never authorize a viewer.
+assert.equal((await db.query("select private.has_role(array['admin','owner','registration_manager','merch_manager','viewer']) allowed")).rows[0].allowed,false);checks++;
+assert.equal((await db.query('select public.admin_summary() data')).rows[0].data.registrations,2);checks++;
+assert.equal((await db.query('select public.admin_sheet_sync_status() data')).rows[0].data.total,2);checks++;
+for(const table of ['registrations','registration_wellbeing','registration_files','products','product_variants','orders','order_items','payments','order_receipts','audit_events','registration_sheet_sync']){
+ assert.ok((await db.query(`select * from public.${table}`)).rows.length>0,`Viewer can read ${table}`);checks++;
+}
+assert.equal((await db.query('select count(*)::int n from public.admin_memberships')).rows[0].n,1);checks++;
+assert.equal((await db.query('select count(*)::int n from storage.objects')).rows[0].n,2);checks++;
+for(const rpc of writeRpcs){
+ const args=rpc.argtypes.map(type=>`null::${type}`).join(',');
+ await denied(()=>db.query(`select public.${rpc.proname}(${args})`),/Not authorized|permission denied/);
+}
+for(const table of ['admin_memberships','registrations','registration_wellbeing','registration_files','products','product_variants','orders','order_items','payments','order_receipts','inventory_movements','audit_events','shop_settings','partnership_settings','registration_sheet_sync']){
+ await denied(()=>db.query(`delete from public.${table}`),/permission denied/);
+ await denied(()=>db.query(`insert into public.${table} default values`),/permission denied/);
+}
+await denied(()=>db.query("update public.admin_memberships set role='admin' where user_id=$1",[viewer]),/permission denied/);
+await denied(()=>db.query("update public.registrations set status='rejected' where id=$1",[rid]),/permission denied/);
+await denied(()=>db.query("insert into storage.objects(bucket_id,name) values('delegate-cvs',$1)",[delegate+'/viewer-upload/cv']),/row-level security/);
+await denied(()=>db.query('select public.sheet_sync_batch()'),/permission denied/);
+await denied(()=>db.query('select public.sheet_sync_ack($1,1)',[rid]),/permission denied/);
+await identity(viewer2);
+assert.equal((await db.query('select public.admin_summary() data')).rows[0].data.registrations,2);checks++;
+// Revocation takes effect at the database even for an existing signed-in user.
+await db.exec('reset role');
+await db.query('update public.admin_memberships set is_active=false where user_id=$1',[viewer]);
+await identity(viewer);
+await denied(()=>db.query('select public.admin_summary()'),/Not authorized/);
+await denied(()=>db.query('select public.admin_sheet_sync_status()'),/Not authorized/);
+assert.equal((await db.query('select * from public.registrations')).rows.length,0);checks++;
+assert.equal((await db.query('select * from storage.objects')).rows.length,0);checks++;
+await identity(other);
+await denied(()=>db.query('select public.admin_summary()'),/Not authorized/);
+assert.equal((await db.query('select * from public.registrations')).rows.length,0);checks++;
+await identity(admin);
+assert.equal((await db.query("select role from public.admin_memberships where user_id=$1",[admin])).rows[0].role,'admin');checks++;
+await db.query("select public.admin_registration($1,'approved',true)",[rid]);
+assert.ok((await db.query('select checked_in_at from public.registrations where id=$1',[rid])).rows[0].checked_in_at);checks++;
+await db.query('select public.admin_shop_settings(true)');
+// Viewers can inspect hidden catalogue entries while the public shop is paused.
+await identity(viewer2);
+assert.ok((await db.query('select * from public.products')).rows.length>0);checks++;
+await identity(other);
+assert.equal((await db.query('select * from public.products')).rows.length,0);checks++;
+// The provisioning template is safe to rerun and refuses to demote the admin.
+await db.exec('reset role');
+const provision=await readFile(root+'/templates/provision-viewer.sql','utf8');
+await denied(()=>db.exec(provision),/Create the eb@cat.com Auth user/);
+await db.exec('rollback');
+const provisionViewer=provision.replaceAll('eb@cat.com','eb@example.test');
+await db.exec(provisionViewer);await db.exec(provisionViewer);
+assert.equal((await db.query('select role,is_active from public.admin_memberships where user_id=$1',[viewer])).rows[0].role,'viewer');checks++;
+assert.equal((await db.query('select is_active from public.admin_memberships where user_id=$1',[viewer])).rows[0].is_active,true);checks++;
+await denied(()=>db.exec(provision.replaceAll('eb@cat.com','admin@example.test')),/Refusing to change their role/);
+await db.exec('rollback');
+assert.equal((await db.query('select role from public.admin_memberships where user_id=$1',[admin])).rows[0].role,'admin');checks++;
+// Rerunning the viewer upgrade with existing functions, policies and user data is safe.
+const upgrade=await readFile(root+'/migrations/202611120002_viewer_access.sql','utf8');
+const membershipsBefore=(await db.query('select * from public.admin_memberships order by user_id')).rows;
+const registrationsBefore=(await db.query('select * from public.registrations order by id')).rows;
+await db.exec(upgrade);await db.exec(upgrade);
+assert.deepEqual((await db.query('select * from public.admin_memberships order by user_id')).rows,membershipsBefore);checks++;
+assert.deepEqual((await db.query('select * from public.registrations order by id')).rows,registrationsBefore);checks++;
+await identity(viewer);
+assert.equal((await db.query('select public.admin_summary() data')).rows[0].data.registrations,2);checks++;
+await denied(()=>db.query('select public.admin_shop_settings(false)'),/Not authorized/);
+await identity(null,'anon');
+await denied(()=>db.query('select private.can_view_admin()'),/permission denied/);
+await denied(()=>db.query('select public.admin_summary()'),/permission denied/);
+console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, viewer access, provisioning, pre-order atomicity, pause, payment and collection).`);
 await db.close();

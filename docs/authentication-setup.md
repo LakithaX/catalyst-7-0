@@ -4,7 +4,7 @@ Registration uses a Supabase anonymous session and does not ask for an email cod
 
 The registration RPC accepts only the caller’s own anonymous Auth identity and validates the personal email format. It cannot be called by the unauthenticated browser role. The original authenticated registration RPC continues to require a verified email. The order RPC resolves the registration from auth.uid(); callers cannot choose another delegate's registration ID.
 
-Admin sign-in uses signInWithPassword with the supplied email and password. It does not send OTP codes or offer public admin signup. A pre-existing Auth user must be provisioned with the admin role through a trusted database operation. The single-active-admin constraint prevents multiple active administrators. Public signups cannot assign this role. All admin RPCs check the authenticated membership in the database.
+Admin sign-in uses signInWithPassword with the supplied email and password. It does not send OTP codes or offer public admin signup. A pre-existing Auth user must be provisioned with the admin role through a trusted database operation. One active full-access administrator is allowed alongside multiple active read-only viewers. See [Admin and viewer access](admin-permissions.md) for the required upgrade and provisioning steps. Public signups cannot assign this role. All admin RPCs check the authenticated membership in the database.
 
 Supabase configuration still required:
 

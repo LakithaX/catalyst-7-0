@@ -1063,3 +1063,159 @@ end $$;
 
 
 commit;
+
+
+-- 202611120001_registration_sheet_sync.sql
+begin;
+-- Durable, versioned outbox. A stale acknowledgement cannot hide a newer edit.
+create table public.registration_sheet_sync (
+ registration_id uuid primary key references public.registrations(id) on delete cascade,
+ version bigint not null default 1,
+ synced_version bigint not null default 0,
+ last_synced_at timestamptz,
+ last_error text,
+ next_attempt_at timestamptz not null default now()
+);
+alter table public.registration_sheet_sync enable row level security;
+create policy sheet_sync_admin_read on public.registration_sheet_sync for select to authenticated
+ using(private.has_role(array['admin']));
+grant select on public.registration_sheet_sync to authenticated;
+create function private.queue_registration_sheet_sync() returns trigger
+language plpgsql security definer set search_path='' as $$ begin
+ insert into public.registration_sheet_sync(registration_id) values(new.id)
+ on conflict(registration_id) do update set version=public.registration_sheet_sync.version+1,last_error=null,next_attempt_at=now();
+ return new;
+end $$;
+create trigger registration_sheet_sync_changed after insert or update on public.registrations
+ for each row execute function private.queue_registration_sheet_sync();
+insert into public.registration_sheet_sync(registration_id) select id from public.registrations;
+create function public.admin_requeue_sheet_sync(p_all boolean default false) returns void
+language plpgsql security definer set search_path='' as $$ begin
+ if not private.has_role(array['admin']) then raise exception 'Not authorized'; end if;
+ update public.registration_sheet_sync set version=version+1,last_error=null,next_attempt_at=now()
+ where p_all or last_error is not null;
+end $$;
+create function public.admin_sheet_sync_status() returns jsonb
+language plpgsql security definer set search_path='' as $$ begin
+ if not private.has_role(array['admin']) then raise exception 'Not authorized'; end if;
+ return jsonb_build_object('total',(select count(*) from public.registration_sheet_sync),
+ 'pending',(select count(*) from public.registration_sheet_sync where version>synced_version and last_error is null),
+ 'failed',(select count(*) from public.registration_sheet_sync where version>synced_version and last_error is not null),
+ 'last_synced_at',(select max(last_synced_at) from public.registration_sheet_sync));
+end $$;
+-- Worker-only API. Explicit allowlist avoids exporting identities or private files.
+create function public.sheet_sync_batch() returns jsonb
+language sql security definer set search_path='' as $$
+ select coalesce(jsonb_agg(j),'[]'::jsonb) from (
+ select q.registration_id,q.version,jsonb_build_array(r.id,r.reference,r.created_at,r.full_name,r.gender,r.nic,
+ r.aiesec_email,r.personal_email,r.phone,r.university,r.university_other,r.study_year,r.semester,
+ r.faculty,r.faculty_other,r.programme,r.rank,r.function,r.function_other,r.warrior_persona,
+ r.aspiration,r.motivation,r.final_note,r.cv_partner_consent,r.status,r.checked_in_at,r.updated_at) as cells
+ from public.registration_sheet_sync q join public.registrations r on r.id=q.registration_id
+ where q.version>q.synced_version and q.next_attempt_at<=now()
+ order by q.next_attempt_at,q.registration_id limit 100
+ ) j
+$$;
+create function public.sheet_sync_ack(p_id uuid,p_version bigint,p_error text default null) returns void
+language plpgsql security definer set search_path='' as $$ begin
+ update public.registration_sheet_sync set
+ synced_version=case when p_error is null then p_version else synced_version end,
+ last_synced_at=case when p_error is null then now() else last_synced_at end,
+ last_error=left(p_error,500),
+ next_attempt_at=case when p_error is null then now() else now()+interval '5 minutes' end
+ where registration_id=p_id and version=p_version;
+end $$;
+revoke all on function public.admin_requeue_sheet_sync(boolean),public.admin_sheet_sync_status(),public.sheet_sync_batch(),public.sheet_sync_ack(uuid,bigint,text) from public,anon,authenticated;
+grant execute on function public.admin_requeue_sheet_sync(boolean),public.admin_sheet_sync_status() to authenticated;
+grant execute on function public.sheet_sync_batch(),public.sheet_sync_ack(uuid,bigint,text) to service_role;
+commit;
+
+
+-- 202611120002_viewer_access.sql
+begin;
+-- Preserve the existing administrator; viewers do not count toward the admin limit.
+alter table public.admin_memberships drop constraint if exists admin_memberships_role_check;
+alter table public.admin_memberships add constraint admin_memberships_role_check
+  check (role in ('admin', 'viewer'));
+drop index if exists public.one_active_catalyst_admin;
+create unique index one_active_catalyst_admin on public.admin_memberships ((is_active))
+  where is_active and role = 'admin';
+
+-- Read access is deliberately separate from private.has_role(), which remains
+-- admin-only for every existing mutation RPC, including legacy role checks.
+create or replace function private.has_role(roles text[]) returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists(select 1 from public.admin_memberships
+    where user_id = auth.uid() and is_active and role = 'admin')
+$$;
+create or replace function private.can_view_admin() returns boolean
+language sql stable security definer set search_path = '' as $$
+  select exists(select 1 from public.admin_memberships
+    where user_id = auth.uid() and is_active and role in ('admin', 'viewer'))
+$$;
+revoke all on function private.can_view_admin() from public, anon, authenticated;
+grant execute on function private.can_view_admin() to authenticated;
+
+drop policy if exists admin_panel_read on public.registrations;
+create policy admin_panel_read on public.registrations for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.registration_wellbeing;
+create policy admin_panel_read on public.registration_wellbeing for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.registration_files;
+create policy admin_panel_read on public.registration_files for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.products;
+create policy admin_panel_read on public.products for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.product_variants;
+create policy admin_panel_read on public.product_variants for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.orders;
+create policy admin_panel_read on public.orders for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.inventory_movements;
+create policy admin_panel_read on public.inventory_movements for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.audit_events;
+create policy admin_panel_read on public.audit_events for select to authenticated
+  using (private.can_view_admin());
+drop policy if exists admin_panel_read on public.registration_sheet_sync;
+create policy admin_panel_read on public.registration_sheet_sync for select to authenticated
+  using (private.can_view_admin());
+
+-- Existing order_items/payments/order_receipts policies inherit order visibility.
+-- File access remains limited to the private files linked to known records.
+drop policy if exists admin_panel_cv_read on storage.objects;
+create policy admin_panel_cv_read on storage.objects for select to authenticated
+  using (bucket_id = 'delegate-cvs' and private.can_view_admin()
+    and exists(select 1 from public.registration_files f where f.storage_key = name));
+drop policy if exists admin_panel_receipt_read on storage.objects;
+create policy admin_panel_receipt_read on storage.objects for select to authenticated
+  using (bucket_id = 'payment-receipts' and private.can_view_admin()
+    and exists(select 1 from public.order_receipts r where r.storage_key = name));
+
+create or replace function public.admin_summary() returns jsonb
+language plpgsql stable security definer set search_path='' as $$
+begin
+ if not private.can_view_admin() then raise exception 'Not authorized'; end if;
+ return jsonb_build_object('schema_version',7,'registrations',(select count(*) from public.registrations),
+ 'checked_in',(select count(*) from public.registrations where checked_in_at is not null),
+ 'orders',(select count(*) from public.orders),'collected',(select count(*) from public.orders where status='collected'),
+ 'paid_minor',(select coalesce(sum(amount_minor),0) from public.payments),
+ 'pending_registrations',(select count(*) from public.registrations where status='pending'),
+ 'awaiting_collection',(select count(*) from public.orders where status in ('reserved','ready_for_pickup')),
+ 'registrations_by_status',(select coalesce(jsonb_object_agg(status,n),'{}'::jsonb) from (select status,count(*) n from public.registrations group by status) counts));
+end $$;
+
+create or replace function public.admin_sheet_sync_status() returns jsonb
+language plpgsql security definer set search_path='' as $$ begin
+ if not private.can_view_admin() then raise exception 'Not authorized'; end if;
+ return jsonb_build_object('total',(select count(*) from public.registration_sheet_sync),
+ 'pending',(select count(*) from public.registration_sheet_sync where version>synced_version and last_error is null),
+ 'failed',(select count(*) from public.registration_sheet_sync where version>synced_version and last_error is not null),
+ 'last_synced_at',(select max(last_synced_at) from public.registration_sheet_sync));
+end $$;
+
+commit;
+notify pgrst, 'reload schema';
