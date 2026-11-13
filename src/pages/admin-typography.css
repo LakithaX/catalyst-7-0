@@ -1,0 +1,77 @@
+/* Keep operational text readable at normal browser zoom. */
+.admin-root { font-size: 14px; line-height: 1.55; letter-spacing: -.01em; }
+.admin-root td { font-size: 14px; line-height: 1.6; color: #655548; padding: 16px 12px; }
+.admin-root th { font-size: 12px; font-weight: 600; color: #766452; padding: 12px; }
+.admin-root .admin-reference { font-size: 12px !important; max-width: 200px; }
+.admin-root .admin-status { font-size: 12px; padding: 5px 10px; }
+.admin-root .admin-status.approved { color: #326648; }
+.admin-root .admin-status.pending { color: #82551f; }
+.admin-root .admin-status.rejected { color: #9e3027; }
+.admin-root .admin-status.cancelled { color: #66584b; }
+.admin-root .admin-person small,
+.admin-root td > small { font-size: 12px; color: #796957; }
+.admin-root .admin-person-avatar { width: 38px; height: 38px; font-size: 12px; flex-shrink: 0; }
+
+.admin-root :is(.admin-row-actions button, .admin-button, .admin-text-button,
+  .admin-merch-primary, .admin-product-content button, .admin-variant-form button,
+  .admin-rail-link) { font-size: 13px !important; }
+.admin-root .admin-row-actions button { padding: 9px 12px; min-height: 38px; }
+.admin-root :is(.admin-record-pagination, .admin-record-pagination button,
+  .admin-partnerships-add, .admin-partnerships-remove, .admin-partnerships-actions > button) { font-size: 13px; }
+
+.admin-root :is(input:not([type=checkbox]), select, textarea),
+.admin-root .admin-merch :is(input:not([type=checkbox]), select, textarea),
+.admin-root .admin-partnerships-fields :is(input, textarea) { font-size: 16px; line-height: 1.5; }
+.admin-root :is(.admin-merch label, .admin-partnerships-fields label) { font-size: 13px; color: #675340; }
+.admin-root :is(.admin-merch label small, .admin-variant-form > strong small,
+  .admin-product-content > small) { font-size: 12px; color: #796957; }
+.admin-root .admin-variant-form > strong { font-size: 14px; }
+.admin-root :is(.admin-shop-control p, .admin-product-content > p:not(.admin-eyebrow),
+  .admin-variant-editor > p, .admin-merch-empty p) { font-size: 14px; color: #75614d; }
+.admin-root .admin-product-content h3 { font-size: 17px; }
+.admin-root :is(.admin-merch-message, .admin-error, .admin-preview-note,
+  .admin-partnerships-message, .admin-partnerships-error, .admin-empty,
+  .admin-partnerships-empty, .admin-partnerships-loading) { font-size: 14px; line-height: 1.6; }
+
+.admin-root :is(.admin-eyebrow, .admin-season, .admin-connection,
+  .admin-right-rail > .admin-eyebrow) { font-size: 11px; }
+.admin-root .admin-eyebrow { color: #79614e; }
+.admin-root :is(.admin-welcome p, .admin-section-heading p,
+  .admin-stat-card p, .admin-right-rail > p:not(.admin-eyebrow),
+  .admin-rail-note p) { font-size: 13px; line-height: 1.65; color: #796653; }
+.admin-root .admin-stat-card h3 { font-size: 14px; line-height: 1.5; }
+.admin-root .admin-quick-card strong { font-size: 15px; }
+.admin-root .admin-quick-card small { font-size: 11px; }
+.admin-root .admin-pill { font-size: 12px; }
+.admin-root .admin-hero-number > span { font-size: 14px; color: #f0ddc9; }
+.admin-root .admin-hero-footer small { font-size: 12px; color: #ebd8c3; }
+.admin-root .admin-hero-footer strong span { font-size: 12px; color: #ebd8c3; }
+.admin-root .admin-revenue-card > small { font-size: 13px; color: #fff5eb; }
+.admin-root .admin-revenue-card > div:last-child { font-size: 13px; }
+.admin-root .admin-chart text { font-size: 16px; }
+.admin-root :is(.admin-right-rail h2, .admin-right-rail > h3) { font-size: 16px; }
+.admin-root :is(.admin-ring span, .admin-rail-metric > span:last-child,
+  .admin-rail-count, .admin-rail-note a, .admin-footer) { font-size: 12px; }
+.admin-root .admin-footer { color: #796957; }
+.admin-root .admin-partnerships-intro > div > p:last-child,
+.admin-root .admin-partnerships-panel-heading p { font-size: 14px; color: #75614d; }
+.admin-root .admin-partnerships-panel-heading h3 { font-size: 17px; }
+.admin-root :is(.admin-partnerships-count, .admin-partner-editor-top,
+  .admin-partnerships-actions > span, .admin-sync-stats dt) { font-size: 13px; }
+.admin-root .admin-sheet-sync > p { font-size: 14px; }
+
+.admin-detail-panel { font-size: 14px; line-height: 1.7; }
+.admin-detail-panel :is(button, a, .admin-detail-receipt label) { font-size: 13px; }
+.admin-detail-panel .admin-detail-fields dt { font-size: 12px; color: #79614e; }
+.admin-detail-panel input { font-size: 16px; }
+
+@media (max-width: 760px) {
+  .admin-root .admin-row-actions button { min-height: 44px; }
+  .admin-root .admin-section-heading { row-gap: 14px; }
+  .admin-root .admin-season { display: none; }
+}
+@media (max-width: 480px) {
+  .admin-root .admin-chart text { font-size: 24px; }
+  .admin-root .admin-hero-footer { gap: 10px; flex-wrap: wrap; }
+  .admin-root .admin-revenue-card > div:last-child { gap: 10px; }
+}

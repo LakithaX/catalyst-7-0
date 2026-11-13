@@ -10,7 +10,8 @@
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
     "test:database": "node scripts/test-database.mjs",
-    "test:admin-guard": "node scripts/test-admin-guard.mjs"
+    "test:admin-guard": "node scripts/test-admin-guard.mjs",
+    "test:front-office": "node --import tsx scripts/test-front-office.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

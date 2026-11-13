@@ -1,0 +1,174 @@
+/* Interaction feedback shared by every control room section. */
+:is(.admin-root, .admin-detail-panel, .auth-sheet) :is(button, a, input, select, textarea) {
+  -webkit-tap-highlight-color: transparent;
+  transition: background-color 160ms ease, border-color 160ms ease,
+    color 160ms ease, box-shadow 160ms ease, opacity 160ms ease,
+    transform 180ms ease;
+}
+
+:is(.admin-root, .admin-detail-panel, .auth-sheet) :is(button, input, select, textarea):disabled {
+  cursor: not-allowed;
+}
+
+:is(.admin-root, .admin-detail-panel, .auth-sheet) :is(button, a, input, select, textarea):focus-visible {
+  outline: 2px solid #c9362b;
+  outline-offset: 4px;
+}
+
+.admin-root .admin-nav button:focus-visible,
+.admin-root .admin-sidebar-bottom button:focus-visible { outline-color: #ffd98a; }
+.admin-root .admin-search { transition: box-shadow 160ms ease, background-color 160ms ease; }
+.admin-root .admin-search:focus-within { box-shadow: 0 0 0 2px #c9362b66; background: #fffaf1; }
+.admin-root .admin-search input:focus-visible { outline: 0; }
+/* Sign-in fields already show focus on their surrounding container. */
+.auth-sheet input:focus-visible { outline: none; outline-offset: 0; box-shadow: none; }
+
+.admin-tab-content { min-width: 0; animation: admin-content-in 240ms ease-out; }
+.admin-root :is(.admin-stat-card, .admin-quick-card, .admin-product-card) {
+  transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease;
+}
+.admin-stat-card { animation: admin-content-in 300ms ease-out backwards; }
+.admin-stat-card:nth-child(2) { animation-delay: 45ms; }
+.admin-stat-card:nth-child(3) { animation-delay: 90ms; }
+.admin-root :is(.admin-stat-arrow, .admin-rail-link > svg, .admin-quick-card > svg, .admin-text-button > svg) {
+  transition: transform 180ms ease;
+}
+.admin-root .admin-product-image img { transition: transform 280ms ease; }
+.admin-root tbody tr { transition: background-color 160ms ease; }
+.admin-root tbody tr:focus-within { background: #faf1e7; }
+
+.admin-chart-status { cursor: pointer; outline: none; }
+.admin-chart-hit { transition: fill 160ms ease, stroke 160ms ease; }
+.admin-chart-bar {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: admin-bar-in 400ms ease-out backwards;
+  transition: filter 160ms ease;
+}
+.admin-chart-status:focus-visible .admin-chart-hit { fill: #ffffff12; stroke: #ffd98a; stroke-width: 2; }
+.admin-chart-status:focus-visible .admin-chart-bar { filter: brightness(1.2); }
+.admin-chart-status:active .admin-chart-bar { filter: brightness(1.35); }
+
+@property --admin-ring-progress {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+.admin-root .admin-ring {
+  background: conic-gradient(#c9362b var(--admin-ring-progress), #eee4d5 0);
+  transition: --admin-ring-progress 500ms ease;
+  animation: admin-ring-in 600ms ease-out;
+}
+.admin-count-circle { transition: border-color 180ms ease, background-color 180ms ease, transform 180ms ease; }
+.admin-rail-metric:focus-visible .admin-count-circle { border-color: #c9362b; background: #fff5e8; }
+.admin-root :is(.admin-merch-message, .admin-error, .admin-partnerships-message, .admin-partnerships-error) {
+  animation: admin-content-in 180ms ease-out;
+}
+.admin-detail-overlay { animation: admin-fade-in 160ms ease-out; }
+.admin-detail-panel { animation: admin-dialog-in 220ms ease-out; }
+.admin-detail-panel :is(button, a):focus-visible { outline: 2px solid #c9362b; outline-offset: 4px; }
+.admin-detail-panel button:disabled { opacity: .45; }
+.admin-root .admin-front-office { padding-bottom: 24px; }
+.admin-front-office-total { margin: 0 0 20px; color: #796653; font-size: 14px; }
+.admin-front-office-total > strong { color: #352a24; font-size: 24px; margin-right: 5px; }
+.admin-front-office-bars { display: grid; gap: 10px; }
+.admin-office-toggle { display: inline-flex; flex-wrap: wrap; gap: 4px; padding: 4px; border: 1px solid #e3d5c2; border-radius: 12px; background: #f3eade; margin-bottom: 18px; }
+.admin-office-toggle button { padding: 9px 16px; min-height: 42px; border: 0; border-radius: 8px; color: #705c48; background: transparent; font-size: 14px; }
+.admin-office-toggle button[aria-pressed=true] { background: #fffaf1; color: #a52f25; box-shadow: 0 2px 7px #51302014; font-weight: 600; }
+.admin-office-toggle button[aria-pressed=false]:hover { background: #e8dbca; }
+.admin-front-office-row {
+  display: grid; grid-template-columns: minmax(140px, 180px) minmax(0, 1fr) 68px;
+  align-items: center; gap: 20px; padding: 14px 12px; width: 100%;
+  border: 1px solid #eee3d6; border-radius: 12px; background: #fdfaf5; text-align: left;
+}
+.admin-front-office-label { display: grid; gap: 3px; min-width: 0; }
+.admin-front-office-label > strong { color: #3f332b; font-size: 17px; }
+.admin-front-office-label > span { color: #796653; font-size: 12px; line-height: 1.5; }
+.admin-front-office-track { height: 20px; border-radius: 6px; overflow: hidden; background: #eee6db; }
+.admin-front-office-track > span {
+  display: block; height: 100%; border-radius: inherit; transform-origin: left center;
+  animation: admin-front-bar-in 420ms ease-out backwards;
+}
+.admin-front-office-value { display: grid; gap: 2px; justify-items: end; }
+.admin-front-office-value > strong { font-size: 18px; color: #3f332b; }
+.admin-front-office-value > span { font-size: 12px; color: #796653; }
+.admin-front-office-filter { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 16px; font-size: 13px; color: #675340; }
+.admin-front-office-filter select { min-width: 0; max-width: 100%; border: 1px solid #e3d5c2; background: #fffaf1; padding: 10px 12px; border-radius: 10px; }
+.admin-root .admin-front-office-row:hover { background: #f6ecdf; border-color: #ceb59d; }
+@media (max-width: 600px) {
+  .admin-front-office-row { grid-template-columns: minmax(0, 1fr) 68px; gap: 12px; }
+  .admin-front-office-label { grid-column: 1; grid-row: 1; }
+  .admin-front-office-value { grid-column: 2; grid-row: 1; }
+  .admin-front-office-track { grid-column: 1 / -1; grid-row: 2; }
+  .admin-front-office-filter { align-items: stretch; flex-direction: column; }
+}
+@keyframes admin-front-bar-in { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.admin-root :is(input, textarea)[readonly],
+.admin-root fieldset:disabled :is(input, select, textarea) { background: #f3eee7; color: #655b53; }
+
+@media (hover: hover) and (pointer: fine) {
+  .admin-root .admin-nav button:not(.active):hover { background: #ffffff24; transform: translateY(-2px); }
+  .admin-root .admin-nav button.active:hover { box-shadow: 0 8px 22px #453e3b40; }
+  .admin-root :is(.admin-stat-card, .admin-quick-card):hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 26px #5b362416;
+    border-color: #ddcbb9;
+  }
+  .admin-root .admin-product-card:hover { box-shadow: 0 12px 26px #5b362412; border-color: #d4bda4; }
+  .admin-root .admin-product-card:hover img { transform: scale(1.035); }
+  .admin-root :is(.admin-stat-card, .admin-quick-card):hover > svg { transform: translate(2px, -2px); }
+  .admin-root :is(.admin-text-button, .admin-rail-link):hover > svg { transform: translateX(3px); }
+  .admin-root tbody tr:hover { background: #faf5ed; }
+  .admin-root .admin-chart-status:hover .admin-chart-hit { fill: #ffffff0d; }
+  .admin-root .admin-chart-status:hover .admin-chart-bar { filter: brightness(1.2); }
+  .admin-root .admin-rail-metric:hover .admin-count-circle { transform: translateY(-2px); }
+
+  .admin-root :is(.admin-icon-button, .admin-mobile-menu, .admin-row-actions button,
+    .admin-product-content button, .admin-variant-form button, .admin-record-pagination button,
+    .admin-partnerships-add):not(:disabled):hover,
+  .admin-detail-panel :is(button, a):not(:disabled):hover { background: #f1dfca; border-color: #c8a789; }
+  .admin-root :is(.admin-merch-primary, .admin-partnerships-actions > button, .admin-auth-enter):not(:disabled):hover,
+  .auth-sheet button[type=submit]:not(:disabled):hover { background: #a92922; box-shadow: 0 5px 16px #c9362b25; }
+  .admin-root .admin-partnerships-remove:not(:disabled):hover { background: #fce7e3; color: #9e211b; }
+  .admin-root .admin-shop-switch:not(:disabled):hover { box-shadow: 0 0 0 4px #c9362b18; }
+  .admin-root :is(.admin-hero-footer, .admin-revenue-card) button:hover { background: #ffffff24; }
+  .admin-root .admin-sidebar-bottom button:hover { color: #ffd98a; }
+  .admin-root :is(.admin-delegate-link, .admin-text-button):hover { color: #9e211b; text-decoration: underline; text-underline-offset: 3px; }
+}
+
+:is(.admin-root, .admin-detail-panel, .auth-sheet) button:not(:disabled):active { transform: translateY(1px); }
+
+@media (max-width: 760px) {
+  .admin-root .admin-sidebar {
+    transition: transform 220ms ease, visibility 220ms;
+  }
+  .admin-root .admin-nav-backdrop { animation: admin-fade-in 180ms ease-out; }
+}
+
+@keyframes admin-content-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes admin-fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes admin-dialog-in {
+  from { opacity: 0; transform: translateY(14px) scale(.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes admin-bar-in { from { transform: scaleY(.05); } to { transform: scaleY(1); } }
+@keyframes admin-ring-in { from { --admin-ring-progress: 0%; } }
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.admin-root, .admin-detail-overlay, .admin-detail-panel, .auth-sheet),
+  :is(.admin-root, .admin-detail-overlay, .admin-detail-panel, .auth-sheet) *,
+  :is(.admin-root, .admin-detail-overlay, .admin-detail-panel, .auth-sheet) *::before,
+  :is(.admin-root, .admin-detail-overlay, .admin-detail-panel, .auth-sheet) *::after {
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .admin-root :is(.admin-stat-card, .admin-quick-card):hover,
+  .admin-root .admin-product-card:hover img,
+  .admin-root .admin-rail-metric:hover .admin-count-circle { transform: none; }
+}
