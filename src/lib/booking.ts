@@ -1,4 +1,6 @@
 import { requireSupabase } from './supabase';
+import { requestOrderEmail } from './order-email';
+import { requestAcceptanceEmail } from './acceptance-email';
 import type { CartItem } from '../context/MerchContext';
 
 export async function submitRegistration(key: string, answers: Record<string, string>, file: File | null) {
@@ -25,7 +27,11 @@ export async function submitRegistration(key: string, answers: Record<string, st
     p_user_id: user.id, p_key: key, p_answers: { ...answers, clan: 'SLIIT', 'clan-sp': null }, p_file,
   });
   if (error) throw error;
-  return data as { id: string; reference: string };
+  const registration = data as { id: string; reference: string };
+  // The database queues the acknowledgement atomically with registration.
+  // A mail failure must never turn a saved registration into a failed form.
+  void requestAcceptanceEmail(registration.id);
+  return registration;
 }
 
 export type OrderQuote = { items: { variant_id: string; quantity: number }[]; totalMinor: number };
@@ -49,11 +55,11 @@ export async function quoteOrder(cart: CartItem[]): Promise<OrderQuote> {
 export async function placePreorder(key: string, quote: OrderQuote, file: File) {
   const db = requireSupabase();
   const { data: { user }, error: authError } = await db.auth.getUser();
-  if (authError || !user) throw new Error('Verify your registration email first.');
+  if (authError || !user || user.is_anonymous) throw new Error('Verify your registration email first.');
   if (!['application/pdf','image/jpeg','image/png','image/webp'].includes(file.type) || file.size < 1 || file.size > 5242880) throw new Error('Use a PDF, JPEG, PNG or WebP receipt up to 5 MB.');
   const previous = await db.from('orders').select('id,reference').eq('submission_key', key).maybeSingle();
   if (previous.error) throw previous.error;
-  if (previous.data) return previous.data;
+  if (previous.data) { void requestOrderEmail(previous.data.id, 'received'); return previous.data; }
   const digest=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
   const fileKey=Array.from(new Uint8Array(digest),n=>n.toString(16).padStart(2,'0')).join('');
   const storageKey = `${user.id}/${key}/${fileKey}`;
@@ -65,5 +71,7 @@ export async function placePreorder(key: string, quote: OrderQuote, file: File) 
   }
   const {data,error} = await db.rpc('place_preorder', {p_key:key,p_items:quote.items,p_total:quote.totalMinor,p_receipt:{storage_key:storageKey,original_name:file.name}});
   if (error) throw error;
-  return data as {id:string;reference:string};
+  const order = data as {id:string;reference:string};
+  void requestOrderEmail(order.id, 'received');
+  return order;
 }

@@ -124,7 +124,7 @@ export const ClaimConfirmationModal: React.FC = () => {
   const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   useEffect(() => {
-    if (!isClaimModalOpen) return;
+    if (!isClaimModalOpen || isSuccess) return;
     let active=true;
     setQuote(null);setDelegateReady(false);setSubmitError('');setName('');setEmail('');setPhone('');setDelegateId('');setStep(1);
     async function prepare(){
@@ -133,7 +133,9 @@ export const ClaimConfirmationModal: React.FC = () => {
         const bank=await db.from('shop_settings').select('bank_name,account_name,account_number,bank_branch').eq('id',true).single();
         if(bank.error)throw bank.error;
         if(active)setBank({bank:bank.data.bank_name,accountName:bank.data.account_name,accountNumber:bank.data.account_number,branch:bank.data.bank_branch});
-        if(!session)return;
+        if(!session || session.user.is_anonymous)return;
+        const linked=await db.rpc('link_registration_to_verified_email');
+        if(linked.error)throw linked.error;
         const registration=await db.from('registrations').select('full_name,personal_email,phone,reference,status').eq('user_id',session.user.id).maybeSingle();
         if(registration.error)throw registration.error;
         if(!registration.data || !['pending','approved'].includes(registration.data.status))throw new Error('Complete an active Catalyst registration before pre-ordering.');
@@ -142,7 +144,7 @@ export const ClaimConfirmationModal: React.FC = () => {
       }catch(e){if(active)setSubmitError(errorMessage(e));}
     }
     void prepare();return()=>{active=false;};
-  },[isClaimModalOpen,session?.user.id,cartItems]);
+  },[isClaimModalOpen,session?.user.id,cartItems,isSuccess]);
 
   // free the preview image when it is replaced / removed / the modal unmounts
   useEffect(() => {
@@ -394,7 +396,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                 ) : step === 1 ? (<>
                   {/* ======================= STEP 1 ======================= */}
                   <EmailSignIn />
-                  {!delegateReady && session && <p className="mb-4 text-sm text-[#9e2722]">An active registration is required. <Link to="/register" onClick={handleClose} className="underline">Register for Catalyst</Link></p>}
+                  {!delegateReady && session && !session.user.is_anonymous && <p className="mb-4 text-sm text-[#9e2722]">An active registration is required. <Link to="/register" onClick={handleClose} className="underline">Register for Catalyst</Link></p>}
                   {submitError && <p role="alert" className="mb-4 text-sm text-[#9e2722]">{submitError}</p>}
                   <form onSubmit={goToPayment} noValidate className="space-y-4">
                     <Field id="co-name" label="Full name" error={errors.name}>
@@ -687,8 +689,8 @@ export const ClaimConfirmationModal: React.FC = () => {
                 <h3 className="brush-heading mb-2 font-['Jansina','Bison',sans-serif] text-4xl uppercase tracking-wider text-[#252321]">THANK YOU</h3>
 
                 <p className="mb-6 font-['Droid_Serif',Georgia,serif] text-sm italic text-[#736B63]">
-                  Thank you, <span className="font-semibold text-[#252321]">{name.trim()}</span>. We have your order and receipt. We will check the payment and email
-                  <span className="font-semibold text-[#252321]"> {email.trim()}</span> once it is confirmed.
+                  Thank you, <span className="font-semibold text-[#252321]">{name.trim()}</span>. We have your order and receipt. Your payment is awaiting verification. We’ll send an order receipt to
+                  <span className="font-semibold text-[#252321]"> {email.trim()}</span>, followed by a confirmation after our team verifies your payment.
                 </p>
 
                 <div className="mb-6 rounded-xl border border-[#E5DDD0] bg-white p-5 text-left shadow-xs">
@@ -702,7 +704,7 @@ export const ClaimConfirmationModal: React.FC = () => {
                     </div>
                     <div className="space-y-1 text-xs text-[#736B63]">
                       <p className="font-semibold text-[#252321]">SLIIT Main Auditorium</p>
-                      <p>Show this reference at the Catalyst registration booth on Day 1 to collect your order.</p>
+                      <p>Keep this reference handy. We’ll share pickup arrangements separately after confirmation.</p>
                     </div>
                   </div>
                 </div>

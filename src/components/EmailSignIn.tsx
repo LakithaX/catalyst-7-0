@@ -57,7 +57,7 @@ export default function EmailSignIn({ initialEmail = '', admin = false }: { init
   if (loading) return <p role="status">Checking sign-in…</p>;
   const button = 'rounded-lg bg-[#C9362B] px-4 py-3 text-sm text-white disabled:opacity-50';
   return <div className="my-5 space-y-3 rounded-xl border border-[#E5DDD0] bg-white p-4 text-[#252321]">
-    {session ? <><p className="text-sm">Signed in as {session.user.email}</p><button type="button" disabled={busy} className={button} onClick={() => run('out')}>Sign out</button></> : <>
+    {session && !session.user.is_anonymous ? <><p className="text-sm">Signed in as {session.user.email}</p><button type="button" disabled={busy} className={button} onClick={() => run('out')}>Sign out</button></> : <>
       <p className="text-sm">{admin ? 'Sign in with your invited admin email.' : 'Verify your registration email to continue.'}</p>
       <label className="block text-sm" htmlFor={`${id}-email`}>Email address</label>
       <input id={`${id}-email`} className="w-full rounded-lg border p-3" type="email" autoComplete="email" value={email} disabled={sent || busy} onChange={e => setEmail(e.target.value)} />

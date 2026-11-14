@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { LayoutDashboard, Users, ShoppingBag, Package, Handshake, ArrowUpRight, ArrowRight, Search, RefreshCw, LogOut, ShieldCheck, Check, ChevronRight, Sparkles, Menu, X } from 'lucide-react';
 import { useSession } from '../components/EmailSignIn';
 import { supabase, errorMessage } from '../lib/supabase';
+import { requestAcceptanceEmail } from '../lib/acceptance-email';
 import './admin.css';
 import './admin-interactions.css';
 import './admin-typography.css';
@@ -11,11 +12,16 @@ import AdminDelegateDetails from '../components/AdminDelegateDetails';
 import AdminLogin from '../components/AdminLogin';
 import AdminPartnerships from '../components/AdminPartnerships';
 import AdminSheetSync from '../components/AdminSheetSync';
+import AdminRegistrationEmails from '../components/AdminRegistrationEmails';
 import AdminStatusChart from '../components/AdminStatusChart';
 import AdminFrontOfficeChart, { OfficeToggle } from '../components/AdminFrontOfficeChart';
 import { BACK_OFFICES, FRONT_OFFICES, backOfficeCode, frontOfficeCode, type OfficeKind } from '../lib/front-office';
 
-type Registration = { id: string; full_name: string; personal_email: string; university: string; programme: string | null; function: string | null; reference: string; status: string; created_at: string; checked_in_at: string | null };
+type Registration = { id: string; full_name: string; personal_email: string; university: string; programme: string | null; function: string | null; reference: string; status: string; created_at: string; checked_in_at: string | null; registration_acceptance_emails: { status: string; sent_at: string | null } | null };
+type RawRegistration = Omit<Registration, 'registration_acceptance_emails'> & { registration_acceptance_emails: Registration['registration_acceptance_emails'] | NonNullable<Registration['registration_acceptance_emails']>[] };
+function normalizeRegistration(row: RawRegistration): Registration {
+  return { ...row, registration_acceptance_emails: Array.isArray(row.registration_acceptance_emails) ? row.registration_acceptance_emails[0] || null : row.registration_acceptance_emails };
+}
 type Order = { id: string; registration_id: string; registrations: {full_name:string;personal_email:string}|null; reference: string; status: string; payment_status: string; total_minor: number; created_at: string };
 type Variant = { id: string; sku: string; size: string; price_minor: number };
 type Summary = { registrations: number; checked_in: number; orders: number; collected: number; paid_minor: number; pending_registrations: number; awaiting_collection: number; registrations_by_status: Record<string,number> };
@@ -44,6 +50,18 @@ export default function AdminPage() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [notice, setNotice] = useState('');
+  const [signingOut, setSigningOut] = useState(false);
+  async function signOut() {
+    if (!supabase || signingOut) return;
+    setSigningOut(true); setError('');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      setAuthorized(false); setAdminRole(null); setSelectedDelegate(null);
+      setRegistrations([]); setOrders([]); setVariants([]); setNotice('');
+    } catch (cause) { setError(errorMessage(cause)); }
+    finally { setSigningOut(false); }
+  }
   const mutationInFlight = useRef(false);
   const [mobileNav, setMobileNav] = useState(false);
   const mobileMenuButton = useRef<HTMLButtonElement>(null);
@@ -88,11 +106,11 @@ export default function AdminPage() {
       const membership = await supabase.from('admin_memberships').select('role,is_active').eq('user_id', session.user.id).maybeSingle();
       if (membership.error) throw membership.error;
       if (!membership.data?.is_active || !['admin', 'viewer'].includes(membership.data.role)) throw new Error('This account does not have active Catalyst admin panel access.');
-      const [s, r, o, v] = await Promise.all([supabase.rpc('admin_summary'), supabase.from('registrations').select('id,full_name,personal_email,university,programme,function,reference,status,created_at,checked_in_at').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('orders').select('*,registrations(full_name,personal_email)').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('product_variants').select('*').order('sku')]);
+      const [s, r, o, v] = await Promise.all([supabase.rpc('admin_summary'), supabase.from('registrations').select('id,full_name,personal_email,university,programme,function,reference,status,created_at,checked_in_at,registration_acceptance_emails(status,sent_at)').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('orders').select('*,registrations(full_name,personal_email)').order('created_at', { ascending: false }).order('id',{ascending:false}).range(0,199), supabase.from('product_variants').select('*').order('sku')]);
       for (const result of [s, r, o, v]) if (result.error) throw result.error;
       if(s.data.schema_version!==7)throw new Error('The admin setup needs a database update. Apply the Supabase UI integration upgrade before continuing.');
       if(currentUser.current!==userId)return;
-      setAdminRole(membership.data.role as 'admin' | 'viewer'); setSummary(s.data); setRegistrations(r.data || []); setOrders(o.data || []); setVariants(v.data || []); setAuthorized(true);
+      setAdminRole(membership.data.role as 'admin' | 'viewer'); setSummary(s.data); setRegistrations((r.data || []).map(normalizeRegistration)); setOrders(o.data || []); setVariants(v.data || []); setAuthorized(true);
     } catch (e) { if(currentUser.current===userId){setAuthorized(false);setAdminRole(null);setError(errorMessage(e));} }
     finally { if(currentUser.current===userId)setBusy(false); }
   }
@@ -104,12 +122,12 @@ export default function AdminPage() {
     try {
       const count=kind==='registrations'?registrations.length:orders.length;
       const query=kind==='registrations'
-        ?supabase.from('registrations').select('id,full_name,personal_email,university,programme,function,reference,status,created_at,checked_in_at')
+        ?supabase.from('registrations').select('id,full_name,personal_email,university,programme,function,reference,status,created_at,checked_in_at,registration_acceptance_emails(status,sent_at)')
         :supabase.from('orders').select('*,registrations(full_name,personal_email)');
       const {data,error}=await query.order('created_at',{ascending:false}).order('id',{ascending:false}).range(count,count+199);
       if(error)throw error;
       if(currentUser.current!==userId)return;
-      if(kind==='registrations')setRegistrations(previous=>[...previous,...(data as Registration[])]);
+      if(kind==='registrations')setRegistrations(previous=>[...previous,...(data as RawRegistration[]).map(normalizeRegistration)]);
       else setOrders(previous=>[...previous,...(data as unknown as Order[])]);
     }catch(e){if(currentUser.current===userId)setError(errorMessage(e));}
     finally{if(currentUser.current===userId)setBusy(false);}
@@ -124,10 +142,27 @@ export default function AdminPage() {
       const { error } = await supabase.rpc(rpc, args);
       if (error) throw error;
       if (currentUser.current !== userId) return;
+      let message = 'Changes saved.';
+      if (currentUser.current !== userId) return;
       await load();
-      if (currentUser.current === userId) setNotice('Changes saved.');
+      if (currentUser.current === userId) setNotice(message);
     } catch (e) {
       if (currentUser.current === userId) setError(errorMessage(e));
+    } finally {
+      mutationInFlight.current = false;
+      if (currentUser.current === userId) setBusy(false);
+    }
+  }
+  async function retryAcceptanceEmail(id: string) {
+    if (!canEdit || mutationInFlight.current) return;
+    const userId = session?.user.id;
+    mutationInFlight.current = true;
+    setBusy(true); setNotice(''); setError('');
+    try {
+      const message = await requestAcceptanceEmail(id);
+      if (currentUser.current !== userId) return;
+      await load();
+      if (currentUser.current === userId) setNotice(message);
     } finally {
       mutationInFlight.current = false;
       if (currentUser.current === userId) setBusy(false);
@@ -137,11 +172,11 @@ export default function AdminPage() {
   const visibleOrders = orders.filter(o => `${o.reference} ${o.registrations?.full_name || ''} ${o.registrations?.personal_email || ''} ${o.status} ${o.payment_status}`.toLowerCase().includes(search.trim().toLowerCase()) && (filter === 'all' || o.status === filter));
   if (!supabase) return <div className="admin-root admin-gate"><div className="admin-login"><h1>Admin sign-in unavailable</h1><p role="alert">Supabase is not configured for this build. Contact the site administrator.</p><Link to="/">Back to Catalyst</Link></div></div>;
   if (loading) return <div className="admin-root admin-gate"><p role="status">Checking your session…</p></div>;
-  if (!session || !authorized) return <><AdminLogin signedIn={Boolean(session)} busy={busy || loading} error={error} onRetry={() => void load()} onSignOut={() => void supabase?.auth.signOut()} /></>;
+  if (!session || !authorized) return <><AdminLogin signedIn={Boolean(session)} busy={busy || loading} error={error} onRetry={() => void load()} onSignOut={() => void signOut()} /></>;
   return <><div className="admin-root"><div className="admin-shell">
     {mobileNav && <button className="admin-nav-backdrop" aria-label="Close navigation" onClick={closeMobileNav} />}
-    <aside ref={navigationPanel} id="admin-navigation" aria-label="Control room navigation" className={`admin-sidebar ${mobileNav ? 'is-open' : ''}`}><button className="admin-nav-close" aria-label="Close navigation" onClick={closeMobileNav}><X size={20}/></button><Link to="/" className="admin-brand" aria-label="Catalyst home"><img className="admin-logo" src="/assets/catalyst_7_logo.png" alt="Catalyst 7.0" /></Link><div className="admin-nav">{tabs.map(({ name, icon: Icon }) => <button key={name} title={name} aria-label={name} aria-current={tab === name ? 'page' : undefined} className={tab === name ? 'active' : ''} onClick={() => navigate(name)}><Icon size={21} /><span>{name}</span></button>)}</div><div className="admin-sidebar-bottom"><ShieldCheck size={22} /><span>{canEdit ? 'Administrator' : 'Viewer'}</span><button aria-label="Sign out" title="Sign out" onClick={() => void supabase?.auth.signOut()}><LogOut size={20} /></button></div></aside>
-    <main className="admin-main"><header className="admin-header"><div className="admin-title-group"><button ref={mobileMenuButton} className="admin-mobile-menu" aria-label="Toggle navigation" aria-expanded={mobileNav} aria-controls="admin-navigation" onClick={() => setMobileNav(!mobileNav)}><Menu /></button><div><p className="admin-eyebrow">CATALYST 7.0 <span>/ CONTROL ROOM</span></p><h1>{tab}</h1></div></div><div className="admin-header-actions"><span className="admin-connection"><i />Connected</span><button className="admin-icon-button" title="Refresh data" aria-label="Refresh data" disabled={busy} onClick={() => { setPanelRefresh(value => value + 1); void load(); }}><RefreshCw size={18} className={busy ? 'admin-spin' : ''} /></button><div className="admin-avatar" title={`${session.user.email || 'Signed-in account'} · ${canEdit ? 'Administrator' : 'Viewer'}`} aria-label={canEdit ? 'Administrator account' : 'Viewer account'}>{session.user.email?.charAt(0).toUpperCase() || 'A'}</div></div></header>
+    <aside ref={navigationPanel} id="admin-navigation" aria-label="Control room navigation" className={`admin-sidebar ${mobileNav ? 'is-open' : ''}`}><button className="admin-nav-close" aria-label="Close navigation" onClick={closeMobileNav}><X size={20}/></button><Link to="/" className="admin-brand" aria-label="Catalyst home"><img className="admin-logo" src="/assets/catalyst_7_logo.png" alt="Catalyst 7.0" /></Link><div className="admin-nav">{tabs.map(({ name, icon: Icon }) => <button key={name} title={name} aria-label={name} aria-current={tab === name ? 'page' : undefined} className={tab === name ? 'active' : ''} onClick={() => navigate(name)}><Icon size={21} /><span>{name}</span></button>)}</div><div className="admin-sidebar-bottom"><ShieldCheck size={22} /><span>{canEdit ? 'Administrator' : 'Viewer'}</span><button aria-label="Sign out" title="Sign out" disabled={signingOut} onClick={() => void signOut()}><LogOut size={20} /></button></div></aside>
+    <main className="admin-main"><header className="admin-header"><div className="admin-title-group"><button ref={mobileMenuButton} className="admin-mobile-menu" aria-label="Toggle navigation" aria-expanded={mobileNav} aria-controls="admin-navigation" onClick={() => setMobileNav(!mobileNav)}><Menu /></button><div><p className="admin-eyebrow">CATALYST 7.0 <span>/ CONTROL ROOM</span></p><h1>{tab}</h1></div></div><div className="admin-header-actions"><button className="admin-logout-button" disabled={signingOut} onClick={() => void signOut()}><LogOut size={16}/><span>{signingOut ? 'Logging out…' : 'Log out'}</span></button><span className="admin-connection"><i />Connected</span><button className="admin-icon-button" title="Refresh data" aria-label="Refresh data" disabled={busy} onClick={() => { setPanelRefresh(value => value + 1); void load(); }}><RefreshCw size={18} className={busy ? 'admin-spin' : ''} /></button><div className="admin-avatar" title={`${session.user.email || 'Signed-in account'} · ${canEdit ? 'Administrator' : 'Viewer'}`} aria-label={canEdit ? 'Administrator account' : 'Viewer account'}>{session.user.email?.charAt(0).toUpperCase() || 'A'}</div></div></header>
 
       {!canEdit && <p className="admin-merch-message" role="status">View-only access. You can browse records and files, but cannot make changes.</p>}
       {error && <div className="admin-error" role="alert">{error}<button aria-label="Dismiss message" onClick={() => setError('')}>×</button></div>}
@@ -154,7 +189,8 @@ export default function AdminPage() {
       <div className="admin-stat-grid">{[{ label: 'Registrations to review', value: summary.pending_registrations, sub: 'Give every delegate a warm welcome.', icon: Users, page: 'Registrations', status: 'pending', color: 'purple' }, { label: 'Awaiting collection', value: summary.awaiting_collection, sub: 'A little Catalyst to take home.', icon: ShoppingBag, page: 'Orders', color: 'pink' }, { label: 'Pre-order variants', value: variants.length, sub: 'Manage your merchandise collection.', icon: Package, page: 'Merchandise', color: 'green' }].map(({ label, value, sub, icon: Icon, page, color, status }) => <button className="admin-stat-card" key={label} onClick={() => navigate(page, status)}><span className={`admin-stat-icon ${color}`}><Icon size={21}/></span><ArrowUpRight className="admin-stat-arrow" size={18}/><strong>{value}</strong><h3>{label}</h3><p>{sub}</p></button>)}</div>
       <AdminFrontOfficeChart kind={officeKind} onKindChange={changeOfficeKind} onSelect={code => { navigate('Registrations'); setOfficeFilter(code); }} />
       </> : null}
-      {(tab === 'Overview' || tab === 'Registrations') && <section className="admin-table-card"><div className="admin-section-heading"><div><h2>{tab === 'Overview' ? 'Latest registrations' : 'Delegate directory'}</h2><p>{tab === 'Overview' ? 'The newest faces in our next chapter.' : 'Review registrations and welcome your delegates.'}</p></div>{tab === 'Overview' ? <button className="admin-text-button" onClick={() => navigate('Registrations')}>View all <ArrowRight size={16}/></button> : <select aria-label="Filter registrations" value={filter} onChange={e => setFilter(e.target.value)}>{['all','pending','approved','rejected','cancelled'].map(s => <option key={s}>{s}</option>)}</select>}</div>{tab !== 'Overview' && <><OfficeToggle kind={officeKind} onChange={changeOfficeKind} /><label className="admin-front-office-filter">{officeKind === 'front' ? 'Front office' : 'Back office'}<select aria-label={`Filter registrations by ${officeKind} office`} value={officeFilter} onChange={event => setOfficeFilter(event.target.value)}><option value="all">All {officeKind} offices</option>{officeOptions.map(office => <option key={office.code} value={office.code}>{office.code} — {office.name}</option>)}<option value="other">Other / unspecified</option></select></label><SearchBox value={search} onChange={setSearch}/></>}<div className="admin-table-scroll" role="region" aria-label="Scrollable records" tabIndex={0}><table><thead><tr><th>Delegate</th><th>Reference</th><th>Status</th>{tab !== 'Overview' && canEdit && <th>Actions</th>}</tr></thead><tbody>{(tab === 'Overview' ? visibleRegistrations.slice(0,4) : visibleRegistrations).map((r,i) => <tr key={r.id}><td><div className="admin-person"><span className={`admin-person-avatar tone-${i%3}`}>{r.full_name.split(' ').map(n => n[0]).slice(0,2).join('')}</span><div><button className="admin-delegate-link" onClick={()=>setSelectedDelegate(r.id)}>{r.full_name}</button><small>{tab === 'Overview' ? 'Catalyst 7.0 delegate' : r.personal_email}</small></div></div></td><td className="admin-reference">{r.reference}</td><td><span className={`admin-status ${r.status}`}>{r.status}</span>{r.checked_in_at && <small>Checked in</small>}</td>{tab !== 'Overview' && canEdit && <td><div className="admin-row-actions">{r.status === 'pending' && <><button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'approved' })}>Approve</button><button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'rejected' })}>Reject</button></>}{r.status === 'approved' && !r.checked_in_at && <button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'approved',p_check_in:true })}><Check size={13}/> Check in</button>}</div></td>}</tr>)}</tbody></table>{!visibleRegistrations.length && <p className="admin-empty">No registrations found.</p>}</div></section>}
+      {tab === 'Registrations' && <AdminRegistrationEmails readOnly={!canEdit} refreshKey={registrations} onChanged={() => void load()} />}
+      {(tab === 'Overview' || tab === 'Registrations') && <section className="admin-table-card"><div className="admin-section-heading"><div><h2>{tab === 'Overview' ? 'Latest registrations' : 'Delegate directory'}</h2><p>{tab === 'Overview' ? 'The newest faces in our next chapter.' : 'Review registrations and welcome your delegates.'}</p></div>{tab === 'Overview' ? <button className="admin-text-button" onClick={() => navigate('Registrations')}>View all <ArrowRight size={16}/></button> : <select aria-label="Filter registrations" value={filter} onChange={e => setFilter(e.target.value)}>{['all','pending','approved','rejected','cancelled'].map(s => <option key={s}>{s}</option>)}</select>}</div>{tab !== 'Overview' && <><OfficeToggle kind={officeKind} onChange={changeOfficeKind} /><label className="admin-front-office-filter">{officeKind === 'front' ? 'Front office' : 'Back office'}<select aria-label={`Filter registrations by ${officeKind} office`} value={officeFilter} onChange={event => setOfficeFilter(event.target.value)}><option value="all">All {officeKind} offices</option>{officeOptions.map(office => <option key={office.code} value={office.code}>{office.code} — {office.name}</option>)}<option value="other">Other / unspecified</option></select></label><SearchBox value={search} onChange={setSearch}/></>}<div className="admin-table-scroll" role="region" aria-label="Scrollable records" tabIndex={0}><table><thead><tr><th>Delegate</th><th>Reference</th><th>Status</th>{tab !== 'Overview' && canEdit && <th>Actions</th>}</tr></thead><tbody>{(tab === 'Overview' ? visibleRegistrations.slice(0,4) : visibleRegistrations).map((r,i) => <tr key={r.id}><td><div className="admin-person"><span className={`admin-person-avatar tone-${i%3}`}>{r.full_name.split(' ').map(n => n[0]).slice(0,2).join('')}</span><div><button className="admin-delegate-link" onClick={()=>setSelectedDelegate(r.id)}>{r.full_name}</button><small>{tab === 'Overview' ? 'Catalyst 7.0 delegate' : r.personal_email}</small></div></div></td><td className="admin-reference">{r.reference}</td><td><span className={`admin-status ${r.status}`}>{r.status}</span>{r.checked_in_at && <small>Checked in</small>}{r.registration_acceptance_emails && <small className="admin-email-status">{({sent:'Interest acknowledgement sent',pending:'Interest acknowledgement pending',failed:'Interest acknowledgement failed',sending:'Email sending / verify status',uncertain:'Email delivery needs checking'} as Record<string,string>)[r.registration_acceptance_emails.status]}</small>}</td>{tab !== 'Overview' && canEdit && <td><div className="admin-row-actions">{r.registration_acceptance_emails && <button className="admin-email-send" disabled={busy || !['pending','approved'].includes(r.status) || !['pending','failed'].includes(r.registration_acceptance_emails.status)} onClick={() => void retryAcceptanceEmail(r.id)}>{({ sent: 'Acknowledgement sent', sending: 'Sending…', uncertain: 'Check delivery', failed: 'Retry email' } as Record<string, string>)[r.registration_acceptance_emails.status] || 'Send acknowledgement'}</button>}{r.status === 'pending' && <><button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'approved' })}>Approve</button><button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'rejected' })}>Reject</button></>}{r.status === 'approved' && !r.checked_in_at && <button disabled={busy} onClick={() => void mutate('admin_registration', { p_id:r.id,p_status:'approved',p_check_in:true })}><Check size={13}/> Check in</button>}</div></td>}</tr>)}</tbody></table>{!visibleRegistrations.length && <p className="admin-empty">No registrations found.</p>}</div></section>}
       {tab === 'Registrations' && <div className="admin-record-pagination"><span>Showing { registrations.length } of {summary.registrations}. Search filters the loaded records.</span>{ registrations.length < summary.registrations && <button disabled={busy} onClick={()=>void loadMore('registrations')}>{busy?'Loading…':'Load more records'}</button>}</div>}
       {tab === 'Orders' && <section className="admin-table-card"><div className="admin-section-heading"><div><h2>Merchandise orders</h2><p>From the first reservation to the final handover.</p></div><select aria-label="Filter orders" value={filter} onChange={e=>setFilter(e.target.value)}>{['all','reserved','ready_for_pickup','collected','cancelled'].map(s=><option key={s}>{s}</option>)}</select></div><SearchBox value={search} onChange={setSearch}/><div className="admin-table-scroll" role="region" aria-label="Scrollable records" tabIndex={0}><table><thead><tr><th>Delegate</th><th>Reference</th><th>Total</th><th>Payment</th><th>Status</th>{canEdit && <th>Next action</th>}</tr></thead><tbody>{visibleOrders.map(o=><tr key={o.id}><td><button className="admin-delegate-link" onClick={()=>setSelectedDelegate(o.registration_id)}>{o.registrations?.full_name||'View delegate'}</button></td><td className="admin-reference"><button onClick={()=>setSelectedDelegate(o.registration_id)}>{o.reference}</button></td><td>{money(o.total_minor)}</td><td><span className={`admin-status ${o.payment_status === 'paid' ? 'approved' : 'pending'}`}>{o.payment_status}</span></td><td>{o.status === 'reserved' ? 'Pre-ordered' : o.status.replaceAll('_',' ')}</td>{canEdit && <td><div className="admin-row-actions">{o.payment_status === 'unpaid' && o.status !== 'cancelled' && <button disabled={busy} onClick={()=>setSelectedDelegate(o.registration_id)}>Review payment</button>}{o.status === 'reserved' && <button disabled={busy} onClick={()=>void mutate('admin_order',{p_id:o.id,p_status:'ready_for_pickup'})}>Mark ready</button>}{o.status === 'ready_for_pickup' && o.payment_status === 'paid' && <button disabled={busy} onClick={()=>void mutate('admin_order',{p_id:o.id,p_status:'collected'})}>Mark collected</button>}</div></td>}</tr>)}</tbody></table>{!visibleOrders.length && <p className="admin-empty">No orders found.</p>}</div></section>}
       {tab === 'Orders' && <div className="admin-record-pagination"><span>Showing { orders.length } of {summary.orders}. Search filters the loaded records.</span>{ orders.length < summary.orders && <button disabled={busy} onClick={()=>void loadMore('orders')}>{busy?'Loading…':'Load more records'}</button>}</div>}

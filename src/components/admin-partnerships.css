@@ -30,3 +30,5 @@
 .admin-partnerships-message{background:#edf5ee;color:#3b7053}
 .admin-partnerships-error{background:#fff0ed;color:#a42b21;overflow-wrap:anywhere}
 @media(max-width:620px){.admin-partnerships-intro{align-items:flex-start;flex-direction:column}.admin-partnerships-fields{grid-template-columns:minmax(0,1fr)}.admin-partnerships-fields .wide{grid-column:auto}.admin-partnerships-panel{padding:15px}.admin-partnerships-actions{align-items:stretch;flex-direction:column}.admin-partnerships-actions>button{width:100%}}
+
+.admin-partner-logo-upload{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.admin-partner-logo-upload img{width:110px;height:80px;object-fit:contain;background:#fff;border:1px solid #dfd1bd;border-radius:10px;padding:8px}.admin-partner-logo-upload label{flex:1;min-width:180px}.admin-partner-logo-upload small{display:block;font-size:11px;line-height:1.6;color:#796751;margin-top:6px}

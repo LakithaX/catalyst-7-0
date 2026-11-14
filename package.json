@@ -11,7 +11,9 @@
     "lint": "tsc --noEmit",
     "test:database": "node scripts/test-database.mjs",
     "test:admin-guard": "node scripts/test-admin-guard.mjs",
-    "test:front-office": "node --import tsx scripts/test-front-office.mjs"
+    "test:front-office": "node --import tsx scripts/test-front-office.mjs",
+    "test:acceptance-email": "node --import tsx scripts/test-acceptance-email.mjs",
+    "test:order-email": "node --import tsx scripts/test-order-email.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",
@@ -30,6 +32,7 @@
     "input-otp": "^1.5.0",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
+    "nodemailer": "^10.2.1",
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.18.5",
@@ -43,6 +46,7 @@
     "@electric-sql/pglite": "^0.5.15",
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
+    "@types/nodemailer": "^8.0.2",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "autoprefixer": "^10.4.21",

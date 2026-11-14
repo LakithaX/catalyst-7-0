@@ -45,7 +45,7 @@ Run it once in the Supabase SQL Editor. Do not rerun `setup.sql`, `seed.sql`, or
 
 The admin panel is at `/admin`. It requires a Supabase email/password account with an active `admin` or `viewer` membership; creating an Auth user alone does not grant panel access. One active admin has full access; multiple viewers can browse without changing records or settings. See [Admin and viewer access](docs/admin-permissions.md) for the upgrade and `eb@cat.com` provisioning steps.
 
-Delegate registration and checkout use email verification codes. Configure Supabase Auth email delivery (including SMTP and the email templates) before inviting delegates. Admins sign in with email and password.
+Delegate registration does not require sign-in. Merchandise checkout verifies the personal registration email with an email code. Configure Supabase Auth email delivery (including SMTP and the email templates) before inviting delegates. Admins sign in with email and password.
 
 See [Authentication setup](docs/authentication-setup.md) for the Auth dashboard settings and [Backend schema plan](docs/backend-schema-plan.md) for the data model.
 
@@ -53,7 +53,7 @@ See [Authentication setup](docs/authentication-setup.md) for the Auth dashboard 
 
 Merchandise is sold as pre-orders; there is no stock limit. The shop starts paused behind a Coming soon screen. In **Admin → Merchandise**, the admin can manage products and enter the bank name, account holder, account number, and optional branch when those details are available. Saving bank details does not open the shop. Keep Coming soon enabled until the catalogue and payment instructions are ready, then turn it off explicitly.
 
-Checkout links each order to the signed-in delegate, displays the saved bank instructions, and requires a payment receipt upload. An admin reviews the receipt and verifies or rejects payment in the control room. File buckets for CVs and receipts are private; access is controlled by Supabase policies.
+Checkout links each order to the verified delegate registration, displays the saved bank instructions, and requires a payment receipt upload. An admin reviews the receipt and verifies or rejects payment in the control room. File buckets for CVs and receipts are private; access is controlled by Supabase policies.
 
 See [Merchandise management](docs/merch-management.md) and [Shop readiness migration notes](docs/supabase-upgrade-005.md) for details.
 
@@ -65,6 +65,10 @@ See [Merchandise management](docs/merch-management.md) and [Shop readiness migra
 4. Verify `/admin` sign-in, delegate registration, and the paused shop on the deployed site. Keep Coming soon enabled until bank details and the catalogue are ready.
 
 Do not add a Supabase service-role/secret key to Vercel's frontend environment variables.
+
+### Registration interest acknowledgement emails
+
+Submitting a registration queues and requests the branded interest acknowledgement through Gmail immediately. Follow [Registration email setup](docs/acceptance-email.md) to apply the migrations and configure the private Vercel backend variables. The message acknowledges interest without confirming a place. Queue older pending/approved registrations with migration `202611130003_existing_registration_emails.sql`, then use **Send pending acknowledgements** in Admin → Registrations. Already-sent emails are skipped. Email failures do not undo registration; admins can retry pending/failed sends from Registrations. Approval and check-in do not send another email.
 
 ## Scripts
 
@@ -78,3 +82,7 @@ npm run test:admin-guard    # Verify missing Supabase config cannot expose admin
 ```
 
 The database tests use a local in-memory PostgreSQL instance and do not contact the live Supabase project or send email.
+
+### Merch order emails
+
+Checkout now requires verification of the personal registration email. Order submission sends an awaiting-verification email; admin payment approval sends an order-confirmed email. Both use durable jobs with duplicate-send protection and admin status/retry controls. Apply the new migration before deploying; see [Merch checkout and order email setup](docs/merch-order-emails.md).

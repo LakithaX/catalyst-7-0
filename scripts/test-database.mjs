@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 const db=new PGlite();
 await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create schema storage;
-create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
+create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz,is_anonymous boolean not null default false);
 create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;
 create function auth.jwt() returns jsonb language sql stable as $$select coalesce(nullif(current_setting('request.jwt.claims',true),'')::jsonb,'{}'::jsonb)$$;
 create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
@@ -30,9 +30,9 @@ const delegate='10000000-0000-4000-8000-000000000002';
 const other='10000000-0000-4000-8000-000000000003';
 const key='20000000-0000-4000-8000-000000000001';
 let checks=0;
-async function identity(id,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.query("select set_config('request.jwt.claims',$1,false)",[role==='anonymous'?'{}':JSON.stringify({is_anonymous:id===delegate})]);await db.exec(`set role ${role==='anonymous'?'anon':role}`);}
+async function identity(id,role='authenticated'){await db.exec('reset role');await db.query("select set_config('request.jwt.claim.sub',$1,false)",[id||'']);await db.query("select set_config('request.jwt.claims',$1,false)",[role==='anonymous'?'{}':JSON.stringify({is_anonymous:false})]);await db.exec(`set role ${role==='anonymous'?'anon':role}`);}
 async function denied(action,pattern){await assert.rejects(action,pattern);checks++;}
-await db.exec(`insert into auth.users values('${admin}','admin@example.test',now()),('${delegate}','delegate@example.test',now()),('${other}','other@example.test',now());insert into public.admin_memberships(user_id,role) values('${admin}','admin');`);
+await db.exec(`insert into auth.users(id,email,email_confirmed_at) values('${admin}','admin@example.test',now()),('${delegate}','delegate@example.test',now()),('${other}','other@example.test',now());insert into public.admin_memberships(user_id,role) values('${admin}','admin');`);
 await denied(()=>db.exec(`insert into public.admin_memberships(user_id,role) values('${other}','admin')`),/duplicate key/);
 await identity(null,'anon');
 await denied(()=>db.query('select * from public.registrations'),/permission denied/);
@@ -100,7 +100,7 @@ const anonymousKey='20000000-0000-4000-8000-000000000004';
 await identity(null,'anon');
 await denied(()=>db.query('select public.submit_unverified_registration($1,$2,$3,null)',[anonymous,anonymousKey,JSON.stringify(answers)]),/permission denied/);
 await db.exec('reset role');
-await db.query('insert into auth.users values($1,$2,null)',[anonymous,null]);
+await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,null)',[anonymous,null]);
 await db.exec('reset role');
 await db.query("select set_config('request.jwt.claim.sub',$1,false)",[anonymous]);
 await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({is_anonymous:true})]);
@@ -150,7 +150,7 @@ assert.ok((await db.query('select public.sheet_sync_batch() jobs')).rows[0].jobs
 const viewer='10000000-0000-4000-8000-000000000005';
 const viewer2='10000000-0000-4000-8000-000000000006';
 await db.exec('reset role');
-await db.query('insert into auth.users values($1,$2,now()),($3,$4,now())',[viewer,'eb@example.test',viewer2,'viewer2@example.test']);
+await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now()),($3,$4,now())',[viewer,'eb@example.test',viewer2,'viewer2@example.test']);
 await db.query("insert into public.admin_memberships(user_id,role) values($1,'viewer'),($2,'viewer')",[viewer,viewer2]);
 await denied(()=>db.query("insert into public.admin_memberships(user_id,role) values($1,'admin')",[other]),/duplicate key/);
 await denied(()=>db.query("insert into public.admin_memberships(user_id,role) values($1,'owner')",[other]),/check constraint/);
@@ -232,5 +232,155 @@ await denied(()=>db.query('select public.admin_shop_settings(false)'),/Not autho
 await identity(null,'anon');
 await denied(()=>db.query('select private.can_view_admin()'),/permission denied/);
 await denied(()=>db.query('select public.admin_summary()'),/permission denied/);
+// Interest email jobs commit with submission and cannot be claimed by browsers.
+await identity(admin);
+const emailBefore=(await db.query('select * from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0];
+assert.equal(emailBefore.status,'pending');assert.equal(emailBefore.recipient,'delegate@example.test');checks+=2;
+await db.query('select public.admin_registration($1,$2,true)',[rid,'approved']);
+assert.equal((await db.query('select count(*)::int n from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0].n,1);checks++;
+await denied(()=>db.query('select public.claim_acceptance_email($1)',[rid]),/permission denied/);
+await identity(viewer);
+assert.equal((await db.query('select * from public.registration_acceptance_emails')).rows.length,2);checks++;
+await denied(()=>db.query("update public.registration_acceptance_emails set status='sent'"),/permission denied/);
+await denied(()=>db.query("select public.finish_acceptance_email($1,$2,'sent')",[rid,key]),/permission denied/);
+await identity(other);
+assert.equal((await db.query('select * from public.registration_acceptance_emails')).rows.length,0);checks++;
+await identity(null,'anon');
+await denied(()=>db.query('select * from public.registration_acceptance_emails'),/permission denied/);
+await identity(null,'service_role');
+const claimed=(await db.query('select * from public.claim_acceptance_email($1)',[rid])).rows[0];
+assert.equal(claimed.status,'sending');assert.equal(claimed.attempts,1);checks+=2;
+assert.equal((await db.query('select * from public.claim_acceptance_email($1)',[rid])).rows.length,0);checks++;
+assert.equal((await db.query("select public.finish_acceptance_email($1,$2,'sent') ok",[rid,key])).rows[0].ok,false);checks++;
+assert.equal((await db.query("select public.finish_acceptance_email($1,$2,'failed') ok",[rid,claimed.claim_token])).rows[0].ok,true);checks++;
+const emailRetry=(await db.query('select * from public.claim_acceptance_email($1)',[rid])).rows[0];
+assert.equal(emailRetry.attempts,2);assert.notEqual(emailRetry.claim_token,claimed.claim_token);checks+=2;
+await db.query("select public.finish_acceptance_email($1,$2,'sent',$3)",[rid,emailRetry.claim_token,'test-message']);
+assert.equal((await db.query('select * from public.claim_acceptance_email($1)',[rid])).rows.length,0);checks++;
+await db.exec('reset role');
+assert.ok((await db.query('select sent_at from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0].sent_at);checks++;
+// A pending queue row cannot send after the delegate is rejected.
+await db.query("update public.registration_acceptance_emails set status='pending' where registration_id=$1",[rid]);
+await db.query("update public.registrations set status='rejected' where id=$1",[rid]);
+await identity(null,'service_role');
+assert.equal((await db.query('select * from public.claim_acceptance_email($1)',[rid])).rows.length,0);checks++;
+await db.exec('reset role');
+// Later approval never recreates a missing email job.
+await db.query('delete from public.registration_acceptance_emails where registration_id=$1',[rid]);
+await db.query("update public.registrations set status='approved' where id=$1",[rid]);
+assert.equal((await db.query('select count(*)::int n from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0].n,0);checks++;
+// Insertion rolls back the acknowledgement job together with registration.
+await db.exec('begin');
+await db.query("insert into public.registrations(user_id,submission_key,full_name,gender,nic,aiesec_email,personal_email,phone,university,study_year,semester,faculty,programme,rank,function,warrior_persona,aspiration,motivation) select $1,$2,full_name,gender,'200112345678','test-insert@example.test','test-insert@example.test',phone,university,study_year,semester,faculty,programme,rank,function,warrior_persona,aspiration,motivation from public.registrations where id=$3",[other,'30000000-0000-4000-8000-000000000001',rid]);
+const interestJob=(await db.query("select * from public.registration_acceptance_emails where recipient='test-insert@example.test'")).rows[0];
+assert.equal(interestJob.status,'pending');checks++;
+await db.exec('rollback');
+assert.equal((await db.query("select * from public.registration_acceptance_emails where recipient='test-insert@example.test'")).rows.length,0);checks++;
+// A freshly queued, pending registration can send before admin review.
+await identity(null,'service_role');
+const initialInterest=(await db.query('select * from public.claim_acceptance_email($1)',[anonRegistration.id])).rows[0];
+assert.equal(initialInterest.status,'sending');checks++;
+// Existing-registration backfill is idempotent and never resets delivery history.
+await db.exec('reset role');
+const emailBackfill=await readFile(root+'/migrations/202611130003_existing_registration_emails.sql','utf8');
+await db.exec(emailBackfill);
+assert.equal((await db.query('select status from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0].status,'pending');checks++;
+const preservedClaim=(await db.query('select * from public.registration_acceptance_emails where registration_id=$1',[anonRegistration.id])).rows[0];
+assert.equal(preservedClaim.status,'sending');checks++;
+await db.exec(emailBackfill);
+assert.deepEqual((await db.query('select * from public.registration_acceptance_emails where registration_id=$1',[anonRegistration.id])).rows[0],preservedClaim);checks++;
+assert.equal((await db.query('select count(*)::int n from public.registration_acceptance_emails')).rows[0].n,2);checks++;
+for(const emailStatus of ['sent','uncertain','failed']) {
+ await db.query('update public.registration_acceptance_emails set status=$2 where registration_id=$1',[rid,emailStatus]);
+ await db.exec(emailBackfill);
+ assert.equal((await db.query('select status from public.registration_acceptance_emails where registration_id=$1',[rid])).rows[0].status,emailStatus);checks++;
+}
+// Rejected or cancelled records with no existing job are not included.
+await db.query('delete from public.registration_acceptance_emails where registration_id=$1',[rid]);
+for(const registrationStatus of ['rejected','cancelled']) {
+ await db.query('update public.registrations set status=$2 where id=$1',[rid,registrationStatus]);
+ await db.exec(emailBackfill);
+ assert.equal((await db.query('select * from public.registration_acceptance_emails where registration_id=$1',[rid])).rows.length,0);checks++;
+}
+// Verified merch checkout and two independent, transactional email jobs.
+await identity(admin);
+assert.equal((await db.query("select count(*)::int n from public.order_emails where order_id=$1",[placed.id])).rows[0].n,2);checks++;
+const receivedJob=(await db.query("select * from public.order_emails where order_id=$1 and kind='received'",[placed.id])).rows[0];
+assert.equal(receivedJob.status,'skipped');checks++;
+assert.equal(receivedJob.recipient,'delegate@example.test');assert.equal(receivedJob.items[0].quantity,2);checks+=2;
+assert.equal(receivedJob.total_minor,variant.price_minor*2);checks++;
+await denied(()=>db.query("select public.claim_order_email($1,'received')",[placed.id]),/permission denied/);
+await identity(viewer2);
+assert.equal((await db.query('select * from public.order_emails where order_id=$1',[placed.id])).rows.length,2);checks++;
+await denied(()=>db.query("update public.order_emails set status='sent'"),/permission denied/);
+await identity(other);
+assert.equal((await db.query('select * from public.order_emails')).rows.length,0);checks++;
+await db.exec('reset role');
+await db.query('update auth.users set is_anonymous=true where id=$1',[anonymous]);
+await db.query("update public.registrations set personal_email='merch-returning@example.test' where id=$1",[anonRegistration.id]);
+await identity(admin);await db.query('select public.admin_shop_settings(false)');
+await identity(anonymous);await db.query("select set_config('request.jwt.claims',$1,false)",[JSON.stringify({is_anonymous:true})]);
+const merchKey='60000000-0000-4000-8000-000000000001';
+await denied(()=>db.query('select public.place_preorder($1,$2,$3,null)',[merchKey,items,variant.price_minor*2]),/Verify your personal registration email/);
+await denied(()=>db.query('select private.place_preorder($1,$2,$3,null)',[merchKey,items,variant.price_minor*2]),/permission denied/);
+await db.exec('reset role');
+const verified='60000000-0000-4000-8000-000000000002';
+await db.query("insert into auth.users(id,email,email_confirmed_at) values($1,'merch-returning@example.test',now())",[verified]);
+await identity(verified);
+assert.equal((await db.query('select public.link_registration_to_verified_email() linked')).rows[0].linked,true);checks++;
+assert.equal((await db.query('select public.link_registration_to_verified_email() linked')).rows[0].linked,true);checks++;
+assert.equal((await db.query('select id from public.registrations where user_id=$1',[verified])).rows[0].id,anonRegistration.id);checks++;
+const merchReceipt=verified+'/'+merchKey+'/receipt.pdf';
+await db.query("insert into storage.objects(bucket_id,name,metadata) values('payment-receipts',$1,$2)",[merchReceipt,JSON.stringify({size:100,mimetype:'application/pdf'})]);
+const merch=(await db.query('select public.place_preorder($1,$2,$3,$4) result',[merchKey,items,variant.price_minor*2,JSON.stringify({storage_key:merchReceipt,original_name:'receipt.pdf'})])).rows[0].result;
+assert.equal((await db.query('select registration_id from public.orders where id=$1',[merch.id])).rows[0].registration_id,anonRegistration.id);checks++;
+await identity(admin);
+assert.deepEqual((await db.query('select kind from public.order_emails where order_id=$1',[merch.id])).rows.map(j=>j.kind),['received']);checks++;
+await identity(null,'service_role');
+assert.equal((await db.query("select * from public.claim_order_email($1,'confirmed')",[merch.id])).rows.length,0);checks++;
+const merchClaim=(await db.query("select * from public.claim_order_email($1,'received')",[merch.id])).rows[0];
+assert.equal((await db.query("select * from public.claim_order_email($1,'received')",[merch.id])).rows.length,0);checks++;
+assert.equal((await db.query("select public.finish_order_email($1,'received',$2,'sent') ok",[merch.id,key])).rows[0].ok,false);checks++;
+await db.query("select public.finish_order_email($1,'received',$2,'failed')",[merch.id,merchClaim.claim_token]);
+const retryClaim=(await db.query("select * from public.claim_order_email($1,'received')",[merch.id])).rows[0];
+await db.query("select public.finish_order_email($1,'received',$2,'sent','test-received')",[merch.id,retryClaim.claim_token]);
+assert.equal((await db.query("select * from public.claim_order_email($1,'received')",[merch.id])).rows.length,0);checks++;
+await identity(admin);
+await db.query("select public.admin_review_receipt($1,false,'Unreadable')",[merch.id]);
+assert.equal((await db.query("select count(*)::int n from public.order_emails where order_id=$1 and kind='confirmed'",[merch.id])).rows[0].n,0);checks++;
+await db.query('select public.admin_review_receipt($1,true)',[merch.id]);
+await db.query('select public.admin_review_receipt($1,true)',[merch.id]);
+assert.equal((await db.query("select count(*)::int n from public.order_emails where order_id=$1 and kind='confirmed'",[merch.id])).rows[0].n,1);checks++;
+await identity(null,'service_role');
+const confirmedClaim=(await db.query("select * from public.claim_order_email($1,'confirmed')",[merch.id])).rows[0];
+await db.query("select public.finish_order_email($1,'confirmed',$2,'uncertain')",[merch.id,confirmedClaim.claim_token]);
+assert.equal((await db.query("select * from public.claim_order_email($1,'confirmed')",[merch.id])).rows.length,0);checks++;
+// An email mismatch and unconfirmed identity cannot place another order.
+await db.exec('reset role');await db.query("update auth.users set email='different@example.test' where id=$1",[verified]);
+await identity(verified);
+await denied(()=>db.query('select public.place_preorder($1,$2,$3,null)',[newKey,items,variant.price_minor*2]),/Verify your personal registration email/);
+await db.exec('reset role');await db.query("update auth.users set email='merch-returning@example.test',email_confirmed_at=null where id=$1",[verified]);
+await identity(verified);
+await denied(()=>db.query('select public.place_preorder($1,$2,$3,null)',[newKey,items,variant.price_minor*2]),/Verify your personal registration email/);
+await denied(()=>db.query('select public.link_registration_to_verified_email()'),/Verify your personal email/);
+await db.exec('reset role');await db.query('update auth.users set email_confirmed_at=now() where id=$1',[verified]);
+// A later registration rejection prevents new orders even for a verified owner.
+await db.exec('reset role');await db.query("update public.registrations set status='rejected' where id=$1",[anonRegistration.id]);
+await identity(verified);
+await denied(()=>db.query('select public.place_preorder($1,$2,$3,null)',[newKey,items,variant.price_minor*2]),/Verify your personal registration email/);
+// Partner logos are public, but only the active admin can upload them.
+await identity(admin);
+const logoKey=admin+'/test-logo.png';
+await db.query("insert into storage.objects(bucket_id,name,metadata) values('partner-logos',$1,$2)",[logoKey,JSON.stringify({size:100,mimetype:'image/png'})]);
+await identity(viewer2);
+await denied(()=>db.query("insert into storage.objects(bucket_id,name) values('partner-logos',$1)",[viewer2+'/unauthorized.png']),/row-level security/);
+await identity(other);
+await denied(()=>db.query("insert into storage.objects(bucket_id,name) values('partner-logos',$1)",[other+'/unauthorized.png']),/row-level security/);
+await identity(admin);
+await denied(()=>db.query("insert into storage.objects(bucket_id,name) values('partner-logos',$1)",[other+'/wrong-folder.png']),/row-level security/);
+await db.exec('reset role');
+assert.equal((await db.query("select public,file_size_limit,allowed_mime_types from storage.buckets where id='partner-logos'")).rows[0].file_size_limit,2097152);checks++;
+await identity(other);
+assert.equal((await db.query("select count(*)::int n from storage.objects where bucket_id='partner-logos' and name=$1",[logoKey])).rows[0].n,1);checks++;
 console.log(`PASS: ${checks} database assertions (normalization, identity isolation, permissions, viewer access, provisioning, pre-order atomicity, pause, payment and collection).`);
 await db.close();

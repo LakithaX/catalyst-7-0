@@ -2,14 +2,25 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import {defineConfig, loadEnv} from 'vite';
+import orderEmailHandler from './api/order-email';
+import acceptanceEmailHandler from './api/registration-acceptance';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  for (const key of ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY']) {
+  for (const key of ['SUPABASE_URL', 'SUPABASE_PUBLISHABLE_KEY', 'SUPABASE_SERVICE_ROLE_KEY', 'VITE_SUPABASE_URL', 'VITE_SUPABASE_PUBLISHABLE_KEY', 'GMAIL_USER', 'GMAIL_APP_PASSWORD', 'EMAIL_SITE_URL']) {
     if (process.env[key] === undefined && env[key] !== undefined) process.env[key] = env[key];
   }
   return {
-    plugins: [react(), tailwindcss()],
+    plugins: [react(), tailwindcss(), {
+      name: 'acceptance-email-api',
+      configureServer(server) {
+        server.middlewares.use((req, res, next) => {
+          if (req.url?.split('?')[0] === '/api/order-email') { void orderEmailHandler(req, res); return; }
+          if (req.url?.split('?')[0] !== '/api/registration-acceptance') return next();
+          void acceptanceEmailHandler(req, res);
+        });
+      },
+    }],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
