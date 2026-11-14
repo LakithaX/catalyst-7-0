@@ -77,8 +77,6 @@ const CSS = `
 .pp-btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:0 28px;border-radius:999px;font:700 13px ${F_LABEL};letter-spacing:.14em;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:transform .25s,background .25s,color .25s,border-color .25s}
 .pp-btn.solid{background:${CREAM};color:${RED_DARK};box-shadow:0 6px 0 ${INK}}
 .pp-btn.solid:hover{transform:translateY(-2px)}
-.pp-btn.line{border:2px solid ${CREAM};color:${CREAM};background:transparent}
-.pp-btn.line:hover{background:${CREAM};color:${RED_DARK}}
 .pp-faces{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:34px}
 .pp-faces .row{display:flex}
 .pp-face{width:46px;height:46px;margin-left:-10px;border-radius:50%;border:2px solid ${CREAM};overflow:hidden;background:linear-gradient(#e24a35,#8c0b26)}
@@ -223,9 +221,6 @@ export const PartnershipPage: React.FC = () => {
     return () => io.disconnect();
   }, []);
 
-  const allEmails = PARTNERSHIP_CONTACTS.map((c) => c.email).join(',');
-  const mailAll = `mailto:${allEmails}?subject=${encodeURIComponent('Partnering with Catalyst 7.0')}`;
-
   return (
     <div className="pp" ref={rootRef}>
       <style>{CSS}</style>
@@ -252,7 +247,6 @@ export const PartnershipPage: React.FC = () => {
           </p>
           <div className="pp-cta" data-rv style={{ ['--d' as string]: 240 } as React.CSSProperties}>
             <a className="pp-btn solid" href="#team">Meet the team <ArrowRight size={16} aria-hidden="true" /></a>
-            <a className="pp-btn line" href={mailAll}><Mail size={16} aria-hidden="true" /> Email everyone</a>
           </div>
           {PARTNERSHIP_CONTACTS.length > 0 && (
             <div className="pp-faces" data-rv style={{ ['--d' as string]: 320 } as React.CSSProperties}>
