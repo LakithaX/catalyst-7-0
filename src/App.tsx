@@ -16,6 +16,7 @@ const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage'));
 const CartPage = lazy(() => import('./pages/CartPage'));
 const GameComingSoonPage = lazy(() => import('./pages/GameComingSoonPage'));
 const ContactPage = lazy(() => import('./pages/ContactPage'));
+const PartnershipPage = lazy(() => import('./pages/PartnershipPage'));
 
 initBoot();
 
@@ -119,6 +120,8 @@ export default function App() {
           <Route path="/merch/:productId" element={<ProductDetailPage />} />
           <Route path="/game" element={<GameComingSoonPage />} />
           <Route path="/contact" element={<ContactPage />} />
+          <Route path="/partnership" element={<PartnershipPage />} />
+          <Route path="/partner" element={<Navigate to="/partnership" replace />} />
         </Route>
 
         {/* GROUP A (catch-all): Last route in the list */}

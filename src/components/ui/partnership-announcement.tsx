@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { supabase } from "../../lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -139,6 +140,7 @@ const TierHeading = ({ kanji, en }: { kanji: string; en: string }) => (
 
 export default function PartnershipAnnouncement({ active = false }: { active?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
+  const navigate = useNavigate();
   const [content, setContent] = useState(DEFAULT_CONTENT);
 
   useEffect(() => {
@@ -340,18 +342,20 @@ export default function PartnershipAnnouncement({ active = false }: { active?: b
               <span className="h-px w-12 bg-[#252321]/30 sm:w-20" />
             </div>
             <p style={{ fontSize: 16, color: "#3D3833", marginBottom: 16, maxWidth: "34ch" }}>Want your name on this list? Let’s build Catalyst 7.0 together.</p>
-            <a
-              href={content.cta_url}
-              className="inline-flex min-h-[48px] items-center justify-center whitespace-nowrap rounded-full px-9 text-sm font-bold uppercase tracking-[0.16em] text-white transition-transform duration-300 hover:-translate-y-0.5"
+            <button
+              type="button"
+              onClick={() => navigate("/partnership")}
+              className="inline-flex min-h-[48px] cursor-pointer items-center justify-center whitespace-nowrap rounded-full px-9 text-sm font-bold uppercase tracking-[0.16em] text-white transition-transform duration-300 hover:-translate-y-0.5"
               style={{ background: RED_DARK, fontFamily: LABEL, boxShadow: "0 4px 14px rgba(181,30,35,0.30)" }}
             >
               {content.cta_label}
-            </a>
+            </button>
           </div>
 
           <div className="order-first flex justify-center lg:order-none lg:justify-start"><Illus src={ART.koi} speed={18} className="w-[130px] lg:w-[190px] xl:w-[230px]" /></div>
         </div>
       </div>
+
     </section>
   );
 }
