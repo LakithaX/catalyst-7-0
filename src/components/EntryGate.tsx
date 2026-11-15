@@ -1,5 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { CatalystMark } from './brand/CatalystMark';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/cinzel/400.css';
+import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/700.css';
+import '@fontsource/cinzel/800.css';
+import '@fontsource/yuji-boku/400.css';
 
 // Folder in /public that holds the illustrations
 const ART = '/assets/illustrations/';

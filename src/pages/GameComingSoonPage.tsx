@@ -5,6 +5,9 @@ import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { scrollTopOrRestore } from '../utils/navState';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/shippori-mincho/800.css';
 
 export const GameComingSoonPage: React.FC = () => {
   useEffect(() => {

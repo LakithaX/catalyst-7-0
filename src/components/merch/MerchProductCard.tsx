@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { Heart, ArrowUpRight, Sparkles } from 'lucide-react';
 import { MerchProduct } from '../../data/merchProducts';
 import { useMerch } from '../../context/MerchContext';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/400.css';
 
 interface MerchProductCardProps {
   product: MerchProduct;

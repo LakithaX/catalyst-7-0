@@ -4,6 +4,14 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { OcGroup, buildGroupRows, CSS, GCSS, playFor, photo } from './OcRoster'
 import type { GroupDef } from './OcRoster'
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/800.css';
+import '@fontsource/kaushan-script/400.css';
+import '@fontsource/noto-serif-jp/700.css';
+import '@fontsource/noto-serif-jp/900.css';
+import '@fontsource/oswald/500.css';
+import '@fontsource/oswald/700.css';
 
 // ============================================================================
 // EXECUTIVE BOARD: one full-width "slide" per member, then the "EB REVENANTS" group photo.
@@ -309,7 +317,6 @@ const PLAYED = new Set<string>()
 // styles (everything is in cqw units of the card's container, so it scales as one slide)
 // ----------------------------------------------------------------------------
 const EBCSS = `
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700;800&family=Kaushan+Script&family=Noto+Serif+JP:wght@700;900&display=swap');
 
 /* flush stack: no gaps, no side padding, 1px overlap so no hairline shows between slides */
 .ebm-list{position:relative;padding:0 0 1px}

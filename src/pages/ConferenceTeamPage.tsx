@@ -7,6 +7,12 @@ import { OcRoster } from '../components/OcRoster'
 import { EbRoster } from '../components/EbRoster'
 import { Navbar } from '../components/Navbar'
 import { SakuraPetals } from '../components/SakuraPetals'
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-serif-jp/400.css';
+import '@fontsource/noto-serif-jp/700.css';
+import '@fontsource/noto-serif-jp/900.css';
+import '@fontsource/shippori-mincho/400.css';
 
 // ============================================================================
 // TEAM TABS. The people themselves live in the roster components:

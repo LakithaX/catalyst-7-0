@@ -14,6 +14,11 @@ import OutroFooter from '../components/ui/outro-footer';
 import PartnershipAnnouncement from '../components/ui/partnership-announcement';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/cinzel/600.css';
+import '@fontsource/cinzel/700.css';
+import '@fontsource/playfair-display/800-italic.css';
+import '@fontsource/yuji-boku/400.css';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger);

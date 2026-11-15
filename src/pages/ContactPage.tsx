@@ -11,6 +11,12 @@ import { Navbar } from '../components/Navbar';
 import { SakuraPetals } from '../components/SakuraPetals';
 import { scrollTopOrRestore } from '../utils/navState';
 import { TagMark } from '../components/brand/CatalystTag';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/500.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/noto-serif-jp/700.css';
 
 if (typeof window !== 'undefined') gsap.registerPlugin(ScrollTrigger);
 
@@ -743,7 +749,6 @@ export default function ContactPage() {
 // STYLES
 // ============================================================================
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+JP:wght@700&display=swap');
 
 .cx{font-family:'Inter',system-ui,sans-serif;--ink:#1f1a18;--red:#c9332a;--red-deep:#a8261e;--cream:#F8F3E9}
 .cx-brush{font-family:'Jansina','Brusher','Anton','Impact',sans-serif;font-weight:400;font-synthesis:none;letter-spacing:.02em}

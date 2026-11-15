@@ -20,6 +20,8 @@ import { useCatalog } from '../../context/CatalogContext';
 import { requireSupabase, errorMessage } from '../../lib/supabase';
 import { quoteOrder, placePreorder, type OrderQuote } from '../../lib/booking';
 import { useMerch } from '../../context/MerchContext';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-serif/400-italic.css';
 
 const MAX_RECEIPT_BYTES = 5 * 1024 * 1024;
 const MAX_PICK_BYTES = 12 * 1024 * 1024; // biggest file we will even try to read
@@ -688,7 +690,7 @@ export const ClaimConfirmationModal: React.FC = () => {
 
                 <h3 className="brush-heading mb-2 font-['Jansina','Bison',sans-serif] text-4xl uppercase tracking-wider text-[#252321]">THANK YOU</h3>
 
-                <p className="mb-6 font-['Droid_Serif',Georgia,serif] text-sm italic text-[#736B63]">
+                <p className="mb-6 font-['Noto_Serif',Georgia,serif] text-sm italic text-[#736B63]">
                   Thank you, <span className="font-semibold text-[#252321]">{name.trim()}</span>. We have your order and receipt. Your payment is awaiting verification. We’ll send an order receipt to
                   <span className="font-semibold text-[#252321]"> {email.trim()}</span>, followed by a confirmation after our team verifies your payment.
                 </p>

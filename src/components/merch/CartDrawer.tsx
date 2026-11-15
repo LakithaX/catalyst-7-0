@@ -3,6 +3,9 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Trash2, ArrowRight, ShoppingBag, ShieldAlert } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useMerch } from '../../context/MerchContext';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/400.css';
+import '@fontsource/noto-serif/400-italic.css';
 
 export const CartDrawer: React.FC = () => {
   const { isCartOpen, closeCart, cartItems, removeFromCart, updateQuantity, openClaimModal } = useMerch();
@@ -64,7 +67,7 @@ export const CartDrawer: React.FC = () => {
                   <h4 className="brush-heading font-['Jansina','Bison',sans-serif] text-2xl uppercase tracking-wider text-[#252321] mb-2">
                     YOUR CART IS EMPTY
                   </h4>
-                  <p className="font-['Droid_Serif',Georgia,serif] italic text-xs text-[#736B63] max-w-xs mb-6">
+                  <p className="font-['Noto_Serif',Georgia,serif] italic text-xs text-[#736B63] max-w-xs mb-6">
                     Your cart is empty. Explore the official collection and add the pieces you love.
                   </p>
                   <button

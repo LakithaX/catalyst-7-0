@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { ArrowRight } from 'lucide-react';
 import { MERCH_PRODUCTS } from '../../data/merchProducts';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/800.css';
+import '@fontsource/noto-sans-jp/700.css';
 
 // Featured products for the hero carousel matching the reference design
 const HERO_SLIDES = [

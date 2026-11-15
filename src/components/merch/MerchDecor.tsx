@@ -1,4 +1,6 @@
 import React from 'react'
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-serif-jp/400.css';
 
 // ============================================================================
 // Small shared pieces for the merch pages (decoration only, no logic).

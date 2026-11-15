@@ -7,6 +7,14 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import type { MerchProduct } from "../../data/merchProducts";
 import { useCatalog } from "../../context/CatalogContext";
 import { useMerch } from "../../context/MerchContext";
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/inter/400.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-serif-jp/400.css';
+import '@fontsource/noto-serif-jp/700.css';
+import '@fontsource/shippori-mincho/400.css';
+import '@fontsource/shippori-mincho/700.css';
+import '@fontsource/yuji-boku/400.css';
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);

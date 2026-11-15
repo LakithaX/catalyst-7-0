@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { gsap } from "gsap";
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/yuji-boku/400.css';
 
 /**
  * Japanese-themed custom cursor (GSAP):

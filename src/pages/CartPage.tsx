@@ -13,6 +13,13 @@ import { MerchToast } from '../components/merch/MerchToast';
 import { useMerchMotion } from '../hooks/useMerchMotion';
 import { WaveDivider, Chars, Ill, SEIGAIHA, KANJI_FONT } from '../components/merch/MerchDecor';
 import { scrollTopOrRestore } from '../utils/navState';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/shippori-mincho/400.css';
+import '@fontsource/shippori-mincho/700.css';
+import '@fontsource/shippori-mincho/800.css';
+import '@fontsource/yuji-boku/400.css';
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 

@@ -3,6 +3,16 @@ import { Link } from 'react-router-dom';
 import { Phone, Mail, MessageCircle, ArrowRight, ArrowLeft, Megaphone, Users, TrendingUp, Heart } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import { PARTNERSHIP_CONTACTS, type PartnershipContact } from '../data/partnershipContacts';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/600.css';
+import '@fontsource/noto-sans-jp/400.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-serif-jp/900.css'; // .pp-card .kj and .pp-ph .gk kanji (font: 900 … 'Noto Serif JP')
+import '@fontsource/shippori-mincho/400.css';
+import '@fontsource/shippori-mincho/700.css';
+import '@fontsource/shippori-mincho/800.css';
+import '@fontsource/yuji-boku/400.css';
 
 // ─────────────────────────────────────────────────────────────
 // EDIT THE WORDING HERE

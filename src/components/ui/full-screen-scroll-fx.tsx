@@ -11,6 +11,12 @@ import React, {
 } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css'; // --fx-label
+import '@fontsource/noto-serif-jp/700.css'; // --fx-jp: .fx-vertical
+import '@fontsource/noto-serif-jp/900.css'; // --fx-jp: .fx-seal, .fx-hanko
+import '@fontsource/shippori-mincho/400.css'; // DISPLAY_FONT (root)
+import '@fontsource/shippori-mincho/800.css'; // DISPLAY_FONT: header, featured title, words, footer title
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
