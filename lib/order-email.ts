@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { escapeHtml } from './acceptance-email';
-import { safeToRetry } from './send-acceptance-email';
+import { escapeHtml } from './acceptance-email.js';
+import { safeToRetry } from './send-acceptance-email.js';
 export type OrderEmailKind = 'received' | 'confirmed';
 type Item = { name: string; variant: string; size: string; quantity: number; unit_price_minor: number };
 export type OrderEmailJob = { order_id: string; kind: OrderEmailKind; recipient: string; full_name: string; reference: string; total_minor: number; items: Item[]; pickup_location: string; claim_token: string };

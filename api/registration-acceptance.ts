@@ -1,8 +1,8 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
-import { loadAcceptanceTemplate } from '../lib/acceptance-email';
-import { canRequestRegistrationEmail, sendAcceptanceEmail } from '../lib/send-acceptance-email';
+import { loadAcceptanceTemplate } from '../lib/acceptance-email.js';
+import { canRequestRegistrationEmail, sendAcceptanceEmail } from '../lib/send-acceptance-email.js';
 
 type ApiRequest = IncomingMessage & { body?: unknown };
 export function createAcceptanceHandler(clientFactory: typeof createClient = createClient) {

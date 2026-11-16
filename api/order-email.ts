@@ -1,7 +1,7 @@
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
-import { canRequestOrderEmail, sendOrderEmail } from '../lib/order-email';
+import { canRequestOrderEmail, sendOrderEmail } from '../lib/order-email.js';
 
 type ApiRequest = IncomingMessage & { body?: unknown };
 export function createOrderEmailHandler(clientFactory: typeof createClient = createClient) {

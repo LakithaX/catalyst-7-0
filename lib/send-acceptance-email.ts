@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { renderAcceptanceEmail } from './acceptance-email';
+import { renderAcceptanceEmail } from './acceptance-email.js';
 
 export type AcceptanceJob = { registration_id: string; recipient: string; full_name: string; reference: string; claim_token: string };
 type Mail = { to: string; subject: string; html: string; text: string; messageId: string };
