@@ -4,6 +4,8 @@ import { ArrowRight, ShoppingBag, ChevronDown } from 'lucide-react';
 import { Navbar } from './Navbar';
 import { SakuraPetals } from './SakuraPetals';
 import { CatalystMark } from './brand/CatalystMark';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/cinzel/700.css';
 
 // Assets in public/assets/hero-section-assets/
 // NOTE: foreground-landscape is a .PNG in your folder (not .webp) – that was the broken image.

@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { CatalystMark } from "../brand/CatalystMark";
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/700.css'; // bold buttons and "CATALYST 7.0" inherit the footer's Inter
+// Yuji Boku (the footer's kanji) is loaded in the component below, not imported here. See the comment there.
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -116,6 +120,13 @@ const PETAL_X = [8, 22, 38, 56, 72, 88];
 export default function OutroFooter({ active = false }: { active?: boolean }) {
   const rootRef = useRef<HTMLElement>(null);
   const year = new Date().getFullYear();
+
+  // This footer is part of Layout, which is in the main bundle. A static import of Yuji Boku would put its
+  // ~120 @font-face rules in the CSS every route waits for (even /admin). Loading it when the footer mounts
+  // keeps it off the critical path and off pages that never show the footer.
+  useEffect(() => {
+    void import('@fontsource/yuji-boku/400.css');
+  }, []);
 
   useEffect(() => {
     const root = rootRef.current;

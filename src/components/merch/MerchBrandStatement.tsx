@@ -1,5 +1,7 @@
 import React from 'react';
 import { Chars, Ill, KANJI_FONT } from './MerchDecor';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css';
 
 // Brand statement: text and artwork live in their own columns, so the samurai can never cover the headline.
 // (Effects come from the page's useMerchMotion hook: data-reveal / data-chars.)

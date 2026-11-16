@@ -6,6 +6,11 @@ import '../styles/samurai-registration.css';
 
 import { submitRegistration } from '../lib/booking';
 import { errorMessage } from '../lib/supabase';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/800.css';
+import '@fontsource/noto-serif-jp/400.css';
+import '@fontsource/noto-serif-jp/700.css';
 
 // ============================================================================
 // FORM CONTENT  (edit questions here. Everything else adapts automatically)

@@ -1,6 +1,11 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/oswald/500.css';
+import '@fontsource/oswald/700.css';
+import '@fontsource/anton/400.css';
+import '@fontsource/noto-serif-jp/700.css';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
@@ -186,7 +191,6 @@ const buildClips = (E: Edge[], count: number, kn: number) => {
 const WAVES = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='20' viewBox='0 0 40 20'%3E%3Cg fill='%23F4ECE0' stroke='%23A8102F' stroke-width='1.5'%3E%3Ccircle cx='0' cy='10' r='18'/%3E%3Ccircle cx='0' cy='10' r='12'/%3E%3Ccircle cx='0' cy='10' r='6'/%3E%3Ccircle cx='40' cy='10' r='18'/%3E%3Ccircle cx='40' cy='10' r='12'/%3E%3Ccircle cx='40' cy='10' r='6'/%3E%3Ccircle cx='20' cy='20' r='18'/%3E%3Ccircle cx='20' cy='20' r='12'/%3E%3Ccircle cx='20' cy='20' r='6'/%3E%3C/g%3E%3C/svg%3E")`
 
 export const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@500&family=Noto+Serif+JP:wght@700&display=swap');
 
 /* overflow-x:clip stops the slide-in animations from creating sideways scroll on phones */
 .ocx-wrap{container-type:inline-size;width:100%;overflow-x:clip}

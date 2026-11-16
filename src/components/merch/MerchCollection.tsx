@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { CATEGORIES, ProductCategory } from '../../data/merchProducts';
 import { useCatalog } from '../../context/CatalogContext';
 import { MerchProductCard } from './MerchProductCard';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css';
 
 export const MerchCollection: React.FC = () => {
   const {products: MERCH_PRODUCTS} = useCatalog();

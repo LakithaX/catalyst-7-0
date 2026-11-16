@@ -3,6 +3,9 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { supabase } from "../../lib/supabase";
 import { useNavigate } from "react-router-dom";
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/cinzel/700.css';
+import '@fontsource/yuji-boku/400.css';
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);

@@ -5,6 +5,13 @@ import { ArrowRight, ArrowUpRight, Compass, Award, Flame, Users } from 'lucide-r
 import { Navbar } from '../components/Navbar'
 import { TagMark } from '../components/brand/CatalystTag'
 import { SakuraPetals } from '../components/SakuraPetals'
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-serif-jp/400.css';
+import '@fontsource/noto-serif-jp/700.css';
+import '@fontsource/noto-serif-jp/900.css';
+import '@fontsource/shippori-mincho/400.css';
+import '@fontsource/shippori-mincho/700.css';
 
 // ============================================================================
 // ABOUT PAGE (route: /about)

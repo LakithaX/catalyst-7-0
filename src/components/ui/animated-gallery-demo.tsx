@@ -4,6 +4,12 @@ import { Button } from "@/components/ui/button"
 import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { ArrowRight } from "lucide-react"
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/inter/400.css';
+import '@fontsource/inter/700.css';
+import '@fontsource/noto-sans-jp/700.css';
+import '@fontsource/noto-serif-jp/400.css';
+import '@fontsource/shippori-mincho/400.css';
 
 gsap.registerPlugin(ScrollTrigger)
 ScrollTrigger.config({ ignoreMobileResize: true })

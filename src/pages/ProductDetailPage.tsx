@@ -30,6 +30,10 @@ import { scrollTopOrRestore } from '../utils/navState';
 import { NavCartButton } from '../components/merch/NavCartButton';
 import { useMerchMotion } from '../hooks/useMerchMotion';
 import { WaveDivider, Chars, Ill, SectionTag, SEIGAIHA, KANJI_FONT } from '../components/merch/MerchDecor';
+// Fonts used by this component (see docs/fonts.md)
+import '@fontsource/montserrat/400.css';
+import '@fontsource/montserrat/500.css';
+import '@fontsource/noto-serif/400-italic.css';
 
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
@@ -121,7 +125,7 @@ export const ProductDetailPage: React.FC = () => {
           <h2 className="brush-heading mb-4 font-['Jansina','Bison',sans-serif] text-4xl text-[#252321]">
             PIECE NOT FOUND
           </h2>
-          <p className="mb-8 max-w-md font-['Droid_Serif',Georgia,serif] italic text-[#736B63]">
+          <p className="mb-8 max-w-md font-['Noto_Serif',Georgia,serif] italic text-[#736B63]">
             The merchandise item you are looking for does not exist in the Catalyst 7.0 archive.
           </p>
           <Link
