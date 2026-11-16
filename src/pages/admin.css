@@ -216,3 +216,5 @@ body:has(.admin-root){overscroll-behavior-y:none}
 .admin-order-emails{margin-top:18px;padding-top:14px;border-top:1px solid #e3d5c2}.admin-detail-panel .admin-email-send:disabled{background:#ecebea;color:#777;border-color:#d5d3d0;opacity:1;cursor:not-allowed}
 
 .admin-logout-button{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:8px 12px;border:1px solid #dfd1bd;border-radius:10px;background:#fffaf1;color:#6e625e;white-space:nowrap;font-size:12px}@media(max-width:480px){.admin-header-actions{gap:6px;flex-wrap:wrap;justify-content:flex-end}.admin-logout-button{padding:8px;font-size:11px}}
+
+.admin-merch-image-upload{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap}.admin-merch-image-upload img{width:180px;height:180px;object-fit:contain;border-radius:12px;background:#fff;border:1px solid #dfd1bd}.admin-merch-image-upload label{flex:1;min-width:200px}.admin-merch-image-upload small{display:block;margin-top:8px;line-height:1.6}

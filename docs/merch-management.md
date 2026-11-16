@@ -12,7 +12,7 @@ The admin Merchandise section controls the database catalogue, publishing, varia
 
 - Coming soon replaces the public collection, product detail pages and cart with a dedicated message. Public read policies also hide catalogue records while paused. A database trigger rejects new orders, including requests outside the UI. Existing orders are preserved.
 - Hiding a product removes it from the public catalogue and the order function rejects it.
-- New products have an image URL, category, edition label and description. Sizes are comma-separated; blank means one size. The initial price applies to each size and is editable per variant afterward.
+- New products have an uploaded image, category, edition label and description. Sizes are comma-separated; blank means one size. The initial price applies to each size and is editable per variant afterward.
 - Existing products can be edited without rewriting order item snapshots. There are no stock fields in the admin UI. Legacy database stock fields are retained for compatibility; new pre-orders do not reserve or consume stock.
 - The public catalogue refreshes on focus and every 10 seconds. Checkout validates prices, registration identity and shop status in the database.
 - Only the active administrator can mutate catalogue/settings through the provided RPCs. Clients have read-only table grants.
@@ -22,3 +22,7 @@ The admin Merchandise section controls the database catalogue, publishing, varia
 Build and TypeScript checks can run locally. Live integration checks require the schema and an authorized admin session. Verify create/edit/publish/hide, per-size prices, paused-checkout rejection, and reopening the collection. Unauthorized RPC calls should be rejected. Do not use delegate personal data for these checks.
 
 Receipt uploads and bank instructions are now integrated. See `docs/supabase-upgrade-005.md` for existing-project upgrade and rollout instructions.
+
+## Product image uploads
+
+For an existing database, apply `supabase/migrations/202611160001_merch_image_uploads.sql` before deploying the updated editor. It creates the public `merch-images` bucket with admin-only uploads. Choose a PNG, JPEG or WebP image up to 5 MB; the editor previews it and uploads it on Save product. Existing images remain until replaced. Uploaded images are public and use unique paths so replacements do not overwrite cached images.
