@@ -8,7 +8,9 @@ export async function dispatchRegistrationEmail(registrationId: string): Promise
     method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${data.session.access_token}` },
     body: JSON.stringify({ registrationId }), signal: AbortSignal.timeout(45000),
   });
-  const result = await response.json();
+  const result = await response.json().catch(() => {
+    throw new Error(`The email service returned HTTP ${response.status}. Check the Vercel function logs and refresh the email status before retrying.`);
+  });
   if (!response.ok) throw new Error(result.error || 'Could not send the acknowledgement. Refresh its status before retrying.');
   if (!['sent', 'failed', 'uncertain', 'unchanged'].includes(result.status)) throw new Error('Unknown email result. Refresh its status before retrying.');
   return result.status;
@@ -21,7 +23,10 @@ export async function requestAcceptanceEmail(registrationId: string): Promise<st
     if (status === 'failed') return 'Registration received. Email sending failed. Use Retry email to try again.';
     if (status === 'uncertain') return 'Registration received. Email delivery needs checking. Check the Gmail Sent folder before any further send.';
     return 'Registration received. Email already sent, in progress, or unavailable. Check the status below.';
-  } catch {
+  } catch (error) {
+    if (error instanceof Error && !['AbortError', 'TimeoutError', 'TypeError'].includes(error.name)) {
+      return `Registration received. ${error.message}`;
+    }
     return 'Registration received. The email request was interrupted. Refresh its status before retrying.';
   }
 }
